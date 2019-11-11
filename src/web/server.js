@@ -10,6 +10,7 @@ const {
   getDevicesInfo,
   runAction
 } = require("./../devices/actions");
+var { devices } = require("./../devices/actions");
 const {
   broadlink,
   discoverDevices

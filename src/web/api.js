@@ -5,12 +5,12 @@ const {
   discoverDevices
 } = require("./../devices/device");
 const {
-  handleListAllActions,
   getDevicesInfo,
   runAction,
   listFilestructure,
   deleteFile
 } = require("./../devices/actions");
+var { devices } = require("./../devices/actions");
 
 router.post("/play", function (req, res) {
   if (req.body.topic && req.body.topic !== "") {

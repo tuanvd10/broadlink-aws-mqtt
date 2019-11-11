@@ -10,6 +10,7 @@ const cfg = require("./../config");
 // -------------------------------------
 
 let actionIsRunning = false;
+var devices = [];
 const commandsPath = cfg.recording.path || path.join(__dirname, "commands");
 
 function runAction(action, topic, origin) {
@@ -447,5 +448,6 @@ module.exports = {
     handleListAllActions,
     deleteFile,
     listFilestructure,
-    getDevicesInfo
+    getDevicesInfo,
+    devices
 }
