@@ -12,7 +12,7 @@ const cfg = require("./../config");
 let actionIsRunning = false;
 var devices = [];
 const commandsPath = cfg.recording.path || path.join(__dirname, "commands");
-
+console.log(commandsPath);
 function runAction(action, topic, origin) {
     action = action.toLowerCase();
     let actionMode = action;

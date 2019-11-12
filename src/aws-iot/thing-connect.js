@@ -14,7 +14,6 @@ var thingShadows = awsIot.thingShadow({
     clientId: 'sdk-nodejs-c347ce22-4717-4190-8e89-ef701aa31a8e',
     host: "a3oosh7oql9nlc-ats.iot.us-east-1.amazonaws.com"
 });
-console.log('thingShadows end');
 //
 // Client token value returned from thingShadows.update() operation
 //

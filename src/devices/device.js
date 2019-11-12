@@ -5,6 +5,7 @@ const broadlink = new BroadlinkJS();
 const EventEmitter = require("events");
 const myEmitter = new EventEmitter();
 const logger = require("./../logger");
+var { devices } = require("./actions");
 const discoveredDevices = {};
 const limit = 5;
 let discovering = false;
