@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/text_remote_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="22sp"
+        android:layout_margin="8dp" />
+    <Button
+        android:id="@+id/bt_power"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="clickFanRemoteButton"
+        android:text="@string/fan_power" />
+
+    <Button
+        android:id="@+id/bt_swing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="clickFanRemoteButton"
+        android:text="@string/fan_swing" />
+
+    <Button
+        android:id="@+id/bt_speed"
+        android:onClick="clickFanRemoteButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fan_speed" />
+
+    <Button
+        android:id="@+id/bt_timer"
+        android:onClick="clickFanRemoteButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fan_timer" />
+
+    <Button
+        android:id="@+id/bt_rhythm"
+        android:onClick="clickFanRemoteButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fan_rhythm" />
+
+</LinearLayout>

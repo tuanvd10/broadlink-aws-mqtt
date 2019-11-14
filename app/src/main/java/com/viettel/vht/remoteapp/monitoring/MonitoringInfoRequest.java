@@ -63,7 +63,9 @@ public class MonitoringInfoRequest extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        views.get(0).setText(result);
+        if (result != null || !result.equals("Cannot get information")) {
+            views.get(0).setText("Load complete");
+        }
     }
 
 

@@ -14,4 +14,11 @@
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
     <string name="air_status">Air Status</string>
+    <string name="menu_remote_control">Remote Control</string>
+
+    <string name="fan_speed">Speed</string>
+    <string name="fan_power">Power</string>
+    <string name="fan_swing">Swing</string>
+    <string name="fan_rhythm">Rhythm</string>
+    <string name="fan_timer">Timer</string>
 </resources>
