@@ -16,9 +16,19 @@
     <string name="air_status">Air Status</string>
     <string name="menu_remote_control">Remote Control</string>
 
+<!--    String for fan mitsubishi-->
+    <string name="fan_mitsubishi">Mitsubishi LV16-RT</string>
+<!--    String for button in fan mitsubishi-->
+    <string name="bt_connect">Connect</string>
     <string name="fan_speed">Speed</string>
     <string name="fan_power">Power</string>
     <string name="fan_swing">Swing</string>
     <string name="fan_rhythm">Rhythm</string>
     <string name="fan_timer">Timer</string>
+
+<!--    String for status screen in remote control-->
+    <string name="connecting_status">Đang kết nối</string>
+    <string name="connected_status">Đã kết nối</string>
+
+
 </resources>
