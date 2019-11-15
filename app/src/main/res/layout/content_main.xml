@@ -19,19 +19,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/mobile_navigation" />
 
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/air_status"
-        android:gravity="center_horizontal"
-        app:layout_constraintVertical_bias="0.3"
-        tools:layout_editor_absoluteX="171dp"
-        tools:layout_editor_absoluteY="41dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+    <GridView
+        android:id="@+id/gvStatus"
+        android:layout_width="404dp"
+        android:layout_height="332dp"
+        tools:layout_editor_absoluteX="3dp"
+        tools:layout_editor_absoluteY="280dp" />
 
     <!--<TextView
         android:id="@+id/aq"
