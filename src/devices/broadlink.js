@@ -3,7 +3,7 @@ const dgram = require('dgram');
 const os = require('os');
 const crypto = require('crypto');
 const assert = require('assert');
-
+const logger = require("./../logger");
 // RM Devices (without RF support)
 const rmDeviceTypes = {};
 rmDeviceTypes[parseInt(0x2737, 16)] = 'Broadlink RM Mini';
@@ -12,6 +12,10 @@ rmDeviceTypes[parseInt(0x2712, 16)] = 'Broadlink RM2';
 rmDeviceTypes[parseInt(0x2783, 16)] = 'Broadlink RM2 Home Plus';
 rmDeviceTypes[parseInt(0x277c, 16)] = 'Broadlink RM2 Home Plus GDT';
 rmDeviceTypes[parseInt(0x278f, 16)] = 'Broadlink RM Mini Shate';
+
+// SP Devices 
+const spDeviceTypes = {};
+spDeviceTypes[parseInt(0x947A, 16)] = 'Broadlink SP 3';
 
 // RM Devices (with RF support)
 const rmPlusDeviceTypes = {};
@@ -103,7 +107,7 @@ class Broadlink extends EventEmitter {
 
     const splitIPAddress = ipAddress.split('.');
     const port = socket.address().port;
-    if (debug && log) log(`\x1b[35m[INFO]\x1b[0m Listening for Broadlink devices on ${ipAddress}:${port} (UDP)`);
+    if (debug && log) logger.debug(`\x1b[35m[INFO]\x1b[0m Listening for Broadlink devices on ${ipAddress}:${port} (UDP)`);
 
     const now = new Date();
     const starttime = now.getTime();
@@ -196,19 +200,20 @@ class Broadlink extends EventEmitter {
     // Ignore devices that don't support infrared or RF.
     if (unsupportedDeviceTypes[parseInt(deviceType, 16)]) return null;
     if (deviceType >= 0x7530 && deviceType <= 0x7918) return null; // OEM branded SPMini2
-
     // If we don't know anything about the device we ask the user to provide details so that
     // we can handle it correctly.
-    if (!rmDeviceTypes[parseInt(deviceType, 16)] && !rmPlusDeviceTypes[parseInt(deviceType, 16)]) {
-      log(`\n\x1b[35m[Info]\x1b[0m We've discovered an unknown Broadlink device. This likely won't cause any issues.\n\nPlease raise an issue in the GitHub repository (https://github.com/lprhodes/homebridge-broadlink-rm/issues) with details of the type of device and its device type code: "${deviceType.toString(16)}". The device is connected to your network with the IP address "${host.address}".\n`);
+    if (!rmDeviceTypes[parseInt(deviceType, 16)] 
+        && !rmPlusDeviceTypes[parseInt(deviceType, 16)]
+        && !spDeviceTypes[parseInt(deviceType, 16)]) {
+      logger.debug(`\n\x1b[35m[Info]\x1b[0m We've discovered an unknown Broadlink device. This likely won't cause any issues.\n\nPlease raise an issue in the GitHub repository (https://github.com/lprhodes/homebridge-broadlink-rm/issues) with details of the type of device and its device type code: "${deviceType.toString(16)}". The device is connected to your network with the IP address "${host.address}".\n`);
 
       return null;
     }
 
     // The Broadlink device is something we can use.
     const device = new Device(host, macAddress, deviceType)
-    device.log = log;
-    device.debug = debug;
+    device.log = logger.info;
+    device.debug = logger.debug;
 
     this.devices[macAddress] = device;
 
@@ -227,7 +232,8 @@ class Device {
     this.host = host;
     this.mac = macAddress;
     this.emitter = new EventEmitter();
-    this.log = console.log;
+    this.log = logger.info;
+    this.debug = logger.debug;
     this.type = deviceType;
     this.model = rmDeviceTypes[parseInt(deviceType, 16)] || rmPlusDeviceTypes[parseInt(deviceType, 16)];
 
@@ -285,7 +291,7 @@ class Device {
       } else if (command == 0xee || command == 0xef) {
         this.onPayloadReceived(err, payload);
       } else {
-        console.log('Unhandled Command: ', command)
+        logger.debug('Unhandled Command: ', command)
       }
     });
 
@@ -378,11 +384,11 @@ class Device {
     packet[0x20] = checksum & 0xff;
     packet[0x21] = checksum >> 8;
 
-    if (debug) log('\x1b[33m[DEBUG]\x1b[0m packet', packet.toString('hex'))
+    if (debug) logger.debug('\x1b[33m[DEBUG]\x1b[0m packet', packet.toString('hex'))
 
     socket.send(packet, 0, packet.length, this.host.port, this.host.address, (err, bytes) => {
-      if (debug && err) log('\x1b[33m[DEBUG]\x1b[0m send packet error', err)
-      if (debug) log('\x1b[33m[DEBUG]\x1b[0m successfuly sent packet - bytes: ', bytes)
+      if (debug && err) logger.debug('\x1b[33m[DEBUG]\x1b[0m send packet error', err)
+      if (debug) logger.debug('\x1b[33m[DEBUG]\x1b[0m successfuly sent packet - bytes: ', bytes)
     });
   }
 
