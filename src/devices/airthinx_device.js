@@ -116,8 +116,4 @@ global.aq = {
 	"time" : 0
 }
 
-myEmitter.on("discoverCompleted", function(){
-	
-});
-
 module.exports =  {sendControlData,getAirThinxScore}

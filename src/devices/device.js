@@ -154,7 +154,7 @@ myEmitter.on("discoverCompleted", numOfDevice => {
 	
 	setInterval(function (){
 			getAirThinxScore();
-	}, 5000);
+	}, 20000);
 });
 module.exports = {
   broadlink: myEmitter,

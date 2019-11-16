@@ -28,6 +28,6 @@
 	"commandPower":"/fan/mitsubishi/power",
 	"commandIncrease": "/fan/mitsubishi/power",
 	"commandDecrease": "/fan/mitsubishi/power",
-	"interval_time": "0"
+	"interval_time": "130000"
   }
 }
