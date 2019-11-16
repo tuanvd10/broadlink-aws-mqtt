@@ -287,8 +287,10 @@ public class RemoteControlFragment extends Fragment {
                     Log.d(LOG_TAG, "Status = " + String.valueOf(status));
                     // TODO if status is "lost connect" or "unconnect", it must show error to user and suggest user choose "reconnect" or "contact to admin" or "close"
                     // Change connected status in remote control
-                    if (String.valueOf(status).equals("Connected")) {
+                    if (status.name().equals("Connected")) {
                         mStatus.setText(R.string.connected_status);
+                    } else if (status.name().equals("ConnectionLost")) {
+
                     }
 
 //                    runOnUiThread(new Runnable() {

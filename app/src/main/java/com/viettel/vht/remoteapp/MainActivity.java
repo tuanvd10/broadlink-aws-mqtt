@@ -8,8 +8,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
-import com.viettel.vht.remoteapp.common.APILink;
-import com.viettel.vht.remoteapp.monitoring.MonitoringInfoRequest;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
