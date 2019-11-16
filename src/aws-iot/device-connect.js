@@ -7,7 +7,7 @@ const device = awsIot.device({
   keyPath: './cert/broadlink.private.key',
   certPath: './cert/broadlink.cert.pem',
   caPath: './cert/root-CA.crt',
-  clientId: 'sdk-nodejs-c347ce22-4717-4190-8e89-ef701aa31a8e',
+  clientId: 'sdk-nodejs-c347ce22-4717-4190-8e89-ef701aa31a8ef',
   host: "a3oosh7oql9nlc-ats.iot.us-east-1.amazonaws.com",
   region: "us-east-1",
   baseReconnectTimeMs: 10,

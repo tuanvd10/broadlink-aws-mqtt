@@ -1,9 +1,10 @@
 {
   "mqtt": {
-    "host": "127.0.0.1",
+    "host": "192.168.2.69",
     "port": 1883,
     "protocol": "mqtt",
-    "subscribeBasePath": "broadlink"
+    "subscribeBasePath": "broadlink",
+	"subscribeBaseState":"state"
   },
   "recording": {
     "timeout": {
@@ -15,10 +16,18 @@
   "gui": {
     "port": 3001
   },
+
   "smartplug": {
     "POWEROFF": 1,
     "LOW": 5,
     "MEDIUM": 10,
     "HIGH": 15
+	},
+  "airthinx":{
+	"deviceid": "770f78d91f64",
+	"commandPower":"/fan/mitsubishi/power",
+	"commandIncrease": "/fan/mitsubishi/power",
+	"commandDecrease": "/fan/mitsubishi/power",
+	"interval_time": "0"
   }
 }

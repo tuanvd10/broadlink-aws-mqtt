@@ -11,6 +11,9 @@ var {
   devices,
   deviceInfos
 } = require("./actions");
+const mqttClient = require("./../mqtt/mqtt-client");
+
+const {sendControlData,getAirThinxScore} = require("./../devices/airthinx_device");
 
 const discoveredDevices = {};
 let discovering = false;
@@ -148,6 +151,10 @@ myEmitter.on("discoverCompleted", numOfDevice => {
   if (numOfDevice === 0) {
     logger.error("Broadlink device is missing");
   }
+	
+	setInterval(function (){
+			getAirThinxScore();
+	}, 5000);
 });
 module.exports = {
   broadlink: myEmitter,
