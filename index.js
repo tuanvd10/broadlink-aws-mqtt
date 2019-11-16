@@ -6,4 +6,4 @@ require("./src/mqtt/mqtt-client");
 require("./src/aws-iot/device-connect");
 
 logger.info("Starting Broadlink MQTT NodeJS Application");
-discoverDevices();
+discoverDevices(5);

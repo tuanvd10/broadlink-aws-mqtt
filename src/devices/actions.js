@@ -77,7 +77,34 @@ function runAction(action, topic, origin) {
                     topic,
                     origin
                 })
-                .then(queryTemperature)
+                .then(queryTemperature);
+        case "setpower":
+            return prepareAction({
+                    action,
+                    topic,
+                    origin
+                })
+                .then(setPowerAction);    
+        case "checkpower":      
+            return prepareAction({
+                action,
+                topic,
+                origin
+            })
+            .then(checkPowerAction)
+            .then( (data) => {
+                console.log("done check Power action", data);
+            })
+        case "getpower":      
+            return prepareAction({
+                action,
+                topic,
+                origin
+            })
+            .then(getPowerAction)
+            .then( (data) => {
+                console.log("done get Power action");
+            })
         default:
             logger.error(`Action ${action} doesn't exists`);
             return handleActionError(`Action ${action} doesn't exists`);
@@ -335,7 +362,35 @@ const mqttPublish = data =>
         }
         resolve(data);
     });
+const setPowerAction = data =>
+    new Promise((resolve, reject) => {
+        logger.info("setPowerAction");
+        data.device.setPower(false);
+        resolve(data);
+    });
 
+const checkPowerAction = data =>
+    new Promise((resolve, reject) => {
+        logger.info("queryPowerState");
+        try {
+            data.device.checkPower();
+            resolve(data);
+        } catch (error) {
+            logger.error("Failed to query power");
+            reject("Stopped at queryPowerState");
+        }
+    });
+const getPowerAction = data =>
+new Promise((resolve, reject) => {
+    logger.info("getPowerAction");
+    try {
+        data.device.getPower();
+        resolve(data);
+    } catch (error) {
+        logger.error("Failed to query power");
+        reject("Stopped at queryPowerState");
+    }
+});
 // -------------- HELPERS --------------
 
 const deleteFile = path =>

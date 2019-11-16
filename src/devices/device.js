@@ -6,10 +6,12 @@ const EventEmitter = require("events");
 const myEmitter = new EventEmitter();
 const logger = require("./../logger");
 var { devices } = require("./actions");
+const mqttClient = require("./../mqtt/mqtt-client");
 const discoveredDevices = {};
 const limit = 5;
 let discovering = false;
-
+let cfg = require("./../config");
+var mqttOptions = cfg.mqtt;
 const discoverDevicesLoop = (count = 0) => {
   console.log("Discover device", count);
   discovering = true;
@@ -32,11 +34,14 @@ const discoverDevicesLoop = (count = 0) => {
   }, 5 * 1000);
 };
 
-const discoverDevices = () => {
+const discoverDevices = (count) => {
   if (discovering) return;
   discovering = true;
-  discoverDevicesLoop(5);
+  discoverDevicesLoop(count);
 };
+broadlink.on("power", data => {
+  console.log("on event power ", data);
+})
 
 broadlink.on("deviceReady", device => {
   const macAddressParts =
@@ -45,7 +50,7 @@ broadlink.on("deviceReady", device => {
   const macAddress = macAddressParts.join(":");
   device.host.macAddress = macAddress;
   const ipAddress = device.host.address;
-  console.log("found device", device);
+  //console.log("found device", device);
   //console.log("Discover complete")
 
   if (discoveredDevices[ipAddress]) return;
@@ -68,6 +73,7 @@ broadlink.on("deviceReady", device => {
 //            Setup Broadlink
 // -------------------------------------
 // a broadlink device is found
+
 myEmitter.on("device", discoveredDevice => {
   console.log("new device", discoverDevices);
   devices.push(discoveredDevice);
@@ -79,8 +85,16 @@ myEmitter.on("device", discoveredDevice => {
     } catch (error) {
       logger.error("Temperature publish error", error);
     }
-
   });
+  discoveredDevice.on("power", data => {
+    logger.debug(`Broadlink Power ${data}`, discoveredDevice.host);
+    logger.debug(`Publish to ${mqttOptions.subscribeBasePath}-stat/${discoveredDevice.host.id}/power`);
+    try {
+      mqttClient.publish(`${mqttOptions.subscribeBasePath}-stat/${discoveredDevice.host.id}/power`, data.toString());
+    } catch (error) {
+      logger.error("power publish error", error);
+    }
+  })
   /*
   // IR or RF signal found
   device.on("rawData", data => {

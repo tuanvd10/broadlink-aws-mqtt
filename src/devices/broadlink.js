@@ -97,17 +97,13 @@ class Broadlink extends EventEmitter {
   }
 
   onListening(socket, ipAddress) {
-    const {
-      debug,
-      log
-    } = this;
 
     // Broadcase a multicast UDP message to let Broadlink devices know we're listening
     socket.setBroadcast(true);
 
     const splitIPAddress = ipAddress.split('.');
     const port = socket.address().port;
-    if (debug && log) logger.debug(`\x1b[35m[INFO]\x1b[0m Listening for Broadlink devices on ${ipAddress}:${port} (UDP)`);
+    //debug(`\x1b[35m[INFO]\x1b[0m Listening for Broadlink devices on ${ipAddress}:${port} (UDP)`);
 
     const now = new Date();
     const starttime = now.getTime();
@@ -202,21 +198,21 @@ class Broadlink extends EventEmitter {
     if (deviceType >= 0x7530 && deviceType <= 0x7918) return null; // OEM branded SPMini2
     // If we don't know anything about the device we ask the user to provide details so that
     // we can handle it correctly.
-    if (!rmDeviceTypes[parseInt(deviceType, 16)] 
-        && !rmPlusDeviceTypes[parseInt(deviceType, 16)]
-        && !spDeviceTypes[parseInt(deviceType, 16)]) {
-      logger.debug(`\n\x1b[35m[Info]\x1b[0m We've discovered an unknown Broadlink device. This likely won't cause any issues.\n\nPlease raise an issue in the GitHub repository (https://github.com/lprhodes/homebridge-broadlink-rm/issues) with details of the type of device and its device type code: "${deviceType.toString(16)}". The device is connected to your network with the IP address "${host.address}".\n`);
-
+    if (!rmDeviceTypes[parseInt(deviceType, 16)] &&
+      !rmPlusDeviceTypes[parseInt(deviceType, 16)] &&
+      !spDeviceTypes[parseInt(deviceType, 16)]) {
+      //debug(`\n\x1b[35m[Info]\x1b[0m We've discovered an unknown Broadlink device. This likely won't cause any issues.\n\nPlease raise an issue in the GitHub repository (https://github.com/lprhodes/homebridge-broadlink-rm/issues) with details of the type of device and its device type code: "${deviceType.toString(16)}". The device is connected to your network with the IP address "${host.address}".\n`);
       return null;
     }
 
     // The Broadlink device is something we can use.
     const device = new Device(host, macAddress, deviceType)
-    device.log = logger.info;
-    device.debug = logger.debug;
 
     this.devices[macAddress] = device;
-
+    if(rmDeviceTypes[parseInt(deviceType, 16)] || rmPlusDeviceTypes[parseInt(deviceType, 16)]) 
+      device.rmDevice();
+    else if(spDeviceTypes[parseInt(deviceType, 16)])
+      device.spDevice();
     // Authenticate the device and let others know when it's ready.
     device.on('deviceReady', () => {
       this.emit('deviceReady', device);
@@ -232,10 +228,8 @@ class Device {
     this.host = host;
     this.mac = macAddress;
     this.emitter = new EventEmitter();
-    this.log = logger.info;
-    this.debug = logger.debug;
     this.type = deviceType;
-    this.model = rmDeviceTypes[parseInt(deviceType, 16)] || rmPlusDeviceTypes[parseInt(deviceType, 16)];
+    this.model = rmDeviceTypes[parseInt(deviceType, 16)] || rmPlusDeviceTypes[parseInt(deviceType, 16)]|| spDeviceTypes[parseInt(deviceType, 16)];
 
     this.on = this.emitter.on;
     this.emit = this.emitter.emit;
@@ -247,7 +241,7 @@ class Device {
     this.id = new Buffer([0, 0, 0, 0]);
 
     this.setupSocket();
-
+    
     // Dynamically add relevant RF methods if the device supports it
     const isRFSupported = rmPlusDeviceTypes[parseInt(deviceType, 16)];
     if (isRFSupported) this.addRFSupport();
@@ -289,9 +283,10 @@ class Device {
 
         this.emit('deviceReady');
       } else if (command == 0xee || command == 0xef) {
-        this.onPayloadReceived(err, payload);
+        this.emit("payload", err, payload);
+        //this.onPayloadReceived(err, payload);
       } else {
-        logger.debug('Unhandled Command: ', command)
+        //debug('Unhandled Command: ', command)
       }
     });
 
@@ -384,47 +379,99 @@ class Device {
     packet[0x20] = checksum & 0xff;
     packet[0x21] = checksum >> 8;
 
-    if (debug) logger.debug('\x1b[33m[DEBUG]\x1b[0m packet', packet.toString('hex'))
+    //debug('\x1b[33m[DEBUG]\x1b[0m packet', packet.toString('hex'))
 
     socket.send(packet, 0, packet.length, this.host.port, this.host.address, (err, bytes) => {
-      if (debug && err) logger.debug('\x1b[33m[DEBUG]\x1b[0m send packet error', err)
-      if (debug) logger.debug('\x1b[33m[DEBUG]\x1b[0m successfuly sent packet - bytes: ', bytes)
+      //debug('\x1b[33m[DEBUG]\x1b[0m send packet error', err)
+      //debug('\x1b[33m[DEBUG]\x1b[0m successfuly sent packet - bytes: ', bytes)
     });
   }
 
-  onPayloadReceived(err, payload) {
-    const param = payload[0];
-
-    const data = Buffer.alloc(payload.length - 4, 0);
-    payload.copy(data, 0, 4);
-
-    switch (param) {
-      case 1: {
-        const temp = (payload[0x4] * 10 + payload[0x5]) / 10.0;
-        this.emit('temperature', temp);
-        break;
+  
+  rmDevice(){
+    this.on("payload", (err, payload) => {
+      console.log("on rm payload");
+      const param = payload[0];
+  
+      const data = Buffer.alloc(payload.length - 4, 0);
+      payload.copy(data, 0, 4);
+  
+      switch (param) {
+        case 1: {
+          const temp = (payload[0x4] * 10 + payload[0x5]) / 10.0;
+          this.emit('temperature', temp);
+          break;
+        }
+        case 4: { //get from check_data
+          const data = Buffer.alloc(payload.length - 4, 0);
+          payload.copy(data, 0, 4);
+          this.emit('rawData', data);
+          break;
+        }
+        case 26: { //get from check_data
+          const data = Buffer.alloc(1, 0);
+          payload.copy(data, 0, 0x4);
+          if (data[0] !== 0x1) break;
+          this.emit('rawRFData', data);
+          break;
+        }
+        case 27: { //get from check_data
+          const data = Buffer.alloc(1, 0);
+          payload.copy(data, 0, 0x4);
+          if (data[0] !== 0x1) break;
+          this.emit('rawRFData2', data);
+          break;
+        }
       }
-      case 4: { //get from check_data
-        const data = Buffer.alloc(payload.length - 4, 0);
-        payload.copy(data, 0, 4);
-        this.emit('rawData', data);
-        break;
+    });
+  }
+  spDevice(){
+    this.on("payload", (err, payload) => {
+      console.log("on sp payload");
+      var param = payload[0];
+      console.log("param: ", param);
+      console.log("payload: ", payload);
+      
+      switch (param) {
+          case 1: //get from check_power
+              var pwr = Boolean(payload[0x4]);
+              console.log("power: ", pwr);
+              this.emit("power", pwr);
+              break;
+          case 3:
+              console.log('case 3');
+              break;
+          case 4:
+              console.log('case 4');
+              break;
       }
-      case 26: { //get from check_data
-        const data = Buffer.alloc(1, 0);
-        payload.copy(data, 0, 0x4);
-        if (data[0] !== 0x1) break;
-        this.emit('rawRFData', data);
-        break;
-      }
-      case 27: { //get from check_data
-        const data = Buffer.alloc(1, 0);
-        payload.copy(data, 0, 0x4);
-        if (data[0] !== 0x1) break;
-        this.emit('rawRFData2', data);
-        break;
-      }
+    });
+    this.setPower = (state) => {
+      //"""Sets the power state of the smart plug."""
+      const packet = Buffer.alloc(16, 0);
+      packet[0] = 2;
+      packet[4] = state ? 1 : 0;
+      this.sendPacket(0x6a, packet);
+      console.log("set Power");
     }
+
+    this.checkPower = () => {
+      //"""Returns the power state of the smart plug."""
+      var packet = Buffer.alloc(16, 0);
+      packet[0] = 1;
+      this.sendPacket(0x6a, packet);
+    }
+    this.getPower = () => {
+      //const packet = Buffer.alloc(16, 0);
+      //"""Returns the power level of the smart plug."""
+      //let packet = new Buffer([0x08, 0x00, 0xfe, 0x01, 0x05, 0x01, 0x00, 0x00, 0x00, 0x2D]);
+      var packet = new Buffer([8, 0, 254, 1, 5, 1, 0, 0, 0, 45]);
+      //var packet = Buffer.alloc(16, 0);
+           
+      console.log(packet);
+      this.sendPacket(0x6a, packet);
+    }
+    
   }
 
   // Externally Accessed Methods
@@ -458,7 +505,7 @@ class Device {
     packet[0] = 0x1e;
     this.sendPacket(0x6a, packet);
   }
-
+  
   addRFSupport() {
     this.enterRFSweep = () => {
       const packet = Buffer.alloc(16, 0);
