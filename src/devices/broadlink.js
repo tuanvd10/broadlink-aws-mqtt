@@ -3,7 +3,6 @@ const dgram = require('dgram');
 const os = require('os');
 const crypto = require('crypto');
 const assert = require('assert');
-const logger = require("./../logger");
 // RM Devices (without RF support)
 const rmDeviceTypes = {};
 rmDeviceTypes[parseInt(0x2737, 16)] = 'Broadlink RM Mini';
@@ -236,9 +235,9 @@ class Device {
     this.removeListener = this.emitter.removeListener;
 
     this.count = Math.random() & 0xffff;
-    this.key = new Buffer([0x09, 0x76, 0x28, 0x34, 0x3f, 0xe9, 0x9e, 0x23, 0x76, 0x5c, 0x15, 0x13, 0xac, 0xcf, 0x8b, 0x02]);
-    this.iv = new Buffer([0x56, 0x2e, 0x17, 0x99, 0x6d, 0x09, 0x3d, 0x28, 0xdd, 0xb3, 0xba, 0x69, 0x5a, 0x2e, 0x6f, 0x58]);
-    this.id = new Buffer([0, 0, 0, 0]);
+    this.key = Buffer.from([0x09, 0x76, 0x28, 0x34, 0x3f, 0xe9, 0x9e, 0x23, 0x76, 0x5c, 0x15, 0x13, 0xac, 0xcf, 0x8b, 0x02]);
+    this.iv = Buffer.from([0x56, 0x2e, 0x17, 0x99, 0x6d, 0x09, 0x3d, 0x28, 0xdd, 0xb3, 0xba, 0x69, 0x5a, 0x2e, 0x6f, 0x58]);
+    this.id = Buffer.from([0, 0, 0, 0]);
 
     this.setupSocket();
     
@@ -390,7 +389,6 @@ class Device {
   
   rmDevice(){
     this.on("payload", (err, payload) => {
-      console.log("on rm payload");
       const param = payload[0];
   
       const data = Buffer.alloc(payload.length - 4, 0);
@@ -427,22 +425,17 @@ class Device {
   }
   spDevice(){
     this.on("payload", (err, payload) => {
-      console.log("on sp payload");
       var param = payload[0];
-      console.log("param: ", param);
-      console.log("payload: ", payload);
       
       switch (param) {
           case 1: //get from check_power
               var pwr = Boolean(payload[0x4]);
-              console.log("power: ", pwr);
               this.emit("power", pwr);
               break;
           case 3:
-              console.log('case 3');
               break;
           case 4:
-              console.log('case 4');
+          break;
               break;
       }
     });
@@ -452,7 +445,7 @@ class Device {
       packet[0] = 2;
       packet[4] = state ? 1 : 0;
       this.sendPacket(0x6a, packet);
-      console.log("set Power");
+
     }
 
     this.checkPower = () => {
@@ -464,11 +457,7 @@ class Device {
     this.getPower = () => {
       //const packet = Buffer.alloc(16, 0);
       //"""Returns the power level of the smart plug."""
-      //let packet = new Buffer([0x08, 0x00, 0xfe, 0x01, 0x05, 0x01, 0x00, 0x00, 0x00, 0x2D]);
-      var packet = new Buffer([8, 0, 254, 1, 5, 1, 0, 0, 0, 45]);
-      //var packet = Buffer.alloc(16, 0);
-           
-      console.log(packet);
+      const packet = Buffer.from([8, 0, 254, 1, 5, 1, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0]);
       this.sendPacket(0x6a, packet);
     }
     

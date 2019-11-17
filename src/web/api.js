@@ -20,7 +20,7 @@ router.post("/play", function (req, res) {
     }
     runAction(action, req.body.topic, "api")
       .then(() => {
-        console.log("api done");
+        logger.debug("api done");
         res.json({
           message: "Sending message " + req.body.topic
         });
@@ -48,7 +48,7 @@ router.post("/recordir", function (req, res) {
     }
     runAction(action, req.body.topic, "api")
       .then(data => {
-        console.log("api done", data);
+        logger.debug("api done", data);
         res.json({
           message: "Sending message " + req.body.topic
         });
@@ -76,7 +76,7 @@ router.post("/recordrf", function (req, res) {
     }
     runAction(action, req.body.topic, "api")
       .then(data => {
-        console.log("api done", data);
+        logger.debug("api done", data);
         res.json({
           message: "Sending message " + req.body.topic
         });
@@ -99,11 +99,11 @@ router.post("/recordrf", function (req, res) {
 router.get("/files", function (req, res) {
   listFilestructure("./commands")
     .then(data => {
-      console.log("files", data);
+      logger.debug("files", data);
       res.json(data);
     })
     .catch(err => {
-      console.error("api:files:err", err);
+      logger.error("api:files:err", err);
       res.statusCode = 400;
       return res.json({
         errors: ["Error occured"],
@@ -112,16 +112,16 @@ router.get("/files", function (req, res) {
     });
 });
 router.delete("/files", function (req, res) {
-  console.log("delete", req.body.file);
+  logger.debug("delete", req.body.file);
   deleteFile(req.body.file)
     .then(obj => {
-      console.log("file is removed");
+      logger.info("file is removed");
       res.json({
         success: true
       });
     })
     .catch(err => {
-      console.error("api:files:delete:err", err);
+      logger.error("api:files:delete:err", err);
       res.statusCode = 400;
       return res.json({
         errors: ["Error occured"],

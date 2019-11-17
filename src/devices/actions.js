@@ -12,7 +12,6 @@ const cfg = require("./../config");
 let actionIsRunning = false;
 var devices = [];
 const commandsPath = cfg.recording.path || path.join(__dirname, "commands");
-console.log(commandsPath);
 function runAction(action, topic, origin) {
     action = action.toLowerCase();
     let actionMode = action;
@@ -30,10 +29,10 @@ function runAction(action, topic, origin) {
                 .then(deviceExitLearningIR)
                 .then(recordSave)
                 .then(data => {
-                    console.log("done", data);
+                    logger.info("done", data);
                 })
                 .catch(err => {
-                    console.log("error occured", err);
+                    logger.error("error occured", err);
                     prepareAction({
                         action,
                         topic,
@@ -53,10 +52,10 @@ function runAction(action, topic, origin) {
                 .then(deviceExitLearningIR)
                 .then(recordSave)
                 .then(data => {
-                    console.log("done", data);
+                    logger.info("done", data);
                 })
                 .catch(err => {
-                    console.log("error occured", err);
+                    logger.error("error occured", err);
                     prepareAction({
                         action,
                         topic,
@@ -93,7 +92,7 @@ function runAction(action, topic, origin) {
             })
             .then(checkPowerAction)
             .then( (data) => {
-                console.log("done check Power action", data);
+                logger.info("done get Power action", data);
             })
         case "getpower":      
             return prepareAction({
@@ -103,7 +102,7 @@ function runAction(action, topic, origin) {
             })
             .then(getPowerAction)
             .then( (data) => {
-                console.log("done get Power action");
+                logger.info("done get speed action");
             })
         default:
             logger.error(`Action ${action} doesn't exists`);

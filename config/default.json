@@ -14,5 +14,11 @@
   },
   "gui": {
     "port": 3001
+  },
+  "smartplug": {
+    "POWEROFF": 1,
+    "LOW": 5,
+    "MEDIUM": 10,
+    "HIGH": 15
   }
 }

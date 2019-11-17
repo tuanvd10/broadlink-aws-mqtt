@@ -13,11 +13,10 @@ let discovering = false;
 let cfg = require("./../config");
 var mqttOptions = cfg.mqtt;
 const discoverDevicesLoop = (count = 0) => {
-  console.log("Discover device", count);
+  logger.info("Discover device", count);
   discovering = true;
   if (count === 0) {
-    console.log("Discover complete, broadcast devices");
-    discoveredDevices;
+    logger.info("Discover complete, broadcast devices");
     myEmitter.emit("discoverCompleted", Object.keys(discoveredDevices).length);
     Object.keys(discoveredDevices).forEach(device => {
       myEmitter.emit("device", discoveredDevices[device]);
@@ -39,7 +38,6 @@ const discoverDevices = (count) => {
   discovering = true;
   discoverDevicesLoop(count);
 };
-broadlink.on("power", data => {
   console.log("on event power ", data);
 })
 
@@ -50,12 +48,12 @@ broadlink.on("deviceReady", device => {
   const macAddress = macAddressParts.join(":");
   device.host.macAddress = macAddress;
   const ipAddress = device.host.address;
-  //console.log("found device", device);
-  //console.log("Discover complete")
+  //logger.info("found device", device);
+  //logger.info("Discover complete")
 
   if (discoveredDevices[ipAddress]) return;
   /*
-    console.log(
+    logger.info(
       `Discovered Broadlink RM device at ${device.host.macAddress} (${
         device.host.address
       })`
@@ -75,7 +73,7 @@ broadlink.on("deviceReady", device => {
 // a broadlink device is found
 
 myEmitter.on("device", discoveredDevice => {
-  console.log("new device", discoverDevices);
+  logger.info("new device", discoverDevices);
   devices.push(discoveredDevice);
   logger.info("Broadlink Found Device", discoveredDevice.host);
   discoveredDevice.on("temperature", temperature => {
@@ -83,7 +81,7 @@ myEmitter.on("device", discoveredDevice => {
     try {
       mqttClient.publish(`${mqttOptions.subscribeBasePath}-stat/${discoveredDevice.host.id}/temperature`, temperature.toString());
     } catch (error) {
-      logger.error("Temperature publish error", error);
+      logger.error("power publish error", error);
     }
   });
   discoveredDevice.on("power", data => {
@@ -92,7 +90,7 @@ myEmitter.on("device", discoveredDevice => {
     try {
       mqttClient.publish(`${mqttOptions.subscribeBasePath}-stat/${discoveredDevice.host.id}/power`, data.toString());
     } catch (error) {
-      logger.error("power publish error", error);
+      logger.error("energy publish error", error);
     }
   })
   /*
