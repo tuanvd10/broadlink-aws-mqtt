@@ -1,9 +1,6 @@
 let cfg = require("./../config");
 const logger = require("./../logger");
 const mqtt = require("mqtt");
-const {
-  runAction,
-} = require("./../devices/actions");
 // -------------------------------------
 //         Setup MQTT and listen
 // -------------------------------------
@@ -36,16 +33,4 @@ mqttClient.on("offline", function () {
 mqttClient.on("error", function (err) {
   logger.error("MQTT Error", err);
 });
-mqttClient.on("message", function (topic, message) {
-  // message is Buffer
-  const msg = message.toString();
-  logger.debug("MQTT Message", {
-    topic,
-    msg
-  });
-  runAction(msg, topic, "mqtt")
-    .then(data => console.log("mqtt done", data))
-    .catch(err => console.error("mqtt failed on message", err));
-});
-
 module.exports = mqttClient;
