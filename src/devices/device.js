@@ -5,23 +5,42 @@ const broadlink = new BroadlinkJS();
 const EventEmitter = require("events");
 const myEmitter = new EventEmitter();
 const logger = require("./../logger");
-var { devices } = require("./actions");
-const mqttClient = require("./../mqtt/mqtt-client");
+const awsDevice = require("../aws-iot/device-publish");
+
+var {
+  devices,
+  deviceInfos
+} = require("./actions");
+
 const discoveredDevices = {};
-const limit = 5;
 let discovering = false;
 let cfg = require("./../config");
 var mqttOptions = cfg.mqtt;
+
+
+
 const discoverDevicesLoop = (count = 0) => {
   logger.info("Discover device", count);
   discovering = true;
   if (count === 0) {
     logger.info("Discover complete, broadcast devices");
     myEmitter.emit("discoverCompleted", Object.keys(discoveredDevices).length);
+
     Object.keys(discoveredDevices).forEach(device => {
       myEmitter.emit("device", discoveredDevices[device]);
+      deviceInfos.push({
+        "name": discoveredDevices[device].name,
+        "id": discoveredDevices[device].host.id
+      });
     });
     discovering = false;
+
+    //Try to update device infos to mqtt
+    try {
+      awsDevice.awsPublishDeviceInfos(deviceInfos);
+    } catch (error) {
+      logger.error("power publish error", error);
+    }
     return;
   }
 
@@ -38,8 +57,6 @@ const discoverDevices = (count) => {
   discovering = true;
   discoverDevicesLoop(count);
 };
-  console.log("on event power ", data);
-})
 
 broadlink.on("deviceReady", device => {
   const macAddressParts =
@@ -78,17 +95,30 @@ myEmitter.on("device", discoveredDevice => {
   logger.info("Broadlink Found Device", discoveredDevice.host);
   discoveredDevice.on("temperature", temperature => {
     logger.debug(`Broadlink Temperature ${temperature}`, discoveredDevice.host);
+  });
+  discoveredDevice.on("power", data => { //function return when check power command
+    var payload;
+    if (data === true) payload = 'ON';
+    else payload = 'OFF'
+    discoveredDevice.power = payload;
+    logger.debug(`Broadlink Power ${payload}`, discoveredDevice.host);
     try {
-      mqttClient.publish(`${mqttOptions.subscribeBasePath}-stat/${discoveredDevice.host.id}/temperature`, temperature.toString());
+      awsDevice.awsPublishPower(payload);
     } catch (error) {
       logger.error("power publish error", error);
     }
   });
-  discoveredDevice.on("power", data => {
-    logger.debug(`Broadlink Power ${data}`, discoveredDevice.host);
-    logger.debug(`Publish to ${mqttOptions.subscribeBasePath}-stat/${discoveredDevice.host.id}/power`);
+  discoveredDevice.on("energy", data => { //function return when check energy 
+    var speed = 0;
+    //compare to get speed of devices 
+    if (data < cfg.smartplug.LOW) speed = 0;
+    else if (data < cfg.smartplug.MEDIUM) speed = 1;
+    else if (data < cfg.smartplug.HIGH) speed = 2;
+    else speed = 3;
+    discoveredDevice.speed = speed;
+    logger.debug(`Broadlink energy ${speed}`, discoveredDevice.host);
     try {
-      mqttClient.publish(`${mqttOptions.subscribeBasePath}-stat/${discoveredDevice.host.id}/power`, data.toString());
+      awsDevice.awsPublishSpeed(speed);
     } catch (error) {
       logger.error("energy publish error", error);
     }

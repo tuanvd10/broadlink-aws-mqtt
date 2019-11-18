@@ -209,9 +209,15 @@ class Broadlink extends EventEmitter {
 
     this.devices[macAddress] = device;
     if(rmDeviceTypes[parseInt(deviceType, 16)] || rmPlusDeviceTypes[parseInt(deviceType, 16)]) 
+    {
       device.rmDevice();
-    else if(spDeviceTypes[parseInt(deviceType, 16)])
+      device.name = "RM";
+    }
+    else if(spDeviceTypes[parseInt(deviceType, 16)]) {
       device.spDevice();
+      device.name = "SP";
+    }
+      
     // Authenticate the device and let others know when it's ready.
     device.on('deviceReady', () => {
       this.emit('deviceReady', device);
@@ -387,13 +393,12 @@ class Device {
   }
 
   
-  rmDevice(){
+  rmDevice() {
     this.on("payload", (err, payload) => {
       const param = payload[0];
-  
       const data = Buffer.alloc(payload.length - 4, 0);
       payload.copy(data, 0, 4);
-  
+
       switch (param) {
         case 1: {
           const temp = (payload[0x4] * 10 + payload[0x5]) / 10.0;
@@ -423,20 +428,26 @@ class Device {
       }
     });
   }
-  spDevice(){
+  spDevice() {
     this.on("payload", (err, payload) => {
       var param = payload[0];
-      
       switch (param) {
-          case 1: //get from check_power
-              var pwr = Boolean(payload[0x4]);
-              this.emit("power", pwr);
-              break;
-          case 3:
-              break;
-          case 4:
+        case 1: //get from check_power
+          var pwr = Boolean(payload[0x4]);
+          this.emit("power", pwr);
           break;
-              break;
+        case 3:
+          break;
+        case 4:
+          break;
+        case 8:
+          var energy = 0;
+          if (payload[0x07]) {
+            energy = parseInt(payload[0x07].toString(16)) * 256 + parseInt(payload[0x06].toString(16))
+              + parseInt(payload[0x05].toString(16)) / 100.0;
+          }
+          this.emit("energy", energy);
+          break;
       }
     });
     this.setPower = (state) => {
@@ -448,23 +459,21 @@ class Device {
 
     }
 
-    this.checkPower = () => {
+    this.getPower = () => {
       //"""Returns the power state of the smart plug."""
       var packet = Buffer.alloc(16, 0);
       packet[0] = 1;
       this.sendPacket(0x6a, packet);
+      
     }
-    this.getPower = () => {
-      //const packet = Buffer.alloc(16, 0);
+    this.getEnergy = () => {
       //"""Returns the power level of the smart plug."""
       const packet = Buffer.from([8, 0, 254, 1, 5, 1, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0]);
       this.sendPacket(0x6a, packet);
     }
-    
+
   }
-
   // Externally Accessed Methods
-
   checkData() {
     const packet = Buffer.alloc(16, 0);
     packet[0] = 4;
@@ -472,7 +481,7 @@ class Device {
   }
 
   sendData(data, debug = false) {
-    let packet = new Buffer([0x02, 0x00, 0x00, 0x00]);
+    let packet = Buffer.from([0x02, 0x00, 0x00, 0x00]);
     packet = Buffer.concat([packet, data]);
     this.sendPacket(0x6a, packet, debug);
   }
