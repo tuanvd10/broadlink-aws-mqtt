@@ -3,8 +3,6 @@ const logger = require("./../logger");
 const cfg = require("./../config");
 const axios = require("axios");
 const fs = require("fs");
-const EventEmitter = require("events");
-const myEmitter = new EventEmitter();
 
 axios.defaults.headers.common['Authorization'] = "Bearer 1339b161-9ea6-490b-877f-bd6e65674373";
 axios.defaults.headers.common['Accept'] = "application/json";
@@ -22,26 +20,23 @@ const getAirThinxScore =  async ()=>{
 		})
 		.catch((err) => logger.error("airthinx" + JSON.stringify(err)));
 		
-
 	dataPoint = data[0].data_points.find(x => x.name === 'AQ');
 	aq = dataPoint.measurements[0][1];
 	time = dataPoint.measurements[0][0];
 	pm25 = data[0].data_points.find(x => x.name === 'PM2.5').measurements[0][1];
 	pm25 = data[0].data_points.find(x => x.name.indexOf("CO") == 0 ).measurements[0][1];
 
-		
-	logger.info("start airthinx: " +aq);
-	if(global.aq.aq == 0 || (global.aq.aq <= 90 && aq > 90) || global.aq.aq > 90 && aq <= 90)
+	logger.info("aq value: " +aq);
+	if(global.aq.aq == 0 || (global.aq.aq <= 90 && aq > 90) || (global.aq.aq > 90 && aq <= 90))
 			global.aq.time = time;
 		
 	global.aq.aq = aq;
-	
-	//sendControlData();
+
 }
 
 const sendControlData = () => {
-	/* global.aq
-		global.currentState.clientStatus: 
+	/* global.currentState.clientStatus: 
+		"DISCONNECT"
 		0: OFF 
 		1: level 1 
 		2: level 2 
@@ -62,17 +57,17 @@ const sendControlData = () => {
 					if(global.currentState.clientStatus==0){
 						logger.info("[tuanvd10] turn ON level");
 						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
-
 					}else{
 						logger.info("[tuanvd10] increse 1 level");
 						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandIncrease, "airthinx");
 					}
-					global.currentState.clientStatus+=1;
+					//global.currentState.clientStatus+=1;
 			}
 		}
 	}else if(global.aq.aq >90){
 		if(global.currentState.clientStatus==0){
 			//do nothing
+			
 			logger.info("[tuanvd10] OFF level");
 		}else{
 			//decrease a level
@@ -86,7 +81,7 @@ const sendControlData = () => {
 						logger.info("[tuanvd10] decrease 1 level");
 						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandDecrease, "airthinx");
 					}
-					global.currentState.clientStatus-=1;
+					//global.currentState.clientStatus-=1;
 			}
 		}
 	}else{
@@ -109,7 +104,8 @@ const sendCommandMultitime = async (time) =>{
 };
 
 global.currentState = {
-	"clientStatus" : 0
+	"clientStatus" : 0,
+	"time" : 0
 }
 global.aq = {
 	"aq" : -1,

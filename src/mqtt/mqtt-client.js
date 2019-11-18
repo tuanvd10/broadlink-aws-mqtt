@@ -5,9 +5,6 @@ const mqtt = require("mqtt");
 const {
   runAction
 } = require("./../devices/actions");
-
-const {sendControlData} = require("./../devices/airthinx_device");
-
 // -------------------------------------
 //         Setup MQTT and listen
 // -------------------------------------
@@ -25,12 +22,6 @@ mqttClient.on("connect", function (connack) {
   mqttClient.subscribe(`${mqttOptions.subscribeBasePath}/#`, function (err) {
     if (err) {
       logger.error("MQTT Failed to Subscribe", err);
-    }
-  });
-  
-    mqttClient.subscribe(`${mqttOptions.subscribeBaseState}/#`, function (err) {
-    if (err) {
-      logger.error("MQTT Failed to Subscribe " + mqttOptions.subscribeBaseState , err);
     }
   });
 });
@@ -54,15 +45,6 @@ mqttClient.on("message", function (topic, message) {
     topic,
     msg
   });
-  /*check if topic is state of client
-	call once per 5s
-  */
-  if(topic.indexOf(cfg.mqtt.subscribeBaseState)==0){
-	  //message is state of client
-	  global.currentState.clientStatus = parseInt(message);
-	  sendControlData();
-  }
-  else
   runAction(msg, topic, "mqtt")
     .then(data => console.log("mqtt done", data))
     .catch(err => console.error("mqtt failed on message", err));
