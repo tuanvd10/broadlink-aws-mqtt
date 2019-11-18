@@ -5,12 +5,18 @@ const md5 = require("md5");
 const md5File = require("md5-file");
 const logger = require("./../logger");
 const cfg = require("./../config");
+const rmHandles = require("./rm-handles");
+const spHandles = require("./sp-handles");
+const awsDevice = require("../aws-iot/device-publish");
+
+var devices = [];
+var deviceInfos = [];
 // -------------------------------------
 //         Application Actions
 // -------------------------------------
 
 let actionIsRunning = false;
-var devices = [];
+
 const commandsPath = cfg.recording.path || path.join(__dirname, "commands");
 function runAction(action, topic, origin) {
     action = action.toLowerCase();
@@ -24,10 +30,10 @@ function runAction(action, topic, origin) {
                     topic,
                     origin
                 })
-                .then(deviceEnterLearningIR)
-                .then(recordIR)
-                .then(deviceExitLearningIR)
-                .then(recordSave)
+                .then(rmHandles.deviceEnterLearningIR)
+                .then(rmHandles.recordIR)
+                .then(rmHandles.deviceExitLearningIR)
+                .then(rmHandles.recordSave)
                 .then(data => {
                     logger.info("done", data);
                 })
@@ -37,7 +43,7 @@ function runAction(action, topic, origin) {
                         action,
                         topic,
                         origin
-                    }).then(deviceExitLearningIR);
+                    }).then(rmHandles.deviceExitLearningIR);
                 });
         case "recordrf":
             return prepareAction({
@@ -45,12 +51,12 @@ function runAction(action, topic, origin) {
                     topic,
                     origin
                 })
-                .then(deviceEnterLearningRFSweep)
-                .then(recordRFFrequence)
-                .then(deviceEnterLearningIR)
-                .then(recordRFCode)
-                .then(deviceExitLearningIR)
-                .then(recordSave)
+                .then(rmHandles.deviceEnterLearningRFSweep)
+                .then(rmHandles.recordRFFrequence)
+                .then(rmHandles.deviceEnterLearningIR)
+                .then(rmHandles.recordRFCode)
+                .then(rmHandles.deviceExitLearningIR)
+                .then(rmHandles.recordSave)
                 .then(data => {
                     logger.info("done", data);
                 })
@@ -60,7 +66,7 @@ function runAction(action, topic, origin) {
                         action,
                         topic,
                         origin
-                    }).then(deviceExitLearningRF);
+                    }).then(rmHandles.deviceExitLearningRF);
                 });
         case "play":
             return prepareAction({
@@ -68,8 +74,7 @@ function runAction(action, topic, origin) {
                     topic,
                     origin
                 })
-                .then(playAction)
-                .then(mqttPublish);
+                .then(rmHandles.playAction);
         case "temperature":
             return prepareAction({
                     action,
@@ -83,27 +88,29 @@ function runAction(action, topic, origin) {
                     topic,
                     origin
                 })
-                .then(setPowerAction);    
+                .then(spHandles.setPowerAction);    
         case "checkpower":      
             return prepareAction({
                 action,
                 topic,
                 origin
             })
-            .then(checkPowerAction)
+            .then(spHandles.getPowerAction)
             .then( (data) => {
-                logger.info("done get Power action", data);
+                logger.info("Done get Power action", data);
             })
-        case "getpower":      
+        case "checkspeed":      
             return prepareAction({
                 action,
                 topic,
                 origin
             })
-            .then(getPowerAction)
+            .then(spHandles.getEnergyAction)
             .then( (data) => {
-                logger.info("done get speed action");
+                logger.info("Done get speed action");
             })
+        case "getinfo":      
+            return getDeviceInfos()
         default:
             logger.error(`Action ${action} doesn't exists`);
             return handleActionError(`Action ${action} doesn't exists`);
@@ -170,164 +177,9 @@ const prepareAction = data =>
         }
     });
 
-// learn ir
-const deviceEnterLearningIR = data =>
-    new Promise((resolve, reject) => {
-        logger.debug("deviceEnterLearningIR");
-        data.device.enterLearning();
-        resolve(data);
-    });
 
-// Stops ir
-const deviceExitLearningIR = data =>
-    new Promise((resolve, reject) => {
-        logger.debug("deviceExitLearningIR");
-        data.device.cancelLearn();
-        resolve(data);
-    });
 
-// rf sweep frq
-const deviceEnterLearningRFSweep = data =>
-    new Promise((resolve, reject) => {
-        logger.debug("deviceEnterLearningRFSweep");
-        data.device.enterRFSweep();
-        resolve(data);
-    });
-// enter rf learning
-const deviceEnterLearningRF = data =>
-    new Promise((resolve, reject) => {
-        logger.debug("deviceEnterLearningRF");
-        data.device.enterLearning();
-        resolve(data);
-    });
-// stops rf
-const deviceExitLearningRF = data =>
-    new Promise((resolve, reject) => {
-        logger.debug("deviceExitLearningRF");
-        data.device.cancelLearn();
-        resolve(data);
-    });
 
-// Save action
-const recordSave = data =>
-    new Promise((resolve, reject) => {
-        logger.info("recordSave");
-        logger.info(`Save data to file ${data.filePath}`);
-        shell.mkdir("-p", data.folderPath);
-        fs.writeFile(data.filePath, data.signal, {
-            flag: "w"
-        }, err => {
-            if (err) {
-                logger.error("Failed to create file", err);
-                reject("Stopped at recordSave");
-                return;
-            }
-            logger.info("File saved successfully");
-            resolve(data);
-        });
-    });
-
-// Record a IR Signal
-const recordIR = data =>
-    new Promise((resolve, reject) => {
-        logger.info("recordIR: Press an IR signal");
-        let timeout = cfg.recording.timeout.ir;
-        let intervalSpeed = 1;
-        let interval = setInterval(() => {
-            logger.info("recordIR: Timeout in " + timeout);
-            data.device.checkData();
-            timeout -= intervalSpeed;
-            if (timeout <= 0) {
-                clearInterval(interval);
-                logger.error("IR Timeout");
-                reject("Stopped at recordIR");
-            }
-        }, intervalSpeed * 1000);
-
-        // IR signal received
-        const callback = dataRaw => {
-            clearInterval(interval);
-            logger.debug("Broadlink IR RAW");
-            data.device.removeListener("rawData", callback);
-            data.signal = dataRaw;
-            resolve(data);
-        };
-        data.device.on("rawData", callback);
-    });
-
-// Record RF Signal (after a frequence is found)
-const recordRFCode = data =>
-    new Promise((resolve, reject) => {
-        logger.info("recordRFCode: Press RF button");
-        setTimeout(() => {
-            let timeout = cfg.recording.timeout.rf;
-            let intervalSpeed = 1;
-            let interval = setInterval(() => {
-                logger.info("recordRFCode: Timeout in " + timeout);
-                data.device.checkData();
-                timeout -= intervalSpeed;
-                if (timeout <= 0) {
-                    clearInterval(interval);
-                    logger.error("RF Timeout");
-                    reject("Stopped at recordRFCode");
-                }
-            }, intervalSpeed * 1000);
-
-            // IR or RF signal found
-            const callback = dataRaw => {
-                logger.debug("Broadlink RF RAW");
-                data.signal = dataRaw;
-                clearInterval(interval);
-                data.device.removeListener("rawData", callback);
-                resolve(data);
-            };
-            data.device.on("rawData", callback);
-        }, 3000);
-    });
-
-// Record RF, scans for frequence
-const recordRFFrequence = data =>
-    new Promise((resolve, reject) => {
-        logger.info("recordRFFrequence: Hold and RF button");
-        let timeout = cfg.recording.timeout.rf;
-        let intervalSpeed = 1;
-        let interval = setInterval(() => {
-            logger.info("recordRFFrequence: Timeout in " + timeout);
-            data.device.checkRFData();
-            timeout -= intervalSpeed;
-            if (timeout <= 0) {
-                clearInterval(interval);
-                logger.error("RF Sweep Timeout");
-                reject("Stopped at recordRFFrequence");
-            }
-        }, intervalSpeed * 1000);
-
-        // RF Sweep found something
-        const callback = dataRaw => {
-            clearInterval(interval);
-            data.device.removeListener("rawRFData", callback);
-            data.frq = dataRaw;
-            resolve(data);
-        };
-        data.device.on("rawRFData", callback);
-    });
-
-const playAction = data =>
-    new Promise((resolve, reject) => {
-        logger.info("playAction");
-        fs.readFile(data.filePath, (err, fileData) => {
-            if (err) {
-                logger.error("Failed to read file", {
-                    err
-                });
-                reject("Stopped at playAction");
-                return;
-            } else {
-                data.device.sendData(fileData, false);
-                resolve(data);
-            }
-        });
-    });
 
 const queryTemperature = data =>
     new Promise((resolve, reject) => {
@@ -352,44 +204,7 @@ const handleListAllActions = data =>
         resolve(files);
     });
 
-const mqttPublish = data =>
-    new Promise((resolve, reject) => {
-        if (data.origin !== "mqtt") {
-            //@TODO implement
-            //logger.info("broadcast action, how to");
-            //mqttClient.publish()
-        }
-        resolve(data);
-    });
-const setPowerAction = data =>
-    new Promise((resolve, reject) => {
-        logger.info("setPowerAction");
-        data.device.setPower(false);
-        resolve(data);
-    });
 
-const checkPowerAction = data =>
-    new Promise((resolve, reject) => {
-        logger.info("queryPowerState");
-        try {
-            data.device.checkPower();
-            resolve(data);
-        } catch (error) {
-            logger.error("Failed to query power");
-            reject("Stopped at queryPowerState");
-        }
-    });
-const getPowerAction = data =>
-new Promise((resolve, reject) => {
-    logger.info("getPowerAction");
-    try {
-        data.device.getPower();
-        resolve(data);
-    } catch (error) {
-        logger.error("Failed to query power");
-        reject("Stopped at queryPowerState");
-    }
-});
 // -------------- HELPERS --------------
 
 const deleteFile = path =>
@@ -488,7 +303,12 @@ const listFilestructure = dir => {
 
     return walk(dir);
 };
-
+const getDeviceInfos = () => {
+    new Promise((resolve, reject) => {
+        awsDevice.awsPublishDeviceInfos(deviceInfos);
+        resolve();
+    });
+}
 const getDevicesInfo = () =>
     new Promise((resolve, reject) => {
         var devs = [];
@@ -503,5 +323,6 @@ module.exports = {
     deleteFile,
     listFilestructure,
     getDevicesInfo,
-    devices
+    devices,
+    deviceInfos
 }
