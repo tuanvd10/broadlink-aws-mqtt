@@ -82,8 +82,8 @@ public class MonitoringSystem {
 
                             // set data for grid views
                             gdView1.setAdapter(new MonitoringGridAdapter(activity, gdList3));
-                            gdView2.setAdapter(new MonitoringGridAdapter(activity, gdList1));
-                            gdView3.setAdapter(new MonitoringGridAdapter(activity, gdList2));
+                            gdView2.setAdapter(new MonitoringGridAdapter(activity, gdList2));
+                            gdView3.setAdapter(new MonitoringGridAdapter(activity, gdList1));
                             gdView1.setBackground(activity.getApplicationContext().getDrawable(R.drawable.border_rectangle));
                             gdView2.setBackground(activity.getApplicationContext().getDrawable(R.drawable.border_rectangle));
                             gdView3.setBackground(activity.getApplicationContext().getDrawable(R.drawable.border_rectangle));
