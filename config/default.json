@@ -4,7 +4,6 @@
     "port": 1883,
     "protocol": "mqtt",
     "subscribeBasePath": "broadlink",
-	"subscribeBaseState":"broadlink-stat"
   },
   "recording": {
     "timeout": {
