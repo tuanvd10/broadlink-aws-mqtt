@@ -30,5 +30,19 @@
     <string name="connecting_status">Đang kết nối</string>
     <string name="connected_status">Đã kết nối</string>
 
+    <!-- String for Air Parameter -->
+    <string name="AQ">Không Khí</string>
+    <string name="CO2">CO\u2082</string>
+    <string name="H2CO">Formaldehyde</string>
+    <string name="HM">Độ ẩm</string>
+    <string name="Pressure">Áp suất</string>
+    <string name="Temperature">Nhiệt độ</string>
+    <string name="VOC">VOC</string>
+    <string name="PM">Ô nhiễm hạt</string>
+
+    <string name="good">Tốt</string>
+    <string name="mod">Khá</string>
+    <string name="poor">Kém</string>
+
 
 </resources>

@@ -8,8 +8,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
-import com.viettel.vht.remoteapp.common.APILink;
-import com.viettel.vht.remoteapp.monitoring.MonitoringInfoRequest;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -17,8 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
-import android.widget.TextView;
-
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;

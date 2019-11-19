@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_remote_control">
+    app:startDestination="@+id/nav_home">
 
     <fragment
         android:id="@+id/nav_home"
@@ -16,7 +16,7 @@
         android:name="com.viettel.vht.remoteapp.ui.remotecontrol.RemoteControlFragment"
         android:label="@string/menu_remote_control"
         tools:layout="@layout/fragment_remote_control" />
-
+W
     <fragment
         android:id="@+id/nav_gallery"
         android:name="com.viettel.vht.remoteapp.ui.gallery.GalleryFragment"

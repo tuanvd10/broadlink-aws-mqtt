@@ -35,6 +35,8 @@ public class MonitoringRequest {
                 //txtDebug.setText("Error: " + error.toString());
             }
 
+
+
         }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {

@@ -8,61 +8,109 @@
 
 
     <RelativeLayout
-        android:id="@+id/status"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="108dp"
-        android:background="@drawable/shape_cycle"
+        android:id="@+id/aq_status"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
 
-        <ImageView
-            android:id="@+id/status_ic"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/ic_aq"
-            android:tint="@color/White"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="50dp">
-
-        </ImageView>
 
         <TextView
-            android:id="@+id/status_aq"
+            android:id="@+id/aq_status_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_below="@+id/status_ic"
-            android:layout_marginTop="5dp"
-            android:text="Air Quality">
-
-        </TextView>
+            android:layout_marginTop="35dp"
+            android:textColor="@color/White"
+            android:textSize="20dp"
+            android:textStyle="bold"></TextView>
 
         <TextView
+            android:id="@+id/aq_status_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/aq_status_value"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:layout_below="@+id/status_aq"
-            android:layout_marginTop="5dp"
             android:textStyle="bold"
-            android:text="GOOD">
+            android:layout_marginTop="5dp"></TextView>
+
+        <TextView
+            android:id="@+id/aq_status_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/aq_status_title"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/White"
+            android:textStyle="bold">
 
         </TextView>
 
     </RelativeLayout>
 
-    <GridView
-        android:id="@+id/gdStatus"
-        android:layout_width="390dp"
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/loading"
+        style="@style/SpinKitView.Large.Circle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:numColumns="2"
+        android:layout_gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/status" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"
+        card_view:SpinKit_Color="@color/colorAccent" />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/aq_status"
+        app:layout_constraintVertical_bias="0.5">
+
+        <GridView
+            android:id="@+id/gdHTP"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:numColumns="auto_fit"
+            android:padding="10dp"
+            android:verticalSpacing="10dp" />
+
+        <GridView
+            android:id="@+id/gdCO2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/gdHTP"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="20dp"
+            android:numColumns="auto_fit"
+            android:padding="10dp"
+            android:verticalSpacing="10dp" />
+
+        <GridView
+            android:id="@+id/gdPM"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/gdCO2"
+            android:layout_marginTop="20dp"
+            android:numColumns="auto_fit"
+            android:padding="10dp"
+            android:verticalSpacing="10dp" />
+    </RelativeLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
