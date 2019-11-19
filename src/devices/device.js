@@ -13,9 +13,11 @@ var {
 } = require("./actions");
 const mqttClient = require("./../mqtt/mqtt-client");
 
-const {sendControlData,getAirThinxScore} = require("./../devices/airthinx_device");
+const {sendControlData, getAirThinxScore, getCurrentAirthinxState} = require("./../devices/airthinx_device");
 
 const discoveredDevices = {};
+
+const limit = 5;
 let discovering = false;
 let cfg = require("./../config");
 var mqttOptions = cfg.mqtt;
@@ -111,6 +113,7 @@ myEmitter.on("device", discoveredDevice => {
       logger.error("power publish error", error);
     }
   });
+
   discoveredDevice.on("energy", data => { //function return when check energy 
     var speed = 0;
     //compare to get speed of devices 
@@ -120,12 +123,28 @@ myEmitter.on("device", discoveredDevice => {
     else speed = 3;
     discoveredDevice.speed = speed;
     logger.debug(`Broadlink energy ${speed}`, discoveredDevice.host);
-    try {
+	    try {
       awsDevice.awsPublishSpeed(speed);
     } catch (error) {
       logger.error("energy publish error", error);
     }
   })
+
+	if(discoveredDevice.host.id === cfg.airthinx.spDeviceId){
+	 {
+			setInterval(function (){
+					getAirThinxScore();
+			}, 20000);
+			
+			/*auto run every 10s*/
+			setInterval(function (){
+					sendControlData();
+			}, 10000); 
+			
+			getCurrentAirthinxState();
+	  }
+  }
+
   /*
   // IR or RF signal found
   device.on("rawData", data => {
@@ -151,10 +170,6 @@ myEmitter.on("discoverCompleted", numOfDevice => {
   if (numOfDevice === 0) {
     logger.error("Broadlink device is missing");
   }
-	
-	setInterval(function (){
-			getAirThinxScore();
-	}, 20000);
 });
 module.exports = {
   broadlink: myEmitter,

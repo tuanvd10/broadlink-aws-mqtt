@@ -38,4 +38,5 @@ mqttClient.on("message", function (topic, message) {
 });
 
 logger.info("Starting Broadlink MQTT NodeJS Application");
-discoverDevices(5);
+
+discoverDevices(1);

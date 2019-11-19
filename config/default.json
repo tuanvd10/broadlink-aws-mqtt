@@ -4,7 +4,7 @@
     "port": 1883,
     "protocol": "mqtt",
     "subscribeBasePath": "broadlink",
-	"subscribeBaseState":"state"
+	"subscribeBaseState":"broadlink-stat"
   },
   "recording": {
     "timeout": {
@@ -25,6 +25,7 @@
 	},
   "airthinx":{
 	"deviceid": "770f78d91f64",
+	"spDeviceId": "34ea3479ee2b",
 	"commandPower":"/fan/mitsubishi/power",
 	"commandIncrease": "/fan/mitsubishi/power",
 	"commandDecrease": "/fan/mitsubishi/power",

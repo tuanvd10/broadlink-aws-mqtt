@@ -1,4 +1,4 @@
-const { runAction} = require("./../devices/actions");
+const { runAction, devices} = require("./../devices/actions");
 const logger = require("./../logger");
 const cfg = require("./../config");
 const axios = require("axios");
@@ -43,43 +43,47 @@ const sendControlData = () => {
 		3: level 3
 	*/
 	let currentTime = new Date().getTime();
+	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
 
-	logger.debug("[tuanvd10] current state: ", global.currentState);
+	logger.debug("[tuanvd10] current state: ", spDevice.state);
 	logger.debug("[tuanvd10] current aq: ", global.aq);
-	console.log("[tuanvd10] current time: " + currentTime);
+	logger.debug("[tuanvd10] current time: " + currentTime);
 
 	if(global.aq.aq <=90){
-		if(global.currentState.clientStatus==3) {
+		if(spDevice.state.currentState.clientStatus==3) {
 			logger.info("[tuanvd10] max level, cannot increase");
 		}else{
-			if(currentTime - global.aq.time > cfg.airthinx.interval_time){
-					//increase 1 level if it keep state too long
-					if(global.currentState.clientStatus==0){
+			if(currentTime - global.aq.time > cfg.airthinx.interval_time && currentTime-spDevice.state.currentState.time > cfg.airthinx.interval_time){
+					//increase 1 level if it keep aq and state too long
+					if(spDevice.state.currentState.clientStatus==0){
 						logger.info("[tuanvd10] turn ON level");
 						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
+						//sendCommandMultitime(1);//if only 1 button
 					}else{
 						logger.info("[tuanvd10] increse 1 level");
 						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandIncrease, "airthinx");
+						//sendCommandMultitime(1);//if only 1 button
 					}
 					//global.currentState.clientStatus+=1;
 			}
 		}
 	}else if(global.aq.aq >90){
-		if(global.currentState.clientStatus==0){
+		if(spDevice.state.currentState.clientStatus==0){
 			//do nothing
-			
 			logger.info("[tuanvd10] OFF level");
 		}else{
 			//decrease a level
 			let currentTime = new Date().getTime();
-			if(currentTime - global.aq.time > cfg.airthinx.interval_time){
+			if(currentTime - global.aq.time > cfg.airthinx.interval_time && currentTime-spDevice.state.currentState.time > cfg.airthinx.interval_time){
 					//decrease 1 level or OFF if it keep state too long
-					if(global.currentState.clientStatus==1){
+					if(spDevice.state.currentState.clientStatus==1){
 						logger.info("[tuanvd10] Turn OFF level");
 						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
+						//sendCommandMultitime(3);//if only 1 button
 					}else{
 						logger.info("[tuanvd10] decrease 1 level");
 						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandDecrease, "airthinx");
+						//sendCommandMultitime(3);//if only 1 button
 					}
 					//global.currentState.clientStatus-=1;
 			}
@@ -103,6 +107,15 @@ const sendCommandMultitime = async (time) =>{
 	}
 };
 
+function getCurrentAirthinxState(){
+	//get sp device
+	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
+	//logger.info("[tuanvd10] getStateOfDevice: ", spDevice);
+	setInterval(function(){
+		spDevice.getState();
+	},5000);
+}
+
 global.currentState = {
 	"clientStatus" : 0,
 	"time" : 0
@@ -112,4 +125,4 @@ global.aq = {
 	"time" : 0
 }
 
-module.exports =  {sendControlData,getAirThinxScore}
+module.exports =  {sendControlData, getAirThinxScore, getCurrentAirthinxState}

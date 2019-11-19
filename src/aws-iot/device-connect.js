@@ -26,11 +26,6 @@ device.subscribe(`${mqttOptions.subscribeBasePath}/#`, function (err) {
   }
 });
 
-device.subscribe(`${mqttOptions.subscribeBaseState}/#`, function (err) {
-    if (err) {
-      logger.error("AWS IOT MQTT Failed to Subscribe " + mqttOptions.subscribeBaseState , err);
-    }
-});
 
 //
 // Do a simple publish/subscribe demo based on the test-mode passed
@@ -68,25 +63,7 @@ device.on('message', function (topic, payload) {
     topic,
     msg
   });
-  /*check if topic is state of client
-	call once per 5s
-  */
-  if(topic.indexOf(cfg.mqtt.subscribeBaseState)==0){
-	  //message is state of client
-	  var prevStatus = global.currentState.clientStatus;
-	  var currentTime = new Date().getTime();
-	  global.currentState.clientStatus  = msg;
-	  if(prevStatus != global.currentState.clientStatus){
-		  global.currentState.time = currentTime;
-	  }
-	  
-	  if(global.currentState.clientStatus ==="DISCONECTED" && currentTime - global.currentState.time > cfg.airthinx.interval_time){
-		  
-	  }
-	  else
-		sendControlData();
-  }
-  else
+
   runAction(msg, topic, "mqtt")
     .then(data => console.log("mqtt done", data))
     .catch(err => console.error("mqtt failed on message", err));

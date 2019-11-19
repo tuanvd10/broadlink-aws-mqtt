@@ -246,6 +246,14 @@ class Device {
     this.iv = Buffer.from([0x56, 0x2e, 0x17, 0x99, 0x6d, 0x09, 0x3d, 0x28, 0xdd, 0xb3, 0xba, 0x69, 0x5a, 0x2e, 0x6f, 0x58]);
     this.id = Buffer.from([0, 0, 0, 0]);
 
+	this.state={
+		"spState": false,
+		"currentState": {
+			"clientStatus" : 0,
+			"time" : 0
+		}
+	};
+
     this.setupSocket();
     
     // Dynamically add relevant RF methods if the device supports it
@@ -436,6 +444,7 @@ class Device {
         case 1: //get from check_power
           var pwr = Boolean(payload[0x4]);
           this.emit("power", pwr);
+		   this.state.spState = pwr;
           break;
         case 3:
           break;
@@ -472,6 +481,19 @@ class Device {
       const packet = Buffer.from([8, 0, 254, 1, 5, 1, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0]);
       this.sendPacket(0x6a, packet);
     }
+	
+    this.getState = async () => {
+		this.checkPower();
+		await sleep(500);
+		if(this.state.spState){
+			// get Power level of SP device
+			this.getPower();
+		}else{
+			//send power to turn on SP device
+			//this.setPower(true);
+		}
+	}
+  }
 
   }
   // Externally Accessed Methods
@@ -524,6 +546,12 @@ class Device {
       this.sendPacket(0x6a, packet);
     }
   }
+}
+
+function sleep(ms){
+     return new Promise(resolve=>{
+         setTimeout(resolve,ms)
+     })
 }
 
 module.exports = Broadlink;
