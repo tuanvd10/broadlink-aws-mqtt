@@ -1,6 +1,7 @@
 let cfg = require("./../config");
 const logger = require("./../logger");
 const mqtt = require("mqtt");
+
 // -------------------------------------
 //         Setup MQTT and listen
 // -------------------------------------
@@ -33,4 +34,6 @@ mqttClient.on("offline", function () {
 mqttClient.on("error", function (err) {
   logger.error("MQTT Error", err);
 });
+
+
 module.exports = mqttClient;

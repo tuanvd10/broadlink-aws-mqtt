@@ -12,7 +12,15 @@ var {
   deviceInfos
 } = require("./actions");
 
+const {
+  sendControlData,
+  getAirThinxScore,
+  getCurrentAirthinxState
+} = require("./../devices/airthinx_device");
+
 const discoveredDevices = {};
+
+const limit = 5;
 let discovering = false;
 let cfg = require("./../config");
 var mqttOptions = cfg.mqtt;
@@ -100,7 +108,7 @@ myEmitter.on("device", discoveredDevice => {
     var payload;
     if (data === true) payload = 'ON';
     else payload = 'OFF'
-    discoveredDevice.power = payload;
+    discoveredDevice.state.spState = payload;
     logger.debug(`Broadlink Power ${payload}`, discoveredDevice.host);
     try {
       awsDevice.awsPublishPower(payload);
@@ -108,6 +116,7 @@ myEmitter.on("device", discoveredDevice => {
       logger.error("power publish error", error);
     }
   });
+
   discoveredDevice.on("energy", data => { //function return when check energy 
     var speed = 0;
     //compare to get speed of devices 
@@ -115,7 +124,10 @@ myEmitter.on("device", discoveredDevice => {
     else if (data < cfg.smartplug.MEDIUM) speed = 1;
     else if (data < cfg.smartplug.HIGH) speed = 2;
     else speed = 3;
-    discoveredDevice.speed = speed;
+    if (discoveredDevice.state.currentState.clientStatus != speed) {
+      discoveredDevice.state.currentState.time = new Date().getTime();
+    }
+    discoveredDevice.state.currentState.clientStatus = speed;
     logger.debug(`Broadlink energy ${speed}`, discoveredDevice.host);
     try {
       awsDevice.awsPublishSpeed(speed);
@@ -123,6 +135,22 @@ myEmitter.on("device", discoveredDevice => {
       logger.error("energy publish error", error);
     }
   })
+
+  if (discoveredDevice.host.id === cfg.airthinx.spDeviceId) {
+    {
+      setInterval(function () {
+        getAirThinxScore();
+      }, 20000);
+
+      /*auto run every 15s*/
+      setInterval(function () {
+        sendControlData();
+      }, 15000);
+
+      getCurrentAirthinxState();
+    }
+  }
+
   /*
   // IR or RF signal found
   device.on("rawData", data => {

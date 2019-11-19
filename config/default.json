@@ -1,6 +1,6 @@
 {
   "mqtt": {
-    "host": "127.0.0.1",
+    "host": "192.168.2.69",
     "port": 1883,
     "protocol": "mqtt",
     "subscribeBasePath": "broadlink"
@@ -15,10 +15,19 @@
   "gui": {
     "port": 3001
   },
+
   "smartplug": {
     "POWEROFF": 1,
     "LOW": 5,
     "MEDIUM": 10,
     "HIGH": 15
+	},
+  "airthinx":{
+	"deviceid": "770f78d91f64",
+	"spDeviceId": "34ea3479ee2b",
+	"commandPower":"/airpurifier/power",
+	"commandIncrease": "/airpurifier/speedup",
+	"commandDecrease": "/airpurifier/speeddown",
+	"interval_time": "130000"
   }
 }

@@ -201,6 +201,7 @@ class Broadlink extends EventEmitter {
       !rmPlusDeviceTypes[parseInt(deviceType, 16)] &&
       !spDeviceTypes[parseInt(deviceType, 16)]) {
       //debug(`\n\x1b[35m[Info]\x1b[0m We've discovered an unknown Broadlink device. This likely won't cause any issues.\n\nPlease raise an issue in the GitHub repository (https://github.com/lprhodes/homebridge-broadlink-rm/issues) with details of the type of device and its device type code: "${deviceType.toString(16)}". The device is connected to your network with the IP address "${host.address}".\n`);
+
       return null;
     }
 
@@ -208,16 +209,14 @@ class Broadlink extends EventEmitter {
     const device = new Device(host, macAddress, deviceType)
 
     this.devices[macAddress] = device;
-    if(rmDeviceTypes[parseInt(deviceType, 16)] || rmPlusDeviceTypes[parseInt(deviceType, 16)]) 
-    {
+    if (rmDeviceTypes[parseInt(deviceType, 16)] || rmPlusDeviceTypes[parseInt(deviceType, 16)]) {
       device.rmDevice();
       device.name = "RM";
-    }
-    else if(spDeviceTypes[parseInt(deviceType, 16)]) {
+    } else if (spDeviceTypes[parseInt(deviceType, 16)]) {
       device.spDevice();
       device.name = "SP";
     }
-      
+
     // Authenticate the device and let others know when it's ready.
     device.on('deviceReady', () => {
       this.emit('deviceReady', device);
@@ -234,7 +233,7 @@ class Device {
     this.mac = macAddress;
     this.emitter = new EventEmitter();
     this.type = deviceType;
-    this.model = rmDeviceTypes[parseInt(deviceType, 16)] || rmPlusDeviceTypes[parseInt(deviceType, 16)]|| spDeviceTypes[parseInt(deviceType, 16)];
+    this.model = rmDeviceTypes[parseInt(deviceType, 16)] || rmPlusDeviceTypes[parseInt(deviceType, 16)] || spDeviceTypes[parseInt(deviceType, 16)];
 
     this.on = this.emitter.on;
     this.emit = this.emitter.emit;
@@ -245,8 +244,16 @@ class Device {
     this.iv = Buffer.from([0x56, 0x2e, 0x17, 0x99, 0x6d, 0x09, 0x3d, 0x28, 0xdd, 0xb3, 0xba, 0x69, 0x5a, 0x2e, 0x6f, 0x58]);
     this.id = Buffer.from([0, 0, 0, 0]);
 
+    this.state = {
+      "spState": false,
+      "currentState": {
+        "clientStatus": 0,
+        "time": 0
+      }
+    };
+
     this.setupSocket();
-    
+
     // Dynamically add relevant RF methods if the device supports it
     const isRFSupported = rmPlusDeviceTypes[parseInt(deviceType, 16)];
     if (isRFSupported) this.addRFSupport();
@@ -392,7 +399,7 @@ class Device {
     });
   }
 
-  
+
   rmDevice() {
     this.on("payload", (err, payload) => {
       const param = payload[0];
@@ -443,13 +450,14 @@ class Device {
         case 8:
           var energy = 0;
           if (payload[0x07]) {
-            energy = parseInt(payload[0x07].toString(16)) * 256 + parseInt(payload[0x06].toString(16))
-              + parseInt(payload[0x05].toString(16)) / 100.0;
+            energy = parseInt(payload[0x07].toString(16)) * 256 + parseInt(payload[0x06].toString(16)) +
+              parseInt(payload[0x05].toString(16)) / 100.0;
           }
           this.emit("energy", energy);
           break;
       }
     });
+
     this.setPower = (state) => {
       //"""Sets the power state of the smart plug."""
       const packet = Buffer.alloc(16, 0);
@@ -464,7 +472,7 @@ class Device {
       var packet = Buffer.alloc(16, 0);
       packet[0] = 1;
       this.sendPacket(0x6a, packet);
-      
+
     }
     this.getEnergy = () => {
       //"""Returns the power level of the smart plug."""
@@ -472,7 +480,20 @@ class Device {
       this.sendPacket(0x6a, packet);
     }
 
+    this.getState = async () => {
+      this.getPower();
+      await sleep(500);
+      if (this.state.spState) {
+        // get Power level of SP device
+        this.getEnergy();
+      } else {
+        //send power to turn on SP device
+        //this.setPower(true);
+      }
+    }
   }
+
+
   // Externally Accessed Methods
   checkData() {
     const packet = Buffer.alloc(16, 0);
@@ -503,7 +524,7 @@ class Device {
     packet[0] = 0x1e;
     this.sendPacket(0x6a, packet);
   }
-  
+
   addRFSupport() {
     this.enterRFSweep = () => {
       const packet = Buffer.alloc(16, 0);
@@ -523,6 +544,12 @@ class Device {
       this.sendPacket(0x6a, packet);
     }
   }
+}
+
+function sleep(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
 }
 
 module.exports = Broadlink;
