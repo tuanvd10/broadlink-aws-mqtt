@@ -444,7 +444,6 @@ class Device {
         case 1: //get from check_power
           var pwr = Boolean(payload[0x4]);
           this.emit("power", pwr);
-		   this.state.spState = pwr;
           break;
         case 3:
           break;
@@ -460,6 +459,7 @@ class Device {
           break;
       }
     });
+	
     this.setPower = (state) => {
       //"""Sets the power state of the smart plug."""
       const packet = Buffer.alloc(16, 0);

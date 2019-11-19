@@ -105,7 +105,7 @@ myEmitter.on("device", discoveredDevice => {
     var payload;
     if (data === true) payload = 'ON';
     else payload = 'OFF'
-    discoveredDevice.power = payload;
+	this.state.spState = payload;
     logger.debug(`Broadlink Power ${payload}`, discoveredDevice.host);
     try {
       awsDevice.awsPublishPower(payload);
@@ -121,7 +121,10 @@ myEmitter.on("device", discoveredDevice => {
     else if (data < cfg.smartplug.MEDIUM) speed = 1;
     else if (data < cfg.smartplug.HIGH) speed = 2;
     else speed = 3;
-    discoveredDevice.speed = speed;
+    if(discoveredDevice.state.currentState.clientStatus != speed){
+		discoveredDevice.state.currentState.time = new Date().getTime();
+	}
+	discoveredDevice.state.currentState.clientStatus = speed;
     logger.debug(`Broadlink energy ${speed}`, discoveredDevice.host);
 	    try {
       awsDevice.awsPublishSpeed(speed);
@@ -136,10 +139,10 @@ myEmitter.on("device", discoveredDevice => {
 					getAirThinxScore();
 			}, 20000);
 			
-			/*auto run every 10s*/
+			/*auto run every 15s*/
 			setInterval(function (){
 					sendControlData();
-			}, 10000); 
+			}, 15000); 
 			
 			getCurrentAirthinxState();
 	  }
