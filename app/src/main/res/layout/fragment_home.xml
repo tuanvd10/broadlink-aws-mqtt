@@ -35,8 +35,8 @@
             android:layout_below="@+id/aq_status_value"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:textStyle="bold"
-            android:layout_marginTop="5dp"></TextView>
+            android:layout_marginTop="5dp"
+            android:textStyle="bold"></TextView>
 
         <TextView
             android:id="@+id/aq_status_level"

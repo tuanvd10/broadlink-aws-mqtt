@@ -69,11 +69,11 @@ public class MonitoringSystem {
                                     if (listStatus.get(i).getIconName() == "ic_temperature"
                                             || listStatus.get(i).getIconName() == "ic_humidity"
                                             || listStatus.get(i).getIconName() == "ic_pressure"){
-                                        gdList1.add(listStatus.get(i));
+                                        gdList2.add(listStatus.get(i));
                                     }
 
                                     if (listStatus.get(i).getIconName() == "ic_pm") {
-                                        gdList1.add(listStatus.get(i));
+                                        gdList3.add(listStatus.get(i));
                                     }
                                 }
                             }
@@ -81,9 +81,9 @@ public class MonitoringSystem {
                             loadingBar.setVisibility(View.GONE); // disable the loading bar
 
                             // set data for grid views
-                            gdView1.setAdapter(new MonitoringGridAdapter(activity, gdList1));
-                            gdView2.setAdapter(new MonitoringGridAdapter(activity, gdList2));
-                            gdView3.setAdapter(new MonitoringGridAdapter(activity, gdList3));
+                            gdView1.setAdapter(new MonitoringGridAdapter(activity, gdList3));
+                            gdView2.setAdapter(new MonitoringGridAdapter(activity, gdList1));
+                            gdView3.setAdapter(new MonitoringGridAdapter(activity, gdList2));
                             gdView1.setBackground(activity.getApplicationContext().getDrawable(R.drawable.border_rectangle));
                             gdView2.setBackground(activity.getApplicationContext().getDrawable(R.drawable.border_rectangle));
                             gdView3.setBackground(activity.getApplicationContext().getDrawable(R.drawable.border_rectangle));
