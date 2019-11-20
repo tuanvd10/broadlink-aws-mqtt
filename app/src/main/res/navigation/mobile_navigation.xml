@@ -15,7 +15,15 @@
         android:id="@+id/nav_remote_control"
         android:name="com.viettel.vht.remoteapp.ui.remotecontrol.RemoteControlFragment"
         android:label="@string/menu_remote_control"
-        tools:layout="@layout/fragment_remote_control" />
+        tools:layout="@layout/fragment_remote_control" >
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_air_remote_control"
+        android:name="com.viettel.vht.remoteapp.ui.remotecontrol.AirRemoteControl"
+        android:label="@string/menu_air_remote_control"
+        tools:layout="@layout/fragment_air_remote_control" >
+    </fragment>
 
     <fragment
         android:id="@+id/nav_gallery"

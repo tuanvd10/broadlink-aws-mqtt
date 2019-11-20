@@ -15,20 +15,40 @@
     <string name="menu_send">Send</string>
     <string name="air_status">Air Status</string>
     <string name="menu_remote_control">Remote Control</string>
+    <string name="menu_air_remote_control">Air Remote Control</string>
 
 <!--    String for fan mitsubishi-->
     <string name="fan_mitsubishi">Mitsubishi LV16-RT</string>
 <!--    String for button in fan mitsubishi-->
-    <string name="bt_connect">Connect</string>
-    <string name="fan_speed">Speed</string>
-    <string name="fan_power">Power</string>
-    <string name="fan_swing">Swing</string>
-    <string name="fan_rhythm">Rhythm</string>
-    <string name="fan_timer">Timer</string>
+    <string name="bt_connect">Kết nối</string>
+    <string name="fan_speed">Tốc độ</string>
+    <string name="fan_power">Bật/Tắt</string>
+    <string name="fan_swing">Quay</string>
+    <string name="fan_rhythm">Thay đổi nhịp độ</string>
+    <string name="fan_timer">Thời gian tắt</string>
 
 <!--    String for status screen in remote control-->
     <string name="connecting_status">Đang kết nối</string>
     <string name="connected_status">Đã kết nối</string>
+    <string name="bt_try_again">Thử lại</string>
+    <string name="bt_pass">Bỏ qua</string>
+    <string name="msg_lost_connection">Không thể kết nối tới máy chủ</string>
+    <string name="title_lost_connection">Mất kết nối</string>
+
+<!--    String for state in air condition-->
+    <string name="air_purifier">Máy lọc không khí</string>
+    <string name="state_1">Số 1</string>
+    <string name="state_2">Số 2</string>
+    <string name="state_3">Số 3</string>
+    <string name="speed_title">Tốc độ</string>
+    <string name="power_title">Trạng thái</string>
+    <string name="state_power_on">ON</string>
+    <string name="state_power_off">OFF</string>
+
+
+<!--    String for test-->
+    <string name="test">Test</string>
+    <string name="test_number">0</string>
 
 
 </resources>
