@@ -32,6 +32,7 @@ dependencies {
 //    implementation 'io.github.kexanie.library:MathView:0.0.6'
   //  implementation 'com.github.Nishant-Pathak:MathView:1.1'
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.github.ybq:Android-SpinKit:1.4.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'

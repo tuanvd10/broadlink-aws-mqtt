@@ -365,6 +365,20 @@ public class AirRemoteControl extends Fragment {
                     @Override
                     public void run() {
                         mPowerState.setText(cPower);
+                        // Disable button
+                        if (cPower.equals(getString(R.string.state_power_off))) {
+                            // Disable when off
+                            mSpeedDownButton.setEnabled(false);
+                            mSpeedDownButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
+                            mSpeedUpButton.setEnabled(false);
+                            mSpeedUpButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
+                        } else if (cPower.equals(getString(R.string.state_power_on))) {
+                            // Enable when on
+                            mSpeedDownButton.setEnabled(true);
+                            mSpeedDownButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
+                            mSpeedUpButton.setEnabled(true);
+                            mSpeedUpButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
+                        }
                         mSpeedState.setText(cSpeed);
                     }
                 });

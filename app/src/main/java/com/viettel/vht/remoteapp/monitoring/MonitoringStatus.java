@@ -7,10 +7,7 @@ public class MonitoringStatus {
     private String unit;
     private String value;
     private AirQualityLevel qualityLevel;
-    private double poorThreshold[];
-    private double goodThreshold[];
     private String iconName;
-    boolean isDisplay;
 
     public MonitoringStatus(String data_point_id, String name, String unit, String iconName) {
         this.data_point_id = data_point_id;
@@ -24,20 +21,9 @@ public class MonitoringStatus {
         this.name = name;
     }
 
-    public void setDisplay(boolean display) {
-        isDisplay = display;
-    }
-
-    public boolean isDisplay() {
-        return isDisplay;
-    }
 
     public String getDataPointID() {
         return data_point_id;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
     }
 
     public void setValue(String value) {
@@ -72,18 +58,5 @@ public class MonitoringStatus {
         this.qualityLevel = qualityLevel;
     }
 
-    //    private void calculateQualityLevel() {
-//        double doubleValue = Double.parseDouble(getValue());
-//        if (doubleValue <= qualityThreshold[0])
-//            qualityLevel = AirQualityLevel.POOR;
-//        else if (doubleValue > qualityThreshold[0] && doubleValue <= qualityThreshold[1])
-//            qualityLevel = AirQualityLevel.MODERATE;
-//        else if (doubleValue > qualityThreshold[1])
-//            qualityLevel = AirQualityLevel.GOOD;
-//        else
-//            qualityLevel = AirQualityLevel.OFFLINE;
-//
-//        if (qualityThreshold[0] == 0)
-//            qualityLevel = AirQualityLevel.OFFLINE;
-//    }
+
 }

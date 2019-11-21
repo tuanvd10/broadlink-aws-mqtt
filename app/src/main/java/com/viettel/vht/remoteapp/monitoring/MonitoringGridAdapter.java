@@ -1,6 +1,7 @@
 package com.viettel.vht.remoteapp.monitoring;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.VectorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,8 @@ import androidx.core.content.res.ResourcesCompat;
 import com.viettel.vht.remoteapp.R;
 
 import java.util.List;
+
+import static com.viettel.vht.remoteapp.R.color.Yellow;
 
 public class MonitoringGridAdapter extends BaseAdapter {
     private List<MonitoringStatus> listStatus;
@@ -54,7 +57,6 @@ public class MonitoringGridAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-
         MonitoringStatus status = this.listStatus.get(position);
         // set value
         holder.txtParameter.setText(status.getName());
@@ -63,9 +65,9 @@ public class MonitoringGridAdapter extends BaseAdapter {
         VectorDrawable vectorDrawable = (VectorDrawable) ResourcesCompat.getDrawable(context.getResources(), getDrawableResIdByName(status.getIconName()), null);
         holder.flagView.setImageDrawable(vectorDrawable);
         // set color
-//        holder.txtParameter.setBackgroundColor(context.getResources().getColor(getColorIdByName(status.getQualityLevel().toColor()), null));
-        holder.txtValue.setTextColor(context.getResources().getColor(getColorIdByName(status.getQualityLevel().toColor()), null));
-        holder.txtUnit.setTextColor(context.getResources().getColor(getColorIdByName(status.getQualityLevel().toColor()), null));
+        //holder.txtParameter.setTextColor(context.getResources().getColor(getColorIdByName(status.getQualityLevel().toColor()), null));
+      //  holder.txtValue.setTextColor(context.getResources().getColor(getColorIdByName(status.getQualityLevel().toColor()), null));
+      //  holder.txtUnit.setTextColor(context.getResources().getColor(getColorIdByName(status.getQualityLevel().toColor()), null));
         holder.flagView.setColorFilter(context.getResources().getColor(getColorIdByName(status.getQualityLevel().toColor()), null));
 
         return convertView;
