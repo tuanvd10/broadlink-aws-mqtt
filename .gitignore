@@ -105,3 +105,6 @@ dist
 
 # packe lock 
 package-lock.json
+
+# test file 
+test/

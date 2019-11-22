@@ -17,10 +17,10 @@
   },
 
   "smartplug": {
-    "POWEROFF": 1,
-    "LOW": 5,
-    "MEDIUM": 10,
-    "HIGH": 15
+    "POWEROFF": 5,
+    "LOW": 15,
+    "MEDIUM": 30,
+    "HIGH": 55
 	},
   "airthinx":{
 	"deviceid": "770f78d91f64",
