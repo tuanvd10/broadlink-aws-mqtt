@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -13,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.github.ybq.android.spinkit.SpinKitView;
 import com.viettel.vht.remoteapp.R;
 import com.viettel.vht.remoteapp.common.Constants;
 import com.viettel.vht.remoteapp.monitoring.MonitoringSystem;
@@ -24,7 +25,9 @@ public class HomeFragment extends Fragment {
     GridView gdView1, gdView2, gdView3;
     RelativeLayout aqStatus;
     TextView txtAQValue, txtAQLevel, txtAQTitle;
-    SpinKitView loadingBar;
+    ProgressBar loadingBar;
+    ImageView dsIcon;
+    TextView dsText;
 
     private Thread monitoringThread;
     private MonitoringSystem monitoringSystem;
@@ -48,7 +51,9 @@ public class HomeFragment extends Fragment {
         txtAQValue = (TextView) root.findViewById(R.id.aq_status_value);
         txtAQLevel = (TextView) root.findViewById(R.id.aq_status_level);
         txtAQTitle = (TextView) root.findViewById(R.id.aq_status_title);
-        loadingBar = (SpinKitView) root.findViewById(R.id.loading);
+        loadingBar = (ProgressBar) root.findViewById(R.id.loading);
+        dsIcon = (ImageView) root.findViewById(R.id.ds_icon);
+        dsText = (TextView) root.findViewById(R.id.ds_text);
 
         // getting data in another thread
         monitoringThread = new Thread() {
@@ -59,7 +64,7 @@ public class HomeFragment extends Fragment {
                         if (getActivity() == null)
                             return;
                         System.out.println("Getting data...");
-                        monitoringSystem.readAndDisplayStatus(aqStatus, txtAQValue, txtAQTitle, txtAQLevel, gdView1, gdView2, gdView3, loadingBar);
+                        monitoringSystem.readAndDisplayStatus(aqStatus, txtAQValue, txtAQTitle, txtAQLevel, gdView1, gdView2, gdView3, loadingBar, dsIcon, dsText);
                         Thread.sleep(Constants.UPDATE_DATA_TIME * 1000); // get data for each 5s
                     } catch (InterruptedException e) { // stop getting data
                         System.out.println("Stop getting data...");

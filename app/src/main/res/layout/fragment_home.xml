@@ -6,16 +6,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <RelativeLayout
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/aq_status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.2"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ds_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foregroundGravity="center"
+            android:layout_marginTop="5dp"></ImageView>
+
+        <TextView
+            android:id="@+id/ds_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@id/ds_icon"
+            android:textColor="@color/Grey" />
+
+    </RelativeLayout>
+
 
     <RelativeLayout
         android:id="@+id/aq_status"
         android:layout_width="150dp"
         android:layout_height="150dp"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintTop_toTopOf="parent">
 
 
         <TextView
@@ -23,7 +50,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="35dp"
             android:textColor="@color/White"
             android:textSize="20dp"
             android:textStyle="bold"></TextView>
@@ -53,9 +79,8 @@
 
     </RelativeLayout>
 
-    <com.github.ybq.android.spinkit.SpinKitView
+    <ProgressBar
         android:id="@+id/loading"
-        style="@style/SpinKitView.Large.Circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -64,8 +89,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5"
-        card_view:SpinKit_Color="@color/colorAccent" />
+        app:layout_constraintVertical_bias="0.5"/>
 
     <RelativeLayout
         android:id="@+id/relativeLayout"
@@ -74,7 +98,7 @@
         android:padding="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/aq_status"
         app:layout_constraintVertical_bias="0.5">
@@ -83,7 +107,7 @@
             android:id="@+id/gdHTP"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginBottom="25dp"
             android:numColumns="auto_fit"
             android:padding="10dp"
             android:verticalSpacing="10dp" />
@@ -95,7 +119,7 @@
             android:layout_below="@id/gdHTP"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:layout_marginTop="20dp"
+            android:layout_marginBottom="25dp"
             android:numColumns="auto_fit"
             android:padding="10dp"
             android:verticalSpacing="10dp" />
@@ -105,12 +129,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/gdCO2"
-            android:layout_marginTop="20dp"
             android:numColumns="auto_fit"
             android:padding="10dp"
             android:verticalSpacing="10dp" />
     </RelativeLayout>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
