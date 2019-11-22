@@ -5,7 +5,8 @@ public enum MitsubishiFanTopics {
     SPEED("broadlink/fan/mitsubishi/speed"),
     SWING("broadlink/fan/mitsubishi/swing"),
     TIMER("broadlink/fan/mitsubishi/timer"),
-    RHYTHM("broadlink/fan/mitsubishi/rhythm");
+    RHYTHM("broadlink/fan/mitsubishi/rhythm"),
+    LOST_CONNECTION("/android_device/lost_connection");
 
     private String value;
 

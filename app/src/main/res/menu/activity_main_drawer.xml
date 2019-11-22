@@ -10,7 +10,14 @@
             android:title="@string/menu_home"/>
         <item
             android:id="@+id/nav_remote_control"
+            android:icon="@drawable/ic_remote_control"
             android:title="@string/menu_remote_control"/>
+
+        <item
+            android:id="@+id/nav_air_remote_control"
+            android:icon="@drawable/ic_remote_control_2"
+            android:title="@string/menu_air_remote_control" />
+
         <!--<item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"

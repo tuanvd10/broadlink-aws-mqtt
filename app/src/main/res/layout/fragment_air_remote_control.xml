@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+
+
+    <TextView
+        android:id="@+id/tv_remote_control"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="Test"
+        android:textSize="25sp"
+        android:background="@drawable/border_rectangle"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintVertical_bias="0.001"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_power_show"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:textSize="23sp"
+        android:text="@string/power_title"
+        android:gravity="left"
+        app:layout_constraintVertical_bias="0.2"
+        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_speed_show"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:textSize="20sp"
+        android:gravity="left"
+        android:text="@string/speed_title"
+        app:layout_constraintVertical_bias="0.35"
+        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_power_state"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:textSize="25sp"
+        android:background="@drawable/border_rectangle"
+        android:text="@string/test"
+        android:gravity="center"
+        app:layout_constraintVertical_bias="0.2"
+        app:layout_constraintHorizontal_bias="0.88"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_speed_state"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:text="@string/test_number"
+        android:inputType="number"
+        android:background="@drawable/border_rectangle"
+        app:layout_constraintVertical_bias="0.35"
+        app:layout_constraintHorizontal_bias="0.88"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <Button
+        android:id="@+id/bt_power"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/list_selector_background"
+        android:foreground="@drawable/bt_power"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.2"
+        app:layout_constraintVertical_bias="0.75"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/bt_speed_up"
+        android:layout_width="100sp"
+        android:layout_height="100sp"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintVertical_bias="0.65"
+        android:foreground="@drawable/bt_speed_up"
+        android:background="@drawable/list_selector_background"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <Button
+        android:id="@+id/bt_speed_down"
+        android:layout_width="100sp"
+        android:layout_height="100sp"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintVertical_bias="0.85"
+        android:foreground="@drawable/bt_speed_down"
+        android:background="@drawable/list_selector_background"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
+    <ProgressBar
+        android:id="@+id/pb_load_connection"
+        android:layout_width="100sp"
+        android:layout_height="100sp"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
+
+    <!--    <RadioGroup-->
+    <!--        android:id="@+id/rg_speed"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        app:layout_constraintHorizontal_bias="0.8"-->
+    <!--        app:layout_constraintVertical_bias="0.7"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintLeft_toLeftOf="parent"-->
+    <!--        app:layout_constraintRight_toRightOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent">-->
+
+    <!--        <RadioButton-->
+    <!--            android:id="@+id/rb_speed_1"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:padding="10sp"-->
+    <!--            android:text="@string/state_1" />-->
+
+    <!--        <RadioButton-->
+    <!--            android:id="@+id/rb_speed_2"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:padding="10sp"-->
+    <!--            android:text="@string/state_2" />-->
+
+    <!--        <RadioButton-->
+    <!--            android:id="@+id/rb_speed_3"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:padding="10sp"-->
+    <!--            android:text="@string/state_3" />-->
+
+    <!--    </RadioGroup>-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>
