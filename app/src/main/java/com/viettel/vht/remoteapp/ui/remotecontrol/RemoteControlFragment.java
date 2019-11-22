@@ -275,6 +275,7 @@ public class RemoteControlFragment extends Fragment {
         public void run() {
             try {
                 // Check connection
+                int loopNumber = 6;
                 ThreadUtils.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -307,14 +308,39 @@ public class RemoteControlFragment extends Fragment {
                 }
 
                 String power = null, speed = null;
+
                 // Get power
-                while ((power = parentActivity.getStateList().get(KeyOfStates.POWER.getValue())) == null) {
-                    Thread.sleep(500);
+                for (int i = 0; i < loopNumber; i++) {
+                    if ((power = parentActivity.getStateList().get(KeyOfStates.POWER.getValue())) == null) {
+                        Thread.sleep(500);
+                        if (i == loopNumber - 1) {
+                            ThreadUtils.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    disableRemoteButton();
+                                }
+                            });
+                        }
+                    } else {
+                        break;
+                    }
                 }
 
                 // Get speed
-                while ((speed = parentActivity.getStateList().get(KeyOfStates.SPEED.getValue())) == null) {
-                    Thread.sleep(500);
+                for (int i = 0; i < loopNumber; i++) {
+                    if ((speed = parentActivity.getStateList().get(KeyOfStates.SPEED.getValue())) == null) {
+                        Thread.sleep(500);
+                        if (i == loopNumber - 1) {
+                            ThreadUtils.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    disableRemoteButton();
+                                }
+                            });
+                        }
+                    } else {
+                        break;
+                    }
                 }
 
                 final String cPower = power, cSpeed = speed;
@@ -325,8 +351,20 @@ public class RemoteControlFragment extends Fragment {
                     }
                 });
                 // Get device id
-                while ((deviceId = parentActivity.getDeviceList().get(KeyOfDevice.REMOTE.getValue()).getDeviceId()) == null) {
-                    Thread.sleep(500);
+                for (int i = 0; i < loopNumber; i++) {
+                    if ((deviceId = parentActivity.getDeviceList().get(KeyOfDevice.REMOTE.getValue()).getDeviceId()) != null) {
+                        break;
+                    } else {
+                        Thread.sleep(500);
+                        if (i == loopNumber - 1) {
+                            ThreadUtils.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    disableRemoteButton();
+                                }
+                            });
+                        }
+                    }
                 }
 
             } catch (Exception ex) {

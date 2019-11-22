@@ -10,5 +10,8 @@ public class Constants {
     public static final int UPDATE_DATA_TIME = 5; // second
     // name of argment to pass data from activity to fragment
     public static final String ARG_MQTT_CLIENT = "mqtt-client";
+    // Constants for air purifier
+    public static final int MAX_AIR_PURIFIER_SPEED = 3;
+    public static final int MIN_AIR_PURIFIER_SPEED = 0;
 }
 

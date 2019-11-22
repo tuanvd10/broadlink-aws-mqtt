@@ -259,10 +259,28 @@ public class MqttClientToAWS implements Serializable {
     }
 
     public void requestAllStatesOfDevice(String smartPlugId) throws InterruptedException {
-        requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
+        requestPowerStateOfDevice(smartPlugId);
 //        Thread.sleep(300);
         // Check speed if power on
-        requestAWSIotServer("checkspeed-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_SPEED);
+        requestSpeedStateOfDevice(smartPlugId);
+    }
+
+    /**
+     * request power state of device
+     * @param smartPlugId
+     * @throws InterruptedException
+     */
+    public void requestPowerStateOfDevice(String smartPlugId) throws InterruptedException {
+        requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
+    }
+
+    /**
+     *  request speed state of device
+     * @param smartPlugId
+     * @throws InterruptedException
+     */
+    public void requestSpeedStateOfDevice(String smartPlugId) throws InterruptedException {
+        requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
     }
 
     public void requestAWSIotServer(String msg, String topic) {

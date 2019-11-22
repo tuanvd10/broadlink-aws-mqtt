@@ -29,12 +29,11 @@ import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
 import com.viettel.vht.remoteapp.MainActivity;
 import com.viettel.vht.remoteapp.R;
 import com.viettel.vht.remoteapp.common.AirPurifierTopics;
+import com.viettel.vht.remoteapp.common.Constants;
 import com.viettel.vht.remoteapp.common.KeyOfDevice;
 import com.viettel.vht.remoteapp.common.KeyOfStates;
 import com.viettel.vht.remoteapp.exceptions.DisconnectionException;
 import com.viettel.vht.remoteapp.utilities.MqttClientToAWS;
-
-import java.security.Key;
 
 public class AirRemoteControl extends Fragment {
     private MainActivity parentActivity;
@@ -54,7 +53,7 @@ public class AirRemoteControl extends Fragment {
     private MqttClientToAWS mqttClient;
 
     // Dialog alert
-    private Dialog mConnectDialog;
+    private Dialog mCloudConnectionDialog, mServerConnectionDialog;
 
     // Sound button
     private MediaPlayer soundButton;
@@ -64,6 +63,7 @@ public class AirRemoteControl extends Fragment {
     ProgressBar mPbLoadConnection;
 
     private String deviceId = null;
+
 
 
     @Nullable
@@ -96,7 +96,7 @@ public class AirRemoteControl extends Fragment {
         });
 
         // Get dialog
-        mConnectDialog = new AlertDialog.Builder(parentActivity)
+        mCloudConnectionDialog = new AlertDialog.Builder(parentActivity)
                 .setTitle(R.string.title_lost_connection)
                 .setMessage(R.string.msg_lost_connection)
                 .setPositiveButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
@@ -115,6 +115,28 @@ public class AirRemoteControl extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         disableRemoteButton();
+                    }
+                })
+                .create();
+
+        mServerConnectionDialog = new AlertDialog.Builder(parentActivity)
+                .setTitle(R.string.error)
+                .setMessage(R.string.msg_no_response_connection)
+                .setNegativeButton(R.string.OK, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        disableRemoteButton();
+                    }
+                }).setPositiveButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        disableRemoteButton();
+                        mPbLoadConnection.setVisibility(View.VISIBLE);
+                        mqttClient.setConnected(false);
+                        mqttClient.setConnecting(true);
+                        mqttClient.makeConnectionToServer();
+                        // Start a new information checker
+                        new AirRemoteControl.InformationChecker().start();
                     }
                 })
                 .create();
@@ -170,34 +192,52 @@ public class AirRemoteControl extends Fragment {
      * Disable all button on remote control
      */
     private void disableRemoteButton() {
-        // Power up button
-        mPowerButton.setEnabled(false);
-        mPowerButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
-        // Speed up button
-        mSpeedUpButton.setEnabled(false);
-        mSpeedUpButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
-        // Speed down button
-        mSpeedDownButton.setEnabled(false);
-        mSpeedDownButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
-
+        disablePowerButton();
+        disableSpeedButton();
     }
 
     /**
-     * Disable all button
+     * Enable all button
      */
     private void enableRemoteButton() {
+        enablePowerButton();
+        enablePowerButton();
+    }
+
+    /**
+     * Enable speed button
+     */
+    private void enableSpeedButton() {
+        enableSpeedDownButton();
+        enableSpeedUpButton();
+    }
+
+    /**
+     * Enable power button
+     */
+    private void enablePowerButton() {
         // Power up button
         mPowerButton.setEnabled(true);
         mPowerButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
+    }
+
+    /**
+     * Enable speed up button
+     */
+    private void enableSpeedUpButton() {
         // Speed up button
         mSpeedUpButton.setEnabled(true);
         mSpeedUpButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
+    }
+
+    /**
+     * Enable speed up button
+     */
+    private void enableSpeedDownButton() {
         // Speed down button
         mSpeedDownButton.setEnabled(true);
         mSpeedDownButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
     }
-
-
 
 
     public void clickRemoteButton(View view) {
@@ -229,7 +269,7 @@ public class AirRemoteControl extends Fragment {
                     return;
             }
         } catch (DisconnectionException de) {
-            mConnectDialog.show();
+            mCloudConnectionDialog.show();
         }
 
 
@@ -244,8 +284,8 @@ public class AirRemoteControl extends Fragment {
             if (mqttClient.isConnected()) {
                 mqttClient.getMqttManager().publishString(message, topic, AWSIotMqttQos.QOS0);
                 // TODO : send publish to get state after get condition
-                removeStatesInMainActivity();
-                requestStatesOfAirPurifier();
+                removeSpeedStateInMainActivity();
+                mqttClient.requestSpeedStateOfDevice(parentActivity.getSmartPlugId());
                 // Wait new information checker
                 new InformationChecker().start();
             } else {
@@ -264,31 +304,32 @@ public class AirRemoteControl extends Fragment {
     }
 
     private boolean speedDown() throws DisconnectionException {
-        boolean retVal = true;
-        String message = "play-" + deviceId;
-        String topic = AirPurifierTopics.SPEED;
-        // Publish message to aws server
-        try {
-            if (mqttClient.isConnected()) {
-                mqttClient.getMqttManager().publishString(message, topic, AWSIotMqttQos.QOS0);
-                // TODO : send publish to get state after get condition
-                removeStatesInMainActivity();
-                requestStatesOfAirPurifier();
-                // Wait new information checker
-                new InformationChecker().start();
-            } else {
-                throw new DisconnectionException();
-            }
-        } catch (AmazonClientException ace) {
-            retVal = false;
-            ace.printStackTrace();
-        } catch (InterruptedException ie) {
-            retVal = false;
-            Log.e(LOG_TAG, "An InterruptedException!");
-            ie.printStackTrace();
-        }
-
-        return retVal;
+        return speedUp();
+//        boolean retVal = true;
+//        String message = "play-" + deviceId;
+//        String topic = AirPurifierTopics.SPEED;
+//        // Publish message to aws server
+//        try {
+//            if (mqttClient.isConnected()) {
+//                mqttClient.getMqttManager().publishString(message, topic, AWSIotMqttQos.QOS0);
+//                // TODO : send publish to get state after get condition
+//                removeSpeedStateInMainActivity();
+//                mqttClient.requestSpeedStateOfDevice(parentActivity.getSmartPlugId());
+//                // Wait new information checker
+//                new InformationChecker().start();
+//            } else {
+//                throw new DisconnectionException();
+//            }
+//        } catch (AmazonClientException ace) {
+//            retVal = false;
+//            ace.printStackTrace();
+//        } catch (InterruptedException ie) {
+//            retVal = false;
+//            Log.e(LOG_TAG, "An InterruptedException!");
+//            ie.printStackTrace();
+//        }
+//
+//        return retVal;
     }
 
 
@@ -301,8 +342,8 @@ public class AirRemoteControl extends Fragment {
             if (mqttClient.isConnected()) {
                 mqttClient.getMqttManager().publishString(message, topic, AWSIotMqttQos.QOS0);
                 // TODO : send publish to get state after get condition
-                removeStatesInMainActivity();
-                requestStatesOfAirPurifier();
+                removePowerStateInMainActivity();
+                mqttClient.requestAllStatesOfDevice(parentActivity.getSmartPlugId());
                 // Wait new information checker
                 new InformationChecker().start();
             } else {
@@ -320,18 +361,98 @@ public class AirRemoteControl extends Fragment {
         return retVal;
     }
 
+    /**
+     * Remove all state is stored in main activity
+     */
     private void removeStatesInMainActivity() {
-        parentActivity.getStateList().remove(KeyOfStates.POWER.getValue());
+        removePowerStateInMainActivity();
+        removeSpeedStateInMainActivity();
+    }
+
+    /**
+     * remove speed state in main activity
+     */
+    private void removeSpeedStateInMainActivity() {
         parentActivity.getStateList().remove(KeyOfStates.SPEED.getValue());
     }
 
+    /**
+     * remove power state in main activity
+     */
+    private void removePowerStateInMainActivity() {
+        parentActivity.getStateList().remove(KeyOfStates.POWER.getValue());
+    }
+
+    /**
+     * Request to get all states in air purifier
+     * @throws InterruptedException
+     */
     private void requestStatesOfAirPurifier() throws InterruptedException {
         mqttClient.requestAllStatesOfDevice(parentActivity.getSmartPlugId());
     }
 
+    /**
+     * Disable speed down button
+     */
+    private void disableSpeedDownButton() {
+        mSpeedDownButton.setEnabled(false);
+        mSpeedDownButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
+    }
+
+    /**
+     * Disable speed up button
+     */
+    private void disableSpeedUpButton() {
+        mSpeedUpButton.setEnabled(false);
+        mSpeedUpButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
+    }
+
+    /**
+     * Disable speeds button
+     */
+    private void disableSpeedButton() {
+        disableSpeedDownButton();
+        disableSpeedUpButton();
+    }
+
+    private void disablePowerButton() {
+        mPowerButton.setEnabled(false);
+        mPowerButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
+    }
+
     private class InformationChecker extends Thread {
+
+        private final int loopNumber = 6;
+
+        private String checkPowerState() throws InterruptedException {
+            String power = null;
+            for (int i = 0; i < loopNumber; i++) {
+                if ((power = parentActivity.getStateList().get(KeyOfStates.POWER.getValue())) == null) {
+                    Thread.sleep(500);
+                } else {
+                    break;
+                }
+            }
+
+            return power;
+        }
+
+        private String checkSpeedState() throws InterruptedException {
+            String speed = null;
+            for (int i = 0; i < loopNumber; i++) {
+                if ((speed = parentActivity.getStateList().get(KeyOfStates.SPEED.getValue())) == null) {
+                    Thread.sleep(500);
+                } else {
+                    break;
+                }
+            }
+
+            return speed;
+        }
+
         @Override
         public void run() {
+
             try {
                 while (mqttClient.isConnecting()) {
                     Thread.sleep(500);
@@ -342,64 +463,67 @@ public class AirRemoteControl extends Fragment {
                     ThreadUtils.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mConnectDialog.show();
+                            mCloudConnectionDialog.show();
                         }
                     });
                     // Get out
                     return;
                 }
 
-                String power = null, speed = null;
-                // Get power
-                while ((power = parentActivity.getStateList().get(KeyOfStates.POWER.getValue())) == null) {
-                    Thread.sleep(500);
-                }
-
-                // Get speed
-                while ((speed = parentActivity.getStateList().get(KeyOfStates.SPEED.getValue())) == null) {
-                    Thread.sleep(500);
-                }
-
-                final String cPower = power, cSpeed = speed;
-                ThreadUtils.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mPowerState.setText(cPower);
-                        // Disable button
-                        if (cPower.equals(getString(R.string.state_power_off))) {
-                            // Disable when off
-                            mSpeedDownButton.setEnabled(false);
-                            mSpeedDownButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
-                            mSpeedUpButton.setEnabled(false);
-                            mSpeedUpButton.setBackground(getResources().getDrawable(R.drawable.bt_grey_round, null));
-                        } else if (cPower.equals(getString(R.string.state_power_on))) {
-                            // Enable when on
-                            mSpeedDownButton.setEnabled(true);
-                            mSpeedDownButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
-                            mSpeedUpButton.setEnabled(true);
-                            mSpeedUpButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
-                        }
-                        mSpeedState.setText(cSpeed);
-                    }
-                });
-
                 // Get device id
                 while ((deviceId = parentActivity.getDeviceList().get(KeyOfDevice.REMOTE.getValue()).getDeviceId()) == null) {
                     Thread.sleep(500);
                 }
 
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+                // Get power
+                final String power = checkPowerState();
+                // Get speed
+                final String speed = checkSpeedState();
 
-            // Set progress bar
-            ThreadUtils.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    enableRemoteButton();
-                    mPbLoadConnection.setVisibility(View.INVISIBLE);
-                }
-            });
+                // Set progress bar
+                ThreadUtils.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        // check value
+                        if (power == null || speed == null) {
+                            mServerConnectionDialog.show();
+                            // Get out this
+                            return;
+                        }
+                        // Set speed and state
+                        mPowerState.setText(power);
+                        mSpeedState.setText(speed);
+                        // Disable button
+                        enableRemoteButton();
+                        if (power.equals(getString(R.string.state_power_off))) {
+                            // Disable when off
+                            disableSpeedButton();
+                        } else {
+                            int nSpeed = Integer.parseInt(speed);
+                            // check speed
+                            if (nSpeed == Constants.MAX_AIR_PURIFIER_SPEED) {
+                                disableSpeedUpButton();
+                            } else if (nSpeed == Constants.MIN_AIR_PURIFIER_SPEED) {
+                                disableSpeedDownButton();
+                            }
+                        }
+                    }
+                });
+
+            } catch (Exception ex) {
+                // disable remote button
+                disableRemoteButton();
+                ex.printStackTrace();
+            } finally {
+                ThreadUtils.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPbLoadConnection.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
         }
     }
 }

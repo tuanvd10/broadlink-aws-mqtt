@@ -34,7 +34,9 @@
     <string name="bt_pass">Bỏ qua</string>
     <string name="msg_lost_connection">Không thể kết nối tới máy chủ</string>
     <string name="title_lost_connection">Mất kết nối</string>
-
+    <string name="msg_no_response_connection">Máy chủ không phản hồi</string>
+    <string name="error">Lỗi</string>
+    <string name="OK">OK</string>
 <!--    String for state in air condition-->
     <string name="air_purifier">Máy lọc không khí</string>
     <string name="state_1">Số 1</string>
@@ -63,6 +65,5 @@
     <string name="good">Tốt</string>
     <string name="mod">Khá tốt</string>
     <string name="poor">Kém</string>
-
 
 </resources>
