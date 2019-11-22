@@ -25,9 +25,15 @@
   "airthinx":{
 	"deviceid": "770f78d91f64",
 	"spDeviceId": "34ea3479ee2b",
+	"PowerCommand": "/airpurifier/power", 
+	"LowCommand" : "/airpurifier/lowcommand", 
+	"MedCommand": "/airpurifier/medcommand", 
+	"HighCommand": "/airpurifier/highcommand",
+	
 	"commandPower":"/airpurifier/power",
 	"commandIncrease": "/airpurifier/speedup",
 	"commandDecrease": "/airpurifier/speeddown",
-	"interval_time": "130000"
+	
+	"interval_time": "30000"
   }
 }

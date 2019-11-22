@@ -13,8 +13,6 @@ var {
 } = require("./actions");
 
 const {
-  sendControlData,
-  getAirThinxScore,
   getCurrentAirthinxState
 } = require("./../devices/airthinx_device");
 
@@ -24,8 +22,6 @@ const limit = 5;
 let discovering = false;
 let cfg = require("./../config");
 var mqttOptions = cfg.mqtt;
-
-
 
 const discoverDevicesLoop = (count = 0) => {
   logger.info("Discover device", count);
@@ -108,13 +104,16 @@ myEmitter.on("device", discoveredDevice => {
     var payload;
     if (data === true) payload = 'ON';
     else payload = 'OFF'
-    discoveredDevice.state.spState = payload;
+    discoveredDevice.state.spState = data;
     logger.debug(`Broadlink Power ${payload}`, discoveredDevice.host);
     try {
       awsDevice.awsPublishPower(payload);
     } catch (error) {
       logger.error("power publish error", error);
-    }
+    }finally{
+		discoveredDevice.checkPower = false;
+		//discoveredDevice.mutex.release("Get Power Done");
+	}
   });
 
   discoveredDevice.on("energy", data => { //function return when check energy 
@@ -124,32 +123,24 @@ myEmitter.on("device", discoveredDevice => {
     else if (data < cfg.smartplug.MEDIUM) speed = 1;
     else if (data < cfg.smartplug.HIGH) speed = 2;
     else speed = 3;
-    if (discoveredDevice.state.currentState.clientStatus != speed) {
-      discoveredDevice.state.currentState.time = new Date().getTime();
-    }
+	if (discoveredDevice.state.currentState.clientStatus != speed) {
+		discoveredDevice.state.currentState.time = new Date().getTime();
+	}
     discoveredDevice.state.currentState.clientStatus = speed;
     logger.debug(`Broadlink energy ${speed}`, discoveredDevice.host);
     try {
       awsDevice.awsPublishSpeed(speed);
     } catch (error) {
       logger.error("energy publish error", error);
-    }
-  })
+    }finally{
+		discoveredDevice.regularCheck = false;
+		//discoveredDevice.mutex.release("Get Energy Done");
+	}
+});
 
-  if (discoveredDevice.host.id === cfg.airthinx.spDeviceId) {
-    {
-      setInterval(function () {
-        getAirThinxScore();
-      }, 20000);
-
-      /*auto run every 15s*/
-      setInterval(function () {
-        sendControlData();
-      }, 15000);
-
-      getCurrentAirthinxState();
-    }
-  }
+	if (discoveredDevice.host.id === cfg.airthinx.spDeviceId) {
+		getCurrentAirthinxState();
+	}
 
   /*
   // IR or RF signal found

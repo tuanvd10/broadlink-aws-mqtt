@@ -3,6 +3,7 @@ const dgram = require('dgram');
 const os = require('os');
 const crypto = require('crypto');
 const assert = require('assert');
+const Mutex = require('./mutex');
 // RM Devices (without RF support)
 const rmDeviceTypes = {};
 rmDeviceTypes[parseInt(0x2737, 16)] = 'Broadlink RM Mini';
@@ -244,10 +245,13 @@ class Device {
     this.iv = Buffer.from([0x56, 0x2e, 0x17, 0x99, 0x6d, 0x09, 0x3d, 0x28, 0xdd, 0xb3, 0xba, 0x69, 0x5a, 0x2e, 0x6f, 0x58]);
     this.id = Buffer.from([0, 0, 0, 0]);
 
+	this.mutex = new Mutex();
+	this.regularCheck = false;
+	this.checkPower = false;
     this.state = {
       "spState": false,
       "currentState": {
-        "clientStatus": 0,
+        "clientStatus": -1,
         "time": 0
       }
     };
@@ -449,7 +453,7 @@ class Device {
           break;
         case 8:
           var energy = 0;
-          if (payload[0x07]) {
+          {
             energy = parseInt(payload[0x07].toString(16)) * 256 + parseInt(payload[0x06].toString(16)) +
               parseInt(payload[0x05].toString(16)) / 100.0;
           }
@@ -481,18 +485,31 @@ class Device {
     }
 
     this.getState = async () => {
-      this.getPower();
-      await sleep(500);
-      if (this.state.spState) {
-        // get Power level of SP device
-        this.getEnergy();
-      } else {
-        //send power to turn on SP device
-        //this.setPower(true);
-      }
-    }
-  }
-
+		var timeout = 500;
+		//await mutex.lock("Get Power Regular");
+		this.checkPower = true;
+		this.getPower();
+		
+		while(this.checkPower && timeout > 0){
+			await sleep(100);
+			timeout -=100;
+		}
+		if(timeout<=0){
+			//mutex.release("Time out: Get Power Regular");
+			return false;
+		}
+		if (this.state.spState) {
+			// get energy level of SP device
+			//await mutex.lock("Get Energy Regular");
+			this.regularCheck = true;
+			this.getEnergy();
+		} else {
+			//send power to turn on SP device
+			this.setPower(true);
+		}
+		return true;
+	}
+}
 
   // Externally Accessed Methods
   checkData() {

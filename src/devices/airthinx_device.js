@@ -4,6 +4,8 @@ const cfg = require("./../config");
 const axios = require("axios");
 const fs = require("fs");
 
+var commandList = ["PowerCommand", "LowCommand", "MedCommand", "HighCommand"];
+
 axios.defaults.headers.common['Authorization'] = "Bearer 1339b161-9ea6-490b-877f-bd6e65674373";
 axios.defaults.headers.common['Accept'] = "application/json";
 axios.defaults.headers.post['Content-Type'] = "application/json";
@@ -12,14 +14,18 @@ const getAirThinxScore =  async ()=>{
 	let data, dataPoint;
 	let aq, time;
 	let co2, pm25;
+	let haveErr = false;
 	/* get from air thinx server and callculate aq */
 	data = await axios.post('https://api.environet.io/search/nodes',
 	{"node_id":"5dc0391a8ba45e000102d77f", "last": 1}
 		).then((res) => {
 			return res.data
 		})
-		.catch((err) => logger.error("airthinx" + JSON.stringify(err)));
-		
+		.catch((err) => {
+			logger.error("airthinx" + JSON.stringify(err));
+			haveErr = true;
+		});
+	if(haveErr) return false;
 	dataPoint = data[0].data_points.find(x => x.name === 'AQ');
 	aq = dataPoint.measurements[0][1];
 	time = dataPoint.measurements[0][0];
@@ -31,12 +37,11 @@ const getAirThinxScore =  async ()=>{
 			global.aq.time = time;
 		
 	global.aq.aq = aq;
-
+	return true;
 }
 
 const sendControlData = () => {
-	/* global.currentState.clientStatus: 
-		"DISCONNECT"
+	/* device.state.currentState.clientStatus: 
 		0: OFF 
 		1: level 1 
 		2: level 2 
@@ -44,7 +49,10 @@ const sendControlData = () => {
 	*/
 	let currentTime = new Date().getTime();
 	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
-
+	if(spDevice.state.spState === false){
+		logger.debug("[tuanvd10] sendControlData SP state: " + spDevice.state.spState);
+		return;
+	}
 	logger.debug("[tuanvd10] current state: ", spDevice.state);
 	logger.debug("[tuanvd10] current aq: ", global.aq);
 	logger.debug("[tuanvd10] current time: " + currentTime);
@@ -57,14 +65,15 @@ const sendControlData = () => {
 					//increase 1 level if it keep aq and state too long
 					if(spDevice.state.currentState.clientStatus==0){
 						logger.info("[tuanvd10] turn ON level");
-						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
+						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
 						//sendCommandMultitime(1);//if only 1 button
+						sendAirthinxCommand(0);
 					}else{
 						logger.info("[tuanvd10] increse 1 level");
-						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandIncrease, "airthinx");
+						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandIncrease, "airthinx");
 						//sendCommandMultitime(1);//if only 1 button
+						sendAirthinxCommand(spDevice.state.currentState.clientStatus + 1);
 					}
-					//global.currentState.clientStatus+=1;
 			}
 		}
 	}else if(global.aq.aq >90){
@@ -78,19 +87,26 @@ const sendControlData = () => {
 					//decrease 1 level or OFF if it keep state too long
 					if(spDevice.state.currentState.clientStatus==1){
 						logger.info("[tuanvd10] Turn OFF level");
-						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
+						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
 						//sendCommandMultitime(3);//if only 1 button
+						sendAirthinxCommand(0);
 					}else{
 						logger.info("[tuanvd10] decrease 1 level");
-						runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandDecrease, "airthinx");
+						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandDecrease, "airthinx");
 						//sendCommandMultitime(3);//if only 1 button
+						sendAirthinxCommand(spDevice.state.currentState.clientStatus - 1);
 					}
-					//global.currentState.clientStatus-=1;
 			}
 		}
 	}else{
 		
 	}
+}
+
+function sendAirthinxCommand(level){
+	let command = cfg.airthinx[commandList[level]];
+	//console.log("[tuanvd10] sendAirthinxCommand take command: " + command);
+	runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + command, "airthinx");
 }
 
 function sleep(ms){
@@ -107,17 +123,27 @@ const sendCommandMultitime = async (time) =>{
 	}
 };
 
+async function doAction(spDevice){
+		if(spDevice.getState() && getAirThinxScore()){
+			await(1000);
+			sendControlData();
+		}
+}
+
 function getCurrentAirthinxState(){
 	//get sp device
 	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
 	//logger.info("[tuanvd10] getStateOfDevice: ", spDevice);
 	setInterval(function(){
-		spDevice.getState();
-	},20000);
+		doAction(spDevice);
+	}, 20000);
 }
+
 global.aq = {
 	"aq" : -1,
 	"time" : 0
 }
 
-module.exports =  {sendControlData, getAirThinxScore, getCurrentAirthinxState}
+//sendAirthinxCommand(1);
+
+module.exports =  {sendControlData, getAirThinxScore, getCurrentAirthinxState, sendAirthinxCommand}
