@@ -27,3 +27,52 @@ npm install
 
 ## Configure
 Cấu hình được đặt trong `./config/default.json`, bạn có thể thay đổi cấu hình mqtt, web server và cấu hình thiết bị broadlink
+
+
+## Topic
+- Publish bản tin tới topic này để lấy thông tin các thiết bị broadlink hiện có trong mạng 
+```js
+REQUEST_DEVICE_INFO_TOPIC = "broadlink/airpurifier/info";
+payload = "setpower-<Smart Plug ID>"
+```
+- Kết quả trả về được publish lên:
+```js
+REQUEST_DEVICE_INFO_TOPIC = "broadlink-stat/airpurifier/info"; 
+/*     [{"name": "device_name_1", "id": "device_id_2"}, 
+        {"name": "device_name_1", "id": "device_id_2"}, ...]
+*/
+```
+
+- Các Topic để gửi lệnh IR cho thiết bị
+```js
+POWER_TOPIC = "broadlink/airpurifier/power" 
+payload = "play-<RM mini 3 ID>"
+...
+LOW_SPEED_TOPIC = "broadlink/airpurifier/low" 
+payload = "play-<RM mini 3 ID>"
+...
+MED_SPEED_TOPIC = "broadlink/airpurifier/med" 
+payload = "play-<RM mini 3 ID>"
+...
+HIGH_SPEED_TOPIC = "broadlink/airpurifier/high" 
+payload = "play-<RM mini 3 ID>"
+```
+- Gửi bản tin tới các topic này để gửi yêu cầu lấy trạng thái thiết bị, kết quả trả về ở Topic chứa trạng thái bị
+```js
+REQUEST_STATE_POWER_TOPIC = "broadlink/airpurifier/info";
+payload = "checkpower-<Smart Plug ID>"
+...
+REQUEST_STATE_SPEED_TOPIC = "broadlink/airpurifier/info";
+payload = "checkspeed-<Smart Plug ID>"
+```
+
+- Các Topic chứa trạng thái thiết bị - kết quả trả về sau khi yêu cầu lấy trạng thái thiết bị
+```js
+STATE_POWER_TOPIC = "broadlink-stat/airpurifier/power";  // ON - OFF
+STATE_SPEED_TOPIC = "broadlink-stat/airpurifier/speed";    // 0 - 1 - 2 - 3
+```
+- Gửi bản tin tới các topic này để yêu cầu bật thiết bị smart plug
+```js
+SET_STATE_POWER_TOPIC = "broadlink/airpurifier/info";
+payload = "setpower-<Smart Plug ID>"
+```

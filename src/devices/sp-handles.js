@@ -4,7 +4,7 @@ const setPowerAction = data => {
     new Promise((resolve, reject) => {
         logger.info("setPowerAction");
         try {
-            data.device.setPower(false);
+            data.device.setPower(true);
             resolve(data);
         } catch (error) {
             logger.error("Failed to set power");

@@ -453,10 +453,8 @@ class Device {
           break;
         case 8:
           var energy = 0;
-          {
-            energy = parseInt(payload[0x07].toString(16)) * 256 + parseInt(payload[0x06].toString(16)) +
+          energy = parseInt(payload[0x07].toString(16)) * 256 + parseInt(payload[0x06].toString(16)) +
               parseInt(payload[0x05].toString(16)) / 100.0;
-          }
           this.emit("energy", energy);
           break;
       }

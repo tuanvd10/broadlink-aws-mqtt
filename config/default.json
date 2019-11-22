@@ -26,9 +26,9 @@
 	"deviceid": "770f78d91f64",
 	"spDeviceId": "34ea3479ee2b",
 	"PowerCommand": "/airpurifier/power", 
-	"LowCommand" : "/airpurifier/lowcommand", 
-	"MedCommand": "/airpurifier/medcommand", 
-	"HighCommand": "/airpurifier/highcommand",
+	"LowCommand" : "/airpurifier/low", 
+	"MedCommand": "/airpurifier/med", 
+	"HighCommand": "/airpurifier/high",
 	
 	"commandPower":"/airpurifier/power",
 	"commandIncrease": "/airpurifier/speedup",

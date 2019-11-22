@@ -1,7 +1,4 @@
 // Make the imports
-const {
-    discoverDevices
-} = require("./src/devices/device");
 //Require a web server code
 const logger = require("./src/logger");
 require("./src/web/server");;
@@ -19,9 +16,9 @@ awsDevice.on('message', function (topic, payload) {
         topic,
         msg
     });
-    handleMsg.runAction(msg, topic, "mqtt")
+    handleMsg.runAction(msg, topic, "aws")
         .then(data => logger.debug("mqtt done"))
-        .catch(err => logger.eror("mqtt failed on message", err));
+        .catch(err => logger.error("mqtt aws iot failed on message", err));
 });
 
 //Handle mqtt local message
@@ -34,9 +31,10 @@ mqttClient.on("message", function (topic, message) {
     });
     handleMsg.runAction(msg, topic, "mqtt")
         .then(data => logger.debug("mqtt done"))
-        .catch(err => logger.eror("mqtt failed on message", err));
+        .catch(err => logger.info("mqtt failed on message: ", err));
 });
 
 logger.info("Starting Broadlink MQTT NodeJS Application");
 
-discoverDevices(2);
+handleMsg.scanDevice(2);
+

@@ -23,9 +23,10 @@ var awsPublishSpeed = (speed) => {
 }
 //Publish power to AWS IOT
 var awsPublishDeviceInfos = (data) => {
-    logger.debug(`Publish Devices Info to ${mqttOptions.subscribeBasePath}-stat/devices/info`);
+    logger.debug(`Publish Devices Info to ${mqttOptions.subscribeBasePath}-stat/airpurifier/info`);
+    logger.debug(JSON.stringify(data));
     try {
-        device.publish(`${mqttOptions.subscribeBasePath}-stat/devices/info`, JSON.stringify(data));
+        device.publish(`${mqttOptions.subscribeBasePath}-stat/airpurifier/info`, JSON.stringify(data));
     } catch (error) {
         logger.error("AWS IOT MQTT Publish Device Infos Failed", error);
     }
