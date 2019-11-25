@@ -9,8 +9,10 @@ const rmHandles = require("./rm-handles");
 const spHandles = require("./sp-handles");
 const awsDevice = require("../aws-iot/device-publish");
 
-var devices = [];
-var deviceInfos = [];
+// var devices = [];
+// var deviceInfos = [];
+var Broadlink = require("./device");
+
 // -------------------------------------
 //         Application Actions
 // -------------------------------------
@@ -35,7 +37,10 @@ function runAction(action, topic, origin) {
                 .then(rmHandles.deviceExitLearningIR)
                 .then(rmHandles.recordSave)
                 .then(data => {
-                    logger.info("done", data);
+                    logger.info("done", {
+                        action: data.action,
+                        filePath: data.filePath
+                    });
                 })
                 .catch(err => {
                     logger.error("error occured", err);
@@ -88,7 +93,10 @@ function runAction(action, topic, origin) {
                     topic,
                     origin
                 })
-                .then(spHandles.setPowerAction);    
+                .then(spHandles.setPowerAction)    
+                .then( () => {
+                    awsDevice.awsPublishPower("ON");
+                });
         case "checkpower":      
             return prepareAction({
                 action,
@@ -110,7 +118,7 @@ function runAction(action, topic, origin) {
                 logger.info("Done get speed action");
             })
         case "getinfo":      
-            return getDeviceInfos()
+            return getDeviceInfos();
         default:
             logger.error(`Action ${action} doesn't exists`);
             return handleActionError(`Action ${action} doesn't exists`);
@@ -128,8 +136,8 @@ const prepareAction = data =>
     new Promise((resolve, reject) => {
         logger.debug("prepareAction", data);
         if (data.topic.indexOf(cfg.mqtt.subscribeBasePath) === 0) {
-            if (data.topic.split("/").length < 3) {
-                logger.error(
+            if (data.topic.split("/").length < 2) {
+                logger.debug(
                     "Topic is too short, should contain broadcast base e.g. 'broadlink' with following device and action. e.g. broadlink/tv/samsung/power"
                 );
                 reject("Stopped prepareAction");
@@ -146,22 +154,24 @@ const prepareAction = data =>
 
             // find device to use
             let device;
-            if (devices.length === 0) {
+            if (Broadlink.devices.length === 0) {
+                logger.debug("No devices");
                 return reject("No devices");
             } else if (data.action.indexOf("-") !== -1) {
                 // we want to select specific device
                 const deviceId = data.action.substring(data.action.indexOf("-") + 1);
                 for (let i = 0; i < devices.length; i++) {
-                    if (devices[i].host.id === deviceId) {
-                        device = devices[i];
+                    if (Broadlink.devices[i].host.id === deviceId) {
+                        device = Broadlink.devices[i];
                         break;
                     }
                 }
                 if (!device) return reject("Requested device not found");
-            } else if (devices.length > 1) {
+            } else if (Broadlink.devices.length > 1) {
+                logger.debug("Multiple devices exists. Please specify one to use.");
                 return reject("Multiple devices exists. Please specify one to use.");
             } else {
-                device = devices[0];
+                device = Broadlink.devices[0];
             }
 
             data = Object.assign({}, data, {
@@ -303,26 +313,30 @@ const listFilestructure = dir => {
 
     return walk(dir);
 };
-const getDeviceInfos = () => {
+const getDeviceInfos = () => 
     new Promise((resolve, reject) => {
-        awsDevice.awsPublishDeviceInfos(deviceInfos);
-        resolve();
+        awsDevice.awsPublishDeviceInfos(Broadlink.deviceInfos);
+        resolve(Broadlink.deviceInfos);
     });
-}
+
 const getDevicesInfo = () =>
     new Promise((resolve, reject) => {
         var devs = [];
-        for (let i = 0; i < devices.length; i++) {
-            devs.push(Object.assign({}, devices[i].host));
+        for (let i = 0; i < Broadlink.devices.length; i++) {
+            devs.push(Object.assign({}, Broadlink.devices[i].host));
         }
         resolve(devs);
     });
+const scanDevice = (count) => {
+    Broadlink.discoverDevices(count);
+}
+
+    
 module.exports = {
     runAction,
     handleListAllActions,
     deleteFile,
     listFilestructure,
     getDevicesInfo,
-    devices,
-    deviceInfos
+    scanDevice
 }

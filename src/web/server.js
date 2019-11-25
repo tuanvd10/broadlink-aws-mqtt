@@ -8,13 +8,10 @@ const logger = require("./../logger");
 const {
   handleListAllActions,
   getDevicesInfo,
-  runAction
+  runAction,
+  scanDevice
 } = require("./../devices/actions");
-var { devices } = require("./../devices/actions");
-const {
-  broadlink,
-  discoverDevices
-} = require("./../devices/device");
+
 // -------------------------------------
 //             Webserver
 // -------------------------------------
@@ -47,7 +44,11 @@ io.on("connection", socket => {
   socket.on("action", msg => {
     logger.info("Web User want action", msg);
     runAction(msg.action, msg.topic, "web")
-      .then(data => logger.log("web done", data))
+      .then(data => logger.info("web done", {
+        action: data.action,
+        path: data.path,
+        device: data.device.host.id
+      }))
       .catch(err => logger.error("web failed", err));
   });
   socket.on("getActions", () => {
@@ -70,8 +71,7 @@ io.on("connection", socket => {
   });
   socket.on("rescanDevices", () => {
     logger.info("Rescan devices");
-    devices = [];
-    discoverDevices();
+    scanDevice(2);
   });
 });
 module.export = io;

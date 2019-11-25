@@ -1,16 +1,14 @@
 const express = require("express");
 var router = express.Router();
 const logger = require("./../logger");
-const {
-  discoverDevices
-} = require("./../devices/device");
+
 const {
   getDevicesInfo,
   runAction,
   listFilestructure,
-  deleteFile
+  deleteFile,
+  scanDevice
 } = require("./../devices/actions");
-var { devices } = require("./../devices/actions");
 
 router.post("/play", function (req, res) {
   if (req.body.topic && req.body.topic !== "") {
@@ -144,8 +142,7 @@ router.get("/devices", function (req, res) {
 });
 router.get("/devices/discover", function (req, res) {
   logger.info("Rescan devices");
-  devices = [];
-  discoverDevices();
+  scanDevice();
   res.json({
     success: true
   });

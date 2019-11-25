@@ -6,11 +6,11 @@ const EventEmitter = require("events");
 const myEmitter = new EventEmitter();
 const logger = require("./../logger");
 const awsDevice = require("../aws-iot/device-publish");
-
-var {
-  devices,
-  deviceInfos
-} = require("./actions");
+var devices = []
+var deviceInfos = [];
+// var {
+//   deviceInfos
+// } = require("./actions");
 
 const {
   getCurrentAirthinxState
@@ -18,10 +18,18 @@ const {
 
 const discoveredDevices = {};
 
-const limit = 5;
+
 let discovering = false;
 let cfg = require("./../config");
-var mqttOptions = cfg.mqtt;
+
+const discoverDevices = (count = 2) => {
+  //Delete all devices have found
+  devices.splice(0,devices.length);
+  deviceInfos.splice(0,deviceInfos.length);
+  if (discovering) return;
+  discovering = true;
+  discoverDevicesLoop(count);
+};
 
 const discoverDevicesLoop = (count = 0) => {
   logger.info("Discover device", count);
@@ -56,11 +64,6 @@ const discoverDevicesLoop = (count = 0) => {
   }, 5 * 1000);
 };
 
-const discoverDevices = (count) => {
-  if (discovering) return;
-  discovering = true;
-  discoverDevicesLoop(count);
-};
 
 broadlink.on("deviceReady", device => {
   const macAddressParts =
@@ -94,7 +97,7 @@ broadlink.on("deviceReady", device => {
 // a broadlink device is found
 
 myEmitter.on("device", discoveredDevice => {
-  logger.info("new device", discoverDevices);
+  logger.info("new device");
   devices.push(discoveredDevice);
   logger.info("Broadlink Found Device", discoveredDevice.host);
   discoveredDevice.on("temperature", temperature => {
@@ -105,7 +108,7 @@ myEmitter.on("device", discoveredDevice => {
     if (data === true) payload = 'ON';
     else payload = 'OFF'
     discoveredDevice.state.spState = data;
-    logger.debug(`Broadlink Power ${payload}`, discoveredDevice.host);
+    logger.debug(`Broadlink Power ${payload}`);
     try {
       awsDevice.awsPublishPower(payload);
     } catch (error) {
@@ -127,7 +130,7 @@ myEmitter.on("device", discoveredDevice => {
 		discoveredDevice.state.currentState.time = new Date().getTime();
 	}
     discoveredDevice.state.currentState.clientStatus = speed;
-    logger.debug(`Broadlink energy ${speed}`, discoveredDevice.host);
+    logger.debug(`Broadlink speed ${speed} in energy ${data})`);
     try {
       awsDevice.awsPublishSpeed(speed);
     } catch (error) {
@@ -169,6 +172,8 @@ myEmitter.on("discoverCompleted", numOfDevice => {
   }
 });
 module.exports = {
-  broadlink: myEmitter,
-  discoverDevices
+  discoverDevices: discoverDevices,
+  devices: devices,
+  deviceInfos: deviceInfos
+
 };
