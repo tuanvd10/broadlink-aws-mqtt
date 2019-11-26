@@ -23,8 +23,10 @@ public class DatabaseHelper {
         result.add(new MonitoringStatus("5dc0d224f7e52600016d7d8b", ctx.getString(R.string.AQ),"", "ic_aq"));
         result.add(new MonitoringStatus("5dc0d224f7e52600016d7d8a",ctx.getString(R.string.CO2),"ppm","ic_co2"));
         result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce95",ctx.getString(R.string.H2CO),"mg/m\u2083","ic_formaldehyde"));
-        result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce94",ctx.getString(R.string.PM),"\u00B5g/m\u2083","ic_pm"));
-        result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce97",ctx.getString(R.string.Temperature),"\u2109","ic_temperature"));
+        result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce91",ctx.getString(R.string.PM1),"\u00B5g/m\u2083","ic_pm"));
+        result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce93",ctx.getString(R.string.PM10),"\u00B5g/m\u2083","ic_pm"));
+        result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce92",ctx.getString(R.string.PM25),"\u00B5g/m\u2083","ic_pm"));
+        result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce96",ctx.getString(R.string.Temperature),"\u2103","ic_temperature"));
         result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce98",ctx.getString(R.string.HM),"%","ic_humidity"));
         result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce9a",ctx.getString(R.string.Pressure),"hPa","ic_pressure"));
         result.add(new MonitoringStatus("5dc0d1e8de8e1200015dce9e",ctx.getString(R.string.VOC),"ppm","ic_voc"));

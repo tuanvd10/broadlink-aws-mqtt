@@ -63,7 +63,9 @@
     <string name="Pressure">Áp suất</string>
     <string name="Temperature">Nhiệt độ</string>
     <string name="VOC">VOC</string>
-    <string name="PM">Ô nhiễm hạt</string>
+    <string name="PM1">PM1</string>
+    <string name="PM10">PM10</string>
+    <string name="PM25">PM2.5</string>
 
     <string name="good">Tốt</string>
     <string name="mod">Khá tốt</string>
@@ -72,6 +74,12 @@
     <string name="power_off">Tắt Nguồn</string>
     <string name="uv_on">Bật UV</string>
     <string name="uv_off">Tắt UV</string>
+
+    <string name="online">Đang hoạt động</string>
+    <string name="hourago">giờ trước</string>
+    <string name="minago">phút trước</string>
+    <string name="dayago">ngày trước</string>
+    <string name="active">Hoạt động</string>
 
     <string name="name_device">Tên thiết bị</string>
     <string name="state_of_device">Trạng thái hiện tại</string>

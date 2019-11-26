@@ -2,15 +2,18 @@ package com.viettel.vht.remoteapp.monitoring;
 
 import android.app.Activity;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.core.content.res.ResourcesCompat;
 
 import com.android.volley.Response;
-import com.github.ybq.android.spinkit.SpinKitView;
 import com.viettel.vht.remoteapp.R;
 import com.viettel.vht.remoteapp.common.APILink;
 import com.viettel.vht.remoteapp.common.DatabaseHelper;
@@ -33,7 +36,7 @@ public class MonitoringSystem {
     }
 
     public void readAndDisplayStatus(final RelativeLayout vAQStatus, final TextView txtAQValue, final TextView txtAQTitle, final TextView txtAQLevel,
-                                     final GridView gdView1, final GridView gdView2, final GridView gdView3, final SpinKitView loadingBar) {
+                                     final GridView gdView1, final GridView gdView2, final GridView gdView3, final ProgressBar loadingBar, final ImageView dsIcon, final TextView dsText) {
 
         JSONObject jsonObject = new JSONObject(); // requesting json
         try {
@@ -48,36 +51,39 @@ public class MonitoringSystem {
                         List<MonitoringStatus> gdList2 = new ArrayList<>();
                         List<MonitoringStatus> gdList3 = new ArrayList<>();
                         MonitoringStatus aqStatus = null;
-
+                        CharSequence mesuareTime = null;
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             //System.out.println("**LOG**: " + jsonObject.toString());
                             for (int i = 0; i < listStatus.size(); i++) {
+                                if (mesuareTime == null)
+                                    mesuareTime = DateUtils.getRelativeTimeSpanString(extractTime(jsonObject.getString(listStatus.get(i).getDataPointID())));
                                 if (jsonObject.getString(listStatus.get(i).getDataPointID()) != null) {
                                     listStatus.get(i).setValue(extractMeasurement(jsonObject.getString(listStatus.get(i).getDataPointID())));
                                     calculateQualityLevel(listStatus.get(i));
 
-                                    if (listStatus.get(i).getIconName() == "ic_aq")
-                                        aqStatus = listStatus.get(i);
+                                    if (listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.PM1)
+                                            || listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.PM25)
+                                            || listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.PM10))
+                                        gdList3.add(listStatus.get(i));
 
-                                    if (listStatus.get(i).getIconName() == "ic_co2"
-                                    || listStatus.get(i).getIconName() == "ic_formaldehyde"
-                                    || listStatus.get(i).getIconName() == "ic_voc"){
+                                    if (listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.CO2)
+                                            || listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.H2CO)
+                                            || listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.VOC)) {
                                         gdList1.add(listStatus.get(i));
                                     }
 
-                                    if (listStatus.get(i).getIconName() == "ic_temperature"
-                                            || listStatus.get(i).getIconName() == "ic_humidity"
-                                            || listStatus.get(i).getIconName() == "ic_pressure"){
+                                    if (listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.Temperature)
+                                            || listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.HM)
+                                            || listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.Pressure)) {
                                         gdList2.add(listStatus.get(i));
                                     }
 
-                                    if (listStatus.get(i).getIconName() == "ic_pm") {
-                                        gdList3.add(listStatus.get(i));
+                                    if ( listStatus.get(i).getName() ==  activity.getApplicationContext().getString(R.string.AQ)) {
+                                        aqStatus = listStatus.get(i);
                                     }
                                 }
                             }
-
                             loadingBar.setVisibility(View.GONE); // disable the loading bar
 
                             // set data for grid views
@@ -96,6 +102,32 @@ public class MonitoringSystem {
                             txtAQTitle.setText(aqStatus.getName());
                             txtAQValue.setText(aqStatus.getValue());
 
+                            // set status for device
+                            if (mesuareTime.charAt(0) == '0'){
+                                dsText.setText(activity.getApplicationContext().getString(R.string.online));
+                                dsText.setTextColor(activity.getColor(R.color.Black));
+                                GradientDrawable gradientDrawable = (GradientDrawable) ResourcesCompat.getDrawable(activity.getApplicationContext().getResources(),
+                                        R.drawable.online_ic, null);
+                                dsIcon.setBackground(gradientDrawable);
+                            }
+                            else {
+                                String msTime = mesuareTime.toString();
+                                if (msTime.lastIndexOf("day") > -1){
+                                    msTime = msTime.substring(0, msTime.lastIndexOf("day")-1) + " " + activity.getApplicationContext().getString(R.string.dayago);
+                                }
+                                else if (msTime.lastIndexOf("hour") > -1){
+                                    msTime = msTime.substring(0, msTime.lastIndexOf("hour")-1) + " " + activity.getApplicationContext().getString(R.string.hourago);
+                                }
+                                else {
+                                    msTime = msTime.substring(0, msTime.lastIndexOf("minute")-1) + " " + activity.getApplicationContext().getString(R.string.minago);
+                                }
+                                dsText.setText(activity.getApplicationContext().getString(R.string.active) + " " + msTime);
+                                dsText.setTextColor(activity.getColor(R.color.Grey));
+                                GradientDrawable gradientDrawable = (GradientDrawable) ResourcesCompat.getDrawable(activity.getApplicationContext().getResources(),
+                                        R.drawable.offline_ic, null);
+                                dsIcon.setBackground(gradientDrawable);
+                            }
+
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -108,6 +140,12 @@ public class MonitoringSystem {
         meas = meas.replace('[', '\0');
         meas = meas.replace(']', '\0');
         return meas.split(",")[1];
+    }
+
+    private Long extractTime(String meas){
+        meas = meas.replace('[', '\0');
+        meas = meas.replace(']', '\0');
+        return Long.parseLong(meas.split(",")[0].trim());
     }
 
     public int getDrawableResIdByName(String resName) {
@@ -182,7 +220,7 @@ public class MonitoringSystem {
                 result = AirQualityLevel.GOOD;
         }
 
-     //   System.out.println(status.getName() + " = " + value + " - Level: " + result.toString());
+        //   System.out.println(status.getName() + " = " + value + " - Level: " + result.toString());
 
         status.setQualityLevel(result);
     }
