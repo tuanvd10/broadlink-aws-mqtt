@@ -125,7 +125,6 @@ public class MqttClientToAWS implements Serializable {
         certificateId = CERTIFICATE_ID;
 
         // To load cert/key from keystore on filesystem
-        // TODO: command this try block because we use unauthen
         try {
             if (AWSIotKeystoreHelper.isKeystorePresent(keystorePath, keystoreName)) {
                 if (AWSIotKeystoreHelper.keystoreContainsAlias(certificateId, keystorePath,

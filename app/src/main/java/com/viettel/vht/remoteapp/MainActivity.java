@@ -104,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
                 } catch (JSONException je) {
                     Log.e(LOG_TAG, "Error when parsing json device info");
                     je.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
             }
@@ -134,39 +136,70 @@ public class MainActivity extends AppCompatActivity {
      * class: get device and state of device from aws iot
      */
     private class InformationCollector extends Thread {
+        private int sleepTime = 200;
+        private int loopNumber = 5;
         @Override
         public void run() {
             try {
-                while(!mqttClient.isConnected()) {
-                    Thread.sleep(200);
+                for (int i = 0; i < loopNumber; i++) {
+                    if(!mqttClient.isConnected()) {
+                        // Check error
+                        Thread.sleep(sleepTime);
+                        if (i == loopNumber - 1) {
+                            Log.e(LOG_TAG, "Connection is not established");
+                            return;
+                        }
+                    }
                 }
+
 
                 subscribeDeviceInfo();
                 mqttClient.requestDeviceInfos();
 
                 // Subscribe information
-                while (remoteDeviceId == null) {
-                    Thread.sleep(200);
+                for (int i = 0; i < loopNumber; i++) {
+                    if(remoteDeviceId == null || smartPlugId == null) {
+                        Thread.sleep(sleepTime);
+                        // Check error
+                        if (i == loopNumber - 1) {
+                            Log.e(LOG_TAG, "Not found smart plug id or remote device id");
+                            return;
+                        }
+                    }
                 }
+
                 // Subscribe state of devices
                 subscribeDeviceStates();
 
                 // Request state of device
-                while (smartPlugId == null) {
-                    Thread.sleep(200);
-                }
-
                 // Send request
                 mqttClient.requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
                 String power = null;
-                while ((power = stateList.get(KeyOfStates.POWER.getValue())) == null) {
-                    Thread.sleep(200);
+                for (int i = 0; i < loopNumber; i++) {
+                    if((power = stateList.get(KeyOfStates.POWER.getValue())) == null) {
+                        Thread.sleep(sleepTime);
+                        // Check error
+                        if (i == loopNumber - 1) {
+                            Log.e(LOG_TAG, "Not found smart plug id or remote device id");
+                            return;
+                        }
+                    }
                 }
 
                 // Check speed if power on
-                Thread.sleep(200);
+                Thread.sleep(sleepTime);
                 if (power.equals(getString(R.string.state_power_on))) {
                     mqttClient.requestAWSIotServer("checkspeed-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_SPEED);
+                    for (int i = 0; i < loopNumber; i++) {
+                        if(stateList.get(KeyOfStates.SPEED.getValue()) == null) {
+                            Thread.sleep(sleepTime);
+                            // Check error
+                            if (i == loopNumber - 1) {
+                                Log.e(LOG_TAG, "Not found smart plug id or remote device id");
+                                return;
+                            }
+                        }
+                    }
                 } else if (power.equals(getString(R.string.state_power_off))) {
                     stateList.put(KeyOfStates.SPEED.getValue(), "0");
                 }

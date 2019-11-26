@@ -6,16 +6,17 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_dashboard"
             android:title="@string/menu_home" />
-        <item
-            android:id="@+id/nav_remote_control"
-            android:icon="@drawable/ic_remote_control"
-            android:title="@string/menu_remote_control"/>
+
+<!--        <item-->
+<!--            android:id="@+id/nav_remote_control"-->
+<!--            android:icon="@drawable/ic_remote_control"-->
+<!--            android:title="@string/menu_remote_control"/>-->
 
         <item
             android:id="@+id/nav_air_remote_control"
-            android:icon="@drawable/ic_remote_control_2"
+            android:icon="@drawable/ic_remote_control"
             android:title="@string/menu_air_remote_control" />
 
         <!--<item
@@ -33,17 +34,17 @@
             android:title="@string/menu_tools" />-->
     </group>
 
-    <item android:title="Communicate">
-        <menu>
-            <!--<item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="@string/menu_share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="@string/menu_send" />-->
-        </menu>
-    </item>
+<!--    <item android:title="Communicate">-->
+<!--        <menu>-->
+<!--            &lt;!&ndash;<item-->
+<!--                android:id="@+id/nav_share"-->
+<!--                android:icon="@drawable/ic_menu_share"-->
+<!--                android:title="@string/menu_share" />-->
+<!--            <item-->
+<!--                android:id="@+id/nav_send"-->
+<!--                android:icon="@drawable/ic_menu_send"-->
+<!--                android:title="@string/menu_send" />&ndash;&gt;-->
+<!--        </menu>-->
+<!--    </item>-->
 
 </menu>

@@ -118,7 +118,7 @@ public class RemoteControlFragment extends Fragment {
                 })
                 .create();
 
-        // Get button from id and set on click listener
+        // Get button from id and set on click onCheckedChangeListener
         // Power
         mPowerButton = root.findViewById(R.id.bt_power);
         mPowerButton.setOnClickListener(new View.OnClickListener() {
