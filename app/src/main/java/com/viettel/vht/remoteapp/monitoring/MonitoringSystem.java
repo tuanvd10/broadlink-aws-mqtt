@@ -5,12 +5,14 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.text.format.DateUtils;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.android.volley.Response;
@@ -97,10 +99,18 @@ public class MonitoringSystem {
                                     getDrawableResIdByName(aqStatus.getQualityLevel().toCycle()), null);
 
                             // set data for AQ Status
-                            vAQStatus.setBackground(shapeDrawable);
+//                            View parent = (View)gdView2.getParent();
+//                            int aqStatusSize = (int) (parent.getTop()/1.5);
+//                            //System.out.println("Size: " + parent.getTop()/1.5);
+//                            vAQStatus.setLayoutParams(new ConstraintLayout.LayoutParams(aqStatusSize, aqStatusSize));
                             txtAQLevel.setText(aqStatus.getQualityLevel().toString());
                             txtAQTitle.setText(aqStatus.getName());
                             txtAQValue.setText(aqStatus.getValue());
+                            vAQStatus.setBackground(shapeDrawable);
+
+                           // vAQStatus.setLayoutParams(new RelativeLayout.LayoutParams(50,50));
+
+
 
                             // set status for device
                             if (mesuareTime.charAt(0) == '0'){
