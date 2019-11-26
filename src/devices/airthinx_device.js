@@ -1,4 +1,4 @@
-const { runAction, devices} = require("./../devices/actions");
+var { runAction } = require("./actions");
 const logger = require("./../logger");
 const cfg = require("./../config");
 const axios = require("axios");
@@ -40,7 +40,7 @@ const getAirThinxScore =  async ()=>{
 	return true;
 }
 
-const sendControlData = () => {
+const sendControlData = (spDevice) => {
 	/* device.state.currentState.clientStatus: 
 		0: OFF 
 		1: level 1 
@@ -48,7 +48,7 @@ const sendControlData = () => {
 		3: level 3
 	*/
 	let currentTime = new Date().getTime();
-	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
+	//var spDevice = Broadlink.devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
 	if(spDevice.state.spState === false){
 		logger.debug("[tuanvd10] sendControlData SP state: " + spDevice.state.spState);
 		return;
@@ -124,17 +124,19 @@ const sendCommandMultitime = async (time) =>{
 };
 
 async function doAction(spDevice){
-		if(spDevice.getState() && getAirThinxScore()){
-			await(1000);
-			sendControlData();
-		}
+	if(spDevice.getState() && getAirThinxScore()){
+		await(1000);
+		sendControlData(spDevice);
+	}
 }
 
-function getCurrentAirthinxState(){
+function getCurrentAirthinxState(deviceFound) {
+	console.log(runAction);
 	//get sp device
-	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
+	//var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
+	var spDevice = deviceFound;
 	//logger.info("[tuanvd10] getStateOfDevice: ", spDevice);
-	setInterval(function(){
+	setInterval(function () {
 		doAction(spDevice);
 	}, 20000);
 }
@@ -143,7 +145,4 @@ global.aq = {
 	"aq" : -1,
 	"time" : 0
 }
-
-//sendAirthinxCommand(1);
-
-module.exports =  {sendControlData, getAirThinxScore, getCurrentAirthinxState, sendAirthinxCommand}
+module.exports.getCurrentAirthinxState = getCurrentAirthinxState;

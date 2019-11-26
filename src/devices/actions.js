@@ -8,11 +8,6 @@ const cfg = require("./../config");
 const rmHandles = require("./rm-handles");
 const spHandles = require("./sp-handles");
 const awsDevice = require("../aws-iot/device-publish");
-
-// var devices = [];
-// var deviceInfos = [];
-var Broadlink = require("./device");
-
 // -------------------------------------
 //         Application Actions
 // -------------------------------------
@@ -125,6 +120,7 @@ function runAction(action, topic, origin) {
             break;
     }
 }
+
 // Properly handle invalid action input to runAction
 const handleActionError = data =>
     new Promise((resolve, reject) => {
@@ -160,7 +156,7 @@ const prepareAction = data =>
             } else if (data.action.indexOf("-") !== -1) {
                 // we want to select specific device
                 const deviceId = data.action.substring(data.action.indexOf("-") + 1);
-                for (let i = 0; i < devices.length; i++) {
+                for (let i = 0; i < Broadlink.devices.length; i++) {
                     if (Broadlink.devices[i].host.id === deviceId) {
                         device = Broadlink.devices[i];
                         break;
@@ -331,7 +327,6 @@ const scanDevice = (count) => {
     Broadlink.discoverDevices(count);
 }
 
-    
 module.exports = {
     runAction,
     handleListAllActions,
@@ -339,4 +334,5 @@ module.exports = {
     listFilestructure,
     getDevicesInfo,
     scanDevice
-}
+}    
+var Broadlink = require("./device");

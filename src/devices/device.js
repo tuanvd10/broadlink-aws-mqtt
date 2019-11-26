@@ -8,9 +8,6 @@ const logger = require("./../logger");
 const awsDevice = require("../aws-iot/device-publish");
 var devices = []
 var deviceInfos = [];
-// var {
-//   deviceInfos
-// } = require("./actions");
 
 const {
   getCurrentAirthinxState
@@ -142,7 +139,7 @@ myEmitter.on("device", discoveredDevice => {
 });
 
 	if (discoveredDevice.host.id === cfg.airthinx.spDeviceId) {
-		getCurrentAirthinxState();
+		getCurrentAirthinxState(discoveredDevice);
 	}
 
   /*
