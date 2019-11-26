@@ -519,8 +519,8 @@ public class AirRemoteControl extends Fragment {
      */
     private class InformationChecker extends Thread {
 
-        private final int loopNumber = 3;
-        private final int sleepTime = 200;
+        private final int loopNumber = 100;
+        private final int sleepTime = 500;
 
         private String checkPowerState() throws InterruptedException {
             String power = null;
@@ -571,17 +571,31 @@ public class AirRemoteControl extends Fragment {
             return isHaveDevice;
         }
 
+        private boolean checkMqttConnection() throws InterruptedException {
+            boolean isConnect = false;
+
+            for (int i = 0; i < loopNumber; i++) {
+                if (mqttClient.isConnecting()) {
+                    // Wait to connect
+                    Thread.sleep(sleepTime);
+                } else {
+                    // connected or lost connection
+                    if (mqttClient.isConnected()) {
+                        isConnect = true;
+                    }
+                    break;
+                }
+            }
+
+            return isConnect;
+        }
 
         @Override
         public void run() {
 
             try {
-                while (mqttClient.isConnecting()) {
-                    Thread.sleep(500);
-                }
-
-
-                if (!mqttClient.isConnected()) {
+                // Check connection
+                if (!checkMqttConnection()) {
                     ThreadUtils.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -604,7 +618,6 @@ public class AirRemoteControl extends Fragment {
                     // Get out
                     return;
                 }
-
                 // Get power
                 final String power = checkPowerState();
                 // Get speed

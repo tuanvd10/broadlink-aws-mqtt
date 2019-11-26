@@ -30,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.function.IntToDoubleFunction;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -136,70 +137,135 @@ public class MainActivity extends AppCompatActivity {
      * class: get device and state of device from aws iot
      */
     private class InformationCollector extends Thread {
-        private int sleepTime = 200;
-        private int loopNumber = 5;
+        private long sleepTime = 1000L;
+        private int loopNumber = 100;
+
+
+
+        /**
+         * check mqtt connection
+         * @return
+         * @throws InterruptedException
+         */
+        private boolean checkMqttConnection() throws InterruptedException {
+            boolean isConnected = false;
+
+            for (int i = 0; i < loopNumber; i++) {
+                if(!mqttClient.isConnected()) {
+                    // Check error
+                    Thread.sleep(sleepTime);
+                    if (i == loopNumber - 1) {
+                        Log.e(LOG_TAG, "Connection is not established");
+                    }
+                } else {
+                    isConnected = true;
+                    break;
+                }
+            }
+
+            return isConnected;
+        }
+
+        /**
+         * Check Device Info
+         * @return
+         * @throws InterruptedException
+         */
+        private boolean checkDeviceInfo() throws InterruptedException {
+            boolean isHaveInfo = false;
+            for (int i = 0; i < loopNumber; i++) {
+                if(remoteDeviceId == null || smartPlugId == null) {
+                    Thread.sleep(sleepTime);
+                    // Check error
+                    if (i == loopNumber - 1) {
+                        Log.e(LOG_TAG, "Not found smart plug id or remote device id");
+                    }
+                } else {
+                    isHaveInfo = true;
+                    break;
+                }
+            }
+
+            return isHaveInfo;
+        }
+
+        /**
+         * Check power on device
+         * @return
+         * @throws InterruptedException
+         */
+        private String checkPowerDevice() throws InterruptedException {
+            String power = null;
+            for (int i = 0; i < loopNumber; i++) {
+                if(stateList.get(KeyOfStates.POWER.getValue()) == null) {
+                    Thread.sleep(sleepTime);
+                    // Check error
+                    if (i == loopNumber - 1) {
+                        Log.e(LOG_TAG, "Not found power state");
+                    }
+                } else {
+                    power = stateList.get(KeyOfStates.POWER.getValue());
+                    break;
+                }
+            }
+
+            return power;
+        }
+
+        /**
+         * check speed on device
+         * @return
+         * @throws InterruptedException
+         */
+        private String checkSpeedDevice() throws InterruptedException {
+            String speed = null;
+            for (int i = 0; i < loopNumber; i++) {
+                if(stateList.get(KeyOfStates.SPEED.getValue()) == null) {
+                    Thread.sleep(sleepTime);
+                    // Check error
+                    if (i == loopNumber - 1) {
+                        Log.e(LOG_TAG, "Not found speed state");
+                    }
+                } else {
+                    speed = stateList.get(KeyOfStates.SPEED.getValue());
+                    break;
+                }
+            }
+
+            return speed;
+        }
+
+
         @Override
         public void run() {
             try {
-                for (int i = 0; i < loopNumber; i++) {
-                    if(!mqttClient.isConnected()) {
-                        // Check error
-                        Thread.sleep(sleepTime);
-                        if (i == loopNumber - 1) {
-                            Log.e(LOG_TAG, "Connection is not established");
-                            return;
-                        }
-                    }
+                if (!checkMqttConnection()) {
+                    return;
                 }
 
-
+                // Subscribe information
                 subscribeDeviceInfo();
                 mqttClient.requestDeviceInfos();
 
-                // Subscribe information
-                for (int i = 0; i < loopNumber; i++) {
-                    if(remoteDeviceId == null || smartPlugId == null) {
-                        Thread.sleep(sleepTime);
-                        // Check error
-                        if (i == loopNumber - 1) {
-                            Log.e(LOG_TAG, "Not found smart plug id or remote device id");
-                            return;
-                        }
-                    }
+                // Check information
+                if (!checkDeviceInfo()) {
+                    return;
                 }
 
                 // Subscribe state of devices
                 subscribeDeviceStates();
 
                 // Request state of device
-                // Send request
                 mqttClient.requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
                 String power = null;
-                for (int i = 0; i < loopNumber; i++) {
-                    if((power = stateList.get(KeyOfStates.POWER.getValue())) == null) {
-                        Thread.sleep(sleepTime);
-                        // Check error
-                        if (i == loopNumber - 1) {
-                            Log.e(LOG_TAG, "Not found smart plug id or remote device id");
-                            return;
-                        }
-                    }
+                if ((power = checkPowerDevice()) == null) {
+                    return;
                 }
 
                 // Check speed if power on
                 Thread.sleep(sleepTime);
                 if (power.equals(getString(R.string.state_power_on))) {
                     mqttClient.requestAWSIotServer("checkspeed-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_SPEED);
-                    for (int i = 0; i < loopNumber; i++) {
-                        if(stateList.get(KeyOfStates.SPEED.getValue()) == null) {
-                            Thread.sleep(sleepTime);
-                            // Check error
-                            if (i == loopNumber - 1) {
-                                Log.e(LOG_TAG, "Not found smart plug id or remote device id");
-                                return;
-                            }
-                        }
-                    }
                 } else if (power.equals(getString(R.string.state_power_off))) {
                     stateList.put(KeyOfStates.SPEED.getValue(), "0");
                 }
