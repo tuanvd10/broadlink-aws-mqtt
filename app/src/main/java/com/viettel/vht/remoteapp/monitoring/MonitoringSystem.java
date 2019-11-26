@@ -90,9 +90,9 @@ public class MonitoringSystem {
                             gdView1.setAdapter(new MonitoringGridAdapter(activity, gdList3));
                             gdView2.setAdapter(new MonitoringGridAdapter(activity, gdList2));
                             gdView3.setAdapter(new MonitoringGridAdapter(activity, gdList1));
-                            gdView1.setBackground(activity.getApplicationContext().getDrawable(R.drawable.border_rectangle));
-                            gdView2.setBackground(activity.getApplicationContext().getDrawable(R.drawable.border_rectangle));
-                            gdView3.setBackground(activity.getApplicationContext().getDrawable(R.drawable.border_rectangle));
+                            gdView1.setBackground(activity.getApplicationContext().getDrawable(R.drawable.rectangle_home_border));
+                            gdView2.setBackground(activity.getApplicationContext().getDrawable(R.drawable.rectangle_home_border));
+                            gdView3.setBackground(activity.getApplicationContext().getDrawable(R.drawable.rectangle_home_border));
                             GradientDrawable shapeDrawable = (GradientDrawable) ResourcesCompat.getDrawable(activity.getApplicationContext().getResources(),
                                     getDrawableResIdByName(aqStatus.getQualityLevel().toCycle()), null);
 
