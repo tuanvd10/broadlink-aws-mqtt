@@ -124,8 +124,9 @@ const sendCommandMultitime = async (time) =>{
 };
 
 async function doAction(spDevice){
+	logger.info("[tuanvd10] Do ACTION");
 	if(spDevice.getState() && getAirThinxScore()){
-		await(1000);
+		await sleep(2000);
 		sendControlData(spDevice);
 	}
 }
@@ -138,7 +139,7 @@ function getCurrentAirthinxState(deviceFound) {
 	//logger.info("[tuanvd10] getStateOfDevice: ", spDevice);
 	setInterval(function () {
 		doAction(spDevice);
-	}, 20000);
+	}, 10000);
 }
 
 global.aq = {
