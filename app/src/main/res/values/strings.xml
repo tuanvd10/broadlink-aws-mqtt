@@ -56,7 +56,7 @@
     <string name="test_number">0</string>
 
     <!-- String for Air Parameter -->
-    <string name="AQ">Không Khí</string>
+    <string name="AQ">AQ</string>
     <string name="CO2">CO\u2082</string>
     <string name="H2CO">Formaldehyde</string>
     <string name="HM">Độ ẩm</string>
@@ -68,7 +68,7 @@
     <string name="PM25">PM2.5</string>
 
     <string name="good">Tốt</string>
-    <string name="mod">Khá tốt</string>
+    <string name="mod">Khá</string>
     <string name="poor">Kém</string>
     <string name="power_on">Bật Nguồn</string>
     <string name="power_off">Tắt Nguồn</string>
