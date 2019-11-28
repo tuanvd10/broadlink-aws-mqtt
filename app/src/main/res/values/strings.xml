@@ -34,7 +34,8 @@
     <string name="bt_pass">Bỏ qua</string>
     <string name="msg_lost_connection">Không thể kết nối tới máy chủ</string>
     <string name="title_lost_connection">Mất kết nối</string>
-    <string name="msg_no_response_connection">Máy chủ không phản hồi</string>
+    <string name="msg_no_response_connection">Máy chủ không phản hồi (Không thể lấy trạng thái của thiết bị)</string>
+    <string name="check_smart_plug_and_remote">Hãy kiểm tra lại ổ cắm điện và thiết bị điều khiển (Không thể kết nối tới thiết bị)</string>
     <string name="not_connected">Chưa kết nối</string>
     <string name="error">Lỗi</string>
     <string name="info">Thông báo</string>
@@ -46,7 +47,7 @@
     <string name="state_2">Trung bình</string>
     <string name="state_3">Mạnh</string>
     <string name="speed_title">Tốc độ</string>
-    <string name="power_title">Trạng thái</string>
+    <string name="power_title">Nguồn</string>
     <string name="state_power_on">ON</string>
     <string name="state_power_off">OFF</string>
 
@@ -84,5 +85,12 @@
     <string name="name_device">Tên thiết bị</string>
     <string name="state_of_device">Trạng thái hiện tại</string>
     <string name="speed_of_device">Tốc độ quạt</string>
+
+    <string name="speed_0">0</string>
+    <string name="speed_1">1</string>
+    <string name="speed_2">2</string>
+    <string name="speed_3">3</string>
+
+    <string name="status_title">Trạng thái</string>
 
 </resources>

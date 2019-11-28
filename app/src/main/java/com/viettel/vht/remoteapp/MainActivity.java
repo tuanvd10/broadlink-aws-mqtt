@@ -9,8 +9,10 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttNewMessageCallback;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
+import com.amazonaws.services.iot.client.AWSIotQos;
 import com.google.android.material.navigation.NavigationView;
 import com.viettel.vht.remoteapp.common.AirPurifierTopics;
+import com.viettel.vht.remoteapp.common.Constants;
 import com.viettel.vht.remoteapp.common.DevicesTopics;
 import com.viettel.vht.remoteapp.common.KeyOfDevice;
 import com.viettel.vht.remoteapp.common.KeyOfStates;
@@ -42,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     private HashMap<String, String> stateList = new HashMap<String, String>();
     private String remoteDeviceId = null;
     private String smartPlugId = null;
+    private int speed = -1;
+    private boolean power = false;
+    private boolean isControlAvailable = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,31 +120,38 @@ public class MainActivity extends AppCompatActivity {
 
     private void subscribeDeviceStates() {
         // Subscribe state of topic
-        mqttClient.getMqttManager().subscribeToTopic(AirPurifierTopics.SUBSCRIBE_STATE_POWER, AWSIotMqttQos.QOS1, new AWSIotMqttNewMessageCallback() {
+        AWSIotMqttNewMessageCallback callbackPower = new AWSIotMqttNewMessageCallback() {
             @Override
             public void onMessageArrived(String topic, byte[] data) {
                 Log.d(LOG_TAG, "data_power = " + new String(data));
+                setPower(new String(data));
                 stateList.put(KeyOfStates.POWER.getValue(), new String(data));
             }
-        });
+        };
+        mqttClient.subscribe(AirPurifierTopics.SUBSCRIBE_STATE_POWER, callbackPower);
 
         // Subscribe speed state of topic
-        mqttClient.getMqttManager().subscribeToTopic(AirPurifierTopics.SUBSCRIBE_STATE_SPEED, AWSIotMqttQos.QOS1, new AWSIotMqttNewMessageCallback() {
+        AWSIotMqttNewMessageCallback callbackSpeed = new AWSIotMqttNewMessageCallback() {
             @Override
             public void onMessageArrived(String topic, byte[] data) {
                 Log.d(LOG_TAG, "data_speed = " + new String(data));
                 stateList.put(KeyOfStates.SPEED.getValue(), new String(data));
             }
-        });
+        };
+        mqttClient.subscribe(AirPurifierTopics.SUBSCRIBE_STATE_SPEED, callbackSpeed);
+
+    }
+
+
+    public void checkInformation() {
+        new InformationCollector().start();
     }
 
     /**
      * class: get device and state of device from aws iot
      */
     private class InformationCollector extends Thread {
-        private long sleepTime = 1000L;
-        private int loopNumber = 100;
-
+        private long sleepTime = 500L;
 
 
         /**
@@ -150,11 +162,11 @@ public class MainActivity extends AppCompatActivity {
         private boolean checkMqttConnection() throws InterruptedException {
             boolean isConnected = false;
 
-            for (int i = 0; i < loopNumber; i++) {
+            for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
                 if(!mqttClient.isConnected()) {
                     // Check error
                     Thread.sleep(sleepTime);
-                    if (i == loopNumber - 1) {
+                    if (i == Constants.LOOP_NUMBER - 1) {
                         Log.e(LOG_TAG, "Connection is not established");
                     }
                 } else {
@@ -173,11 +185,11 @@ public class MainActivity extends AppCompatActivity {
          */
         private boolean checkDeviceInfo() throws InterruptedException {
             boolean isHaveInfo = false;
-            for (int i = 0; i < loopNumber; i++) {
+            for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
                 if(remoteDeviceId == null || smartPlugId == null) {
                     Thread.sleep(sleepTime);
                     // Check error
-                    if (i == loopNumber - 1) {
+                    if (i == Constants.LOOP_NUMBER - 1) {
                         Log.e(LOG_TAG, "Not found smart plug id or remote device id");
                     }
                 } else {
@@ -196,11 +208,11 @@ public class MainActivity extends AppCompatActivity {
          */
         private String checkPowerDevice() throws InterruptedException {
             String power = null;
-            for (int i = 0; i < loopNumber; i++) {
+            for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
                 if(stateList.get(KeyOfStates.POWER.getValue()) == null) {
                     Thread.sleep(sleepTime);
                     // Check error
-                    if (i == loopNumber - 1) {
+                    if (i == Constants.LOOP_NUMBER - 1) {
                         Log.e(LOG_TAG, "Not found power state");
                     }
                 } else {
@@ -219,11 +231,11 @@ public class MainActivity extends AppCompatActivity {
          */
         private String checkSpeedDevice() throws InterruptedException {
             String speed = null;
-            for (int i = 0; i < loopNumber; i++) {
+            for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
                 if(stateList.get(KeyOfStates.SPEED.getValue()) == null) {
                     Thread.sleep(sleepTime);
                     // Check error
-                    if (i == loopNumber - 1) {
+                    if (i == Constants.LOOP_NUMBER - 1) {
                         Log.e(LOG_TAG, "Not found speed state");
                     }
                 } else {
@@ -242,18 +254,17 @@ public class MainActivity extends AppCompatActivity {
                 if (!checkMqttConnection()) {
                     return;
                 }
-
                 // Subscribe information
                 subscribeDeviceInfo();
-                mqttClient.requestDeviceInfos();
+                // Subscribe state of devices
+                subscribeDeviceStates();
 
+
+                mqttClient.requestDeviceInfos();
                 // Check information
                 if (!checkDeviceInfo()) {
                     return;
                 }
-
-                // Subscribe state of devices
-                subscribeDeviceStates();
 
                 // Request state of device
                 mqttClient.requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
@@ -276,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Getter
+    // Getter and setter
     public MqttClientToAWS getMqttClient() {
         return mqttClient;
     }
@@ -315,5 +326,31 @@ public class MainActivity extends AppCompatActivity {
 
     public void setSmartPlugId(String smartPlugId) {
         this.smartPlugId = smartPlugId;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        if (speed >= 0 && speed <= 3) {
+            this.speed = speed;
+        }
+    }
+
+    public boolean getPower() {
+        return power;
+    }
+
+    private void setPower(boolean power) {
+        this.power = power;
+    }
+
+    public void setPower(String power) {
+        if (power.equals(getString(R.string.state_power_on))) {
+            this.power = true;
+        } else if (power.equals(getString(R.string.state_power_off))) {
+            this.power = false;
+        }
     }
 }

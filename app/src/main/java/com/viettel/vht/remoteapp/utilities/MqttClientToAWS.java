@@ -267,9 +267,8 @@ public class MqttClientToAWS implements Serializable {
     /**
      * request power state of device
      * @param smartPlugId
-     * @throws InterruptedException
      */
-    public void requestPowerStateOfDevice(String smartPlugId) throws InterruptedException {
+    public void requestPowerStateOfDevice(String smartPlugId) {
         requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
     }
 
@@ -278,8 +277,8 @@ public class MqttClientToAWS implements Serializable {
      * @param smartPlugId
      * @throws InterruptedException
      */
-    public void requestSpeedStateOfDevice(String smartPlugId) throws InterruptedException {
-        requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
+    public void requestSpeedStateOfDevice(String smartPlugId) {
+        requestAWSIotServer("checkspeed-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_SPEED);
     }
 
     public void requestAWSIotServer(String msg, String topic) {
@@ -295,8 +294,13 @@ public class MqttClientToAWS implements Serializable {
         }
     }
 
-    
+    public void publish(String msg, String topic) {
+        mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
+    }
 
+    public void subscribe(String topic, AWSIotMqttNewMessageCallback callback) {
+        mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS1, callback);
+    }
     // Getter and setter
     public String getClientId() {
         return clientId;
