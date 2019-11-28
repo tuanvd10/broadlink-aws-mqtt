@@ -5,12 +5,14 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.text.format.DateUtils;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.android.volley.Response;
@@ -79,7 +81,7 @@ public class MonitoringSystem {
                                         gdList2.add(listStatus.get(i));
                                     }
 
-                                    if ( listStatus.get(i).getName() ==  activity.getApplicationContext().getString(R.string.AQ)) {
+                                    if (listStatus.get(i).getName() == activity.getApplicationContext().getString(R.string.AQ)) {
                                         aqStatus = listStatus.get(i);
                                     }
                                 }
@@ -97,29 +99,34 @@ public class MonitoringSystem {
                                     getDrawableResIdByName(aqStatus.getQualityLevel().toCycle()), null);
 
                             // set data for AQ Status
-                            vAQStatus.setBackground(shapeDrawable);
-                            txtAQLevel.setText(aqStatus.getQualityLevel().toString());
+//                            View parent = (View)gdView2.getParent();
+//                            int aqStatusSize = (int) (parent.getTop()/1.5);
+//                            //System.out.println("Size: " + parent.getTop()/1.5);
+//                            vAQStatus.setLayoutParams(new ConstraintLayout.LayoutParams(aqStatusSize, aqStatusSize));
+                            txtAQLevel.setText(toLevelString(aqStatus.getQualityLevel()));
                             txtAQTitle.setText(aqStatus.getName());
                             txtAQValue.setText(aqStatus.getValue());
+                            vAQStatus.setBackground(shapeDrawable);
+
+                            // vAQStatus.setLayoutParams(new RelativeLayout.LayoutParams(50,50));
+
 
                             // set status for device
-                            if (mesuareTime.charAt(0) == '0'){
+                            if (mesuareTime.charAt(0) == '0') {
+                                //  System.out.println("I'M HERE");
                                 dsText.setText(activity.getApplicationContext().getString(R.string.online));
                                 dsText.setTextColor(activity.getColor(R.color.Black));
                                 GradientDrawable gradientDrawable = (GradientDrawable) ResourcesCompat.getDrawable(activity.getApplicationContext().getResources(),
                                         R.drawable.online_ic, null);
                                 dsIcon.setBackground(gradientDrawable);
-                            }
-                            else {
+                            } else {
                                 String msTime = mesuareTime.toString();
-                                if (msTime.lastIndexOf("day") > -1){
-                                    msTime = msTime.substring(0, msTime.lastIndexOf("day")-1) + " " + activity.getApplicationContext().getString(R.string.dayago);
-                                }
-                                else if (msTime.lastIndexOf("hour") > -1){
-                                    msTime = msTime.substring(0, msTime.lastIndexOf("hour")-1) + " " + activity.getApplicationContext().getString(R.string.hourago);
-                                }
-                                else {
-                                    msTime = msTime.substring(0, msTime.lastIndexOf("minute")-1) + " " + activity.getApplicationContext().getString(R.string.minago);
+                                if (msTime.lastIndexOf("day") > -1) {
+                                    msTime = msTime.substring(0, msTime.lastIndexOf("day") - 1) + " " + activity.getApplicationContext().getString(R.string.dayago);
+                                } else if (msTime.lastIndexOf("hour") > -1) {
+                                    msTime = msTime.substring(0, msTime.lastIndexOf("hour") - 1) + " " + activity.getApplicationContext().getString(R.string.hourago);
+                                } else {
+                                    msTime = msTime.substring(0, msTime.lastIndexOf("minute") - 1) + " " + activity.getApplicationContext().getString(R.string.minago);
                                 }
                                 dsText.setText(activity.getApplicationContext().getString(R.string.active) + " " + msTime);
                                 dsText.setTextColor(activity.getColor(R.color.Grey));
@@ -136,13 +143,27 @@ public class MonitoringSystem {
         );
     }
 
+    private String toLevelString(AirQualityLevel level) {
+        switch (level) {
+            case POOR:
+                return activity.getApplicationContext().getString(R.string.poor);
+            case MODERATE:
+                return activity.getApplicationContext().getString(R.string.mod);
+            case GOOD:
+                return activity.getApplicationContext().getString(R.string.good);
+            default:
+                return "";
+
+        }
+    }
+
     private String extractMeasurement(String meas) {
         meas = meas.replace('[', '\0');
         meas = meas.replace(']', '\0');
         return meas.split(",")[1];
     }
 
-    private Long extractTime(String meas){
+    private Long extractTime(String meas) {
         meas = meas.replace('[', '\0');
         meas = meas.replace(']', '\0');
         return Long.parseLong(meas.split(",")[0].trim());

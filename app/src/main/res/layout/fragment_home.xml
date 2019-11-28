@@ -13,7 +13,7 @@
         app:layout_constraintBottom_toTopOf="@+id/aq_status"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintVertical_bias="0.2"
+        app:layout_constraintVertical_bias="0.1"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -39,11 +39,10 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.100000024">
+        app:layout_constraintTop_toTopOf="parent">
 
 
         <TextView
@@ -102,15 +101,15 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.9">
+        app:layout_constraintVertical_bias="0.95">
 
         <GridView
             android:id="@+id/gdHTP"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="15dp"
             android:numColumns="auto_fit"
-            android:padding="10dp"
+            android:padding="5dp"
             android:verticalSpacing="10dp" />
 
         <GridView
@@ -120,9 +119,9 @@
             android:layout_below="@id/gdHTP"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="15dp"
             android:numColumns="auto_fit"
-            android:padding="10dp"
+            android:padding="5dp"
             android:verticalSpacing="10dp" />
 
         <GridView
@@ -131,7 +130,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/gdCO2"
             android:numColumns="auto_fit"
-            android:padding="10dp"
+            android:padding="5dp"
             android:verticalSpacing="10dp" />
     </RelativeLayout>
 
