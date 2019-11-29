@@ -24,6 +24,7 @@ import com.viettel.vht.remoteapp.common.PowerState;
 import com.viettel.vht.remoteapp.common.SpeedState;
 import com.viettel.vht.remoteapp.monitoring.MonitoringSystem;
 import com.viettel.vht.remoteapp.objects.AirPurifier;
+import com.viettel.vht.remoteapp.remotecontrol.StateChecker;
 
 import java.util.HashMap;
 
@@ -97,6 +98,11 @@ public class HomeFragment extends Fragment {
         // High speed
         mBtHighSpeed = root.findViewById(R.id.bt_high_speed);
         mBtHighSpeed.setOnClickListener(btSpeedClick);
+
+        // Parent Activity
+        activity = (MainActivity) getActivity();
+        // Start a state checker
+//        new StateChecker().start();
 
         return root;
     }

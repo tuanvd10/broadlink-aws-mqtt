@@ -15,12 +15,14 @@ public class StateChecker extends Thread {
     private AirPurifier realState;
     private MqttClientToAWS mqttClient;
     private String remoteDeviceId;
+    private String smartPlugId;
 
-    public StateChecker (MqttClientToAWS mqttClient, AirPurifier expectedState, AirPurifier realState, String remoteDeviceId) {
+    public StateChecker (MqttClientToAWS mqttClient, AirPurifier expectedState, AirPurifier realState, String remoteDeviceId, String smartPlugId) {
         this.mqttClient = mqttClient;
         this.expectedState = expectedState;
         this.realState = realState;
         this.remoteDeviceId = remoteDeviceId;
+        this.smartPlugId = smartPlugId;
     }
 
     @Override
@@ -33,7 +35,8 @@ public class StateChecker extends Thread {
                 if (realState.getPower() == PowerState.OFF) {
                     // request turn on smart plug id
                     // turn off speed
-
+                    mqttClient.changeSmartPlugPower(smartPlugId);
+                    Thread.sleep(Constants.WAIT_TO_STATE_CHANGE);
 
                 } else {
                     if (expectedState.getSpeed() != realState.getSpeed()) {
@@ -59,7 +62,7 @@ public class StateChecker extends Thread {
                                         mqttClient.changeSpeedToHigh(remoteDeviceId);
                                         break;
                                     default:
-//
+                                        Log.e(LOG_TAG, "wrong expected speed : " + expectedState.getSpeed().getValue());
                                         break;
                                 }
                             }
