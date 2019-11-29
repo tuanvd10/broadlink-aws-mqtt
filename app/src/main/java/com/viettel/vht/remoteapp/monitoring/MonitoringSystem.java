@@ -124,13 +124,19 @@ public class MonitoringSystem {
                                 dsIcon.setBackground(gradientDrawable);
                             } else {
                                 String msTime = mesuareTime.toString();
-                                if (msTime.lastIndexOf("day") > -1) {
+                                if (msTime.lastIndexOf("Yeste") > -1)
+                                    msTime = "1 " +  activity.getApplicationContext().getString(R.string.dayago);
+                               // msTime = msTime.replaceAll("Yesterday", "1");
+                                else if (msTime.lastIndexOf("day") > -1) {
                                     msTime = msTime.substring(0, msTime.lastIndexOf("day") - 1) + " " + activity.getApplicationContext().getString(R.string.dayago);
                                 } else if (msTime.lastIndexOf("hour") > -1) {
                                     msTime = msTime.substring(0, msTime.lastIndexOf("hour") - 1) + " " + activity.getApplicationContext().getString(R.string.hourago);
                                 } else {
                                     msTime = msTime.substring(0, msTime.lastIndexOf("minute") - 1) + " " + activity.getApplicationContext().getString(R.string.minago);
                                 }
+
+
+
                                 dsText.setText(activity.getApplicationContext().getString(R.string.active) + " " + msTime);
                                 dsText.setTextColor(activity.getColor(R.color.Grey));
                                 GradientDrawable gradientDrawable = (GradientDrawable) ResourcesCompat.getDrawable(activity.getApplicationContext().getResources(),
