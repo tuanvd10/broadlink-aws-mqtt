@@ -41,7 +41,7 @@
         app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent">
 
         <RelativeLayout
             android:id="@+id/aq_status"
@@ -83,9 +83,9 @@
                 android:textColor="@color/White"
                 android:textStyle="bold">
 
-            </TextView>
+        </TextView>
 
-        </RelativeLayout>
+    </RelativeLayout>
 
         <Button
             android:id="@+id/bt_power"
@@ -93,7 +93,6 @@
             android:layout_height="75sp"
             android:foreground="@drawable/bt_power"
             android:background="@drawable/list_selector_background"
-            android:onClick="power"
             app:layout_constraintBottom_toTopOf="@id/aq_status"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
@@ -114,7 +113,6 @@
             android:layout_height="75sp"
             android:background="@drawable/list_selector_background"
             android:foreground="@drawable/ic_fan"
-            android:onClick="changeSpeed"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintRight_toLeftOf="@id/aq_status"/>

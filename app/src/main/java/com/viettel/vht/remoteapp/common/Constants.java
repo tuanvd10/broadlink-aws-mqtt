@@ -17,6 +17,7 @@ public class Constants {
     public static final int LOOP_NUMBER = 10;
     public static final long SLEEP_TIME = 500L;
     public static final long SLEEP_WAIT = 2000L;
+    public static final long WAIT_TO_STATE_CHANGE = 20000L;
 
     public static final int CHECK_DIFFERENCE_LOOP_NUMBER = 1;
     public static final long CHECK_DIFFERENCE_SLEEP_TIME = 1000L;

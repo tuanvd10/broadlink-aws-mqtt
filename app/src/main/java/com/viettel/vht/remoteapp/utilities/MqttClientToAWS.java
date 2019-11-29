@@ -24,6 +24,7 @@ import com.viettel.vht.remoteapp.common.AirPurifierTopics;
 import com.viettel.vht.remoteapp.common.DevicesTopics;
 import com.viettel.vht.remoteapp.common.KeyOfStates;
 import com.viettel.vht.remoteapp.common.MitsubishiFanTopics;
+import com.viettel.vht.remoteapp.objects.AirPurifier;
 import com.viettel.vht.remoteapp.ui.airpurifier.AirPurifierFragment;
 
 import java.io.Serializable;
@@ -295,28 +296,32 @@ public class MqttClientToAWS implements Serializable {
 
 
     public void publish(String msg, String topic) {
+        Log.d(LOG_TAG, "publish message: " + msg + ", to topic: " + topic);
         mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
     }
-
 
     public void subscribe(String topic, AWSIotMqttNewMessageCallback callback) {
         mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS1, callback);
     }
 
     public void changePower(String deviceId) {
-        publish("play" + deviceId, AirPurifierTopics.POWER);
+        publish("play-" + deviceId, AirPurifierTopics.POWER);
     }
 
     public void changeSpeedToLow(String deviceId) {
-        publish("play" + deviceId, AirPurifierTopics.LOW_SPEED);
+        publish("play-" + deviceId, AirPurifierTopics.LOW_SPEED);
     }
 
     public void changeSpeedToMed(String deviceId) {
-        publish("play" + deviceId, AirPurifierTopics.MED_SPEED);
+        publish("play-" + deviceId, AirPurifierTopics.MED_SPEED);
     }
 
     public void changeSpeedToHigh(String deviceId) {
-        publish("play" + deviceId, AirPurifierTopics.HIGH_SPEED);
+        publish("play-" + deviceId, AirPurifierTopics.HIGH_SPEED);
+    }
+
+    public void changeSmartPlugPower(String smartPlugId) {
+        publish("setpower-"+smartPlugId, DevicesTopics.REQUEST_DEVICE_INFO);
     }
     // Getter and setter
     public String getClientId() {

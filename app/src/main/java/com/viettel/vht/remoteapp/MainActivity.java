@@ -19,7 +19,7 @@ import com.viettel.vht.remoteapp.common.DevicesTopics;
 import com.viettel.vht.remoteapp.common.KeyOfDevice;
 import com.viettel.vht.remoteapp.common.KeyOfStates;
 import com.viettel.vht.remoteapp.common.PowerState;
-import com.viettel.vht.remoteapp.objects.Device;
+import com.viettel.vht.remoteapp.objects.RemoteDevice;
 import com.viettel.vht.remoteapp.utilities.MqttClientToAWS;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     static final String LOG_TAG = MainActivity.class.getCanonicalName();
     private MqttClientToAWS mqttClient;
-    private HashMap<String, Device> deviceList = new HashMap<String, Device>();
+    private HashMap<String, RemoteDevice> deviceList = new HashMap<String, RemoteDevice>();
     private HashMap<String, String> stateList = new HashMap<String, String>();
 
 
@@ -150,11 +150,11 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     JSONArray jsonDevices = new JSONArray(strData);
                     JSONObject jsonDevice;
-                    Device device;
+                    RemoteDevice remoteDevice;
                     for (int i = 0; i < jsonDevices.length(); i++) {
                         jsonDevice = jsonDevices.getJSONObject(i);
-                        device = new Device(jsonDevice.getString("name"), jsonDevice.getString("id"));
-                        deviceList.put(device.getName(), device);
+                        remoteDevice = new RemoteDevice(jsonDevice.getString("name"), jsonDevice.getString("id"));
+                        deviceList.put(remoteDevice.getName(), remoteDevice);
                     }
 
                 } catch (JSONException je) {
@@ -226,11 +226,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         /**
-         * Check Device Info
+         * Check RemoteDevice Info
          * @return
          * @throws InterruptedException
          */
-        private boolean checkDeviceInfo() throws InterruptedException {
+        private boolean checkRemoteDeviceInfo() throws InterruptedException {
             boolean isHaveInfo = false;
             for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
                 if(getSmartPlugId() == null || getRemoteDeviceId() == null) {
@@ -310,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
 
                 mqttClient.requestDeviceInfos();
                 // Check information
-                if (!checkDeviceInfo()) {
+                if (!checkRemoteDeviceInfo()) {
                     mInfoDeviceProblemDialog.show();
                     return;
                 }
@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public HashMap<String, Device> getDeviceList() {
+    public HashMap<String, RemoteDevice> getDeviceList() {
         return deviceList;
     }
 

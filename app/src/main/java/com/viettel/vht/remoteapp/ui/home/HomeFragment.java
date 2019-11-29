@@ -21,7 +21,9 @@ import com.viettel.vht.remoteapp.MainActivity;
 import com.viettel.vht.remoteapp.R;
 import com.viettel.vht.remoteapp.common.Constants;
 import com.viettel.vht.remoteapp.common.PowerState;
+import com.viettel.vht.remoteapp.common.SpeedState;
 import com.viettel.vht.remoteapp.monitoring.MonitoringSystem;
+import com.viettel.vht.remoteapp.objects.AirPurifier;
 
 import java.util.HashMap;
 
@@ -83,7 +85,18 @@ public class HomeFragment extends Fragment {
         monitoringThread.start();
 
         // Hungdv39 change below
-
+        // power
+        mBtPower = root.findViewById(R.id.bt_power);
+        mBtPower.setOnClickListener(btPowerClick);
+        // low speed
+        mBtLowSpeed = root.findViewById(R.id.bt_low_speed);
+        mBtLowSpeed.setOnClickListener(btSpeedClick);
+        // Medium speed
+        mBtMedSpeed = root.findViewById(R.id.bt_med_speed);
+        mBtMedSpeed.setOnClickListener(btSpeedClick);
+        // High speed
+        mBtHighSpeed = root.findViewById(R.id.bt_high_speed);
+        mBtHighSpeed.setOnClickListener(btSpeedClick);
 
         return root;
     }
@@ -96,36 +109,78 @@ public class HomeFragment extends Fragment {
 
     // Hungdv39 add variable
     private Button mBtPower, mBtLowSpeed, mBtMedSpeed, mBtHighSpeed;
-    private PowerState expectedPower = PowerState.NULL;
-    private int expectedSpeed = -1;
+    private AirPurifier expectedStateInDevice = new AirPurifier(PowerState.NULL, SpeedState.NULL);
 
     static final String LOG_TAG = HomeFragment.class.getCanonicalName();
 
-    private void power() {
-        if (expectedPower == PowerState.ON) {
-            expectedPower = PowerState.OFF;
-        } else if (expectedPower == PowerState.OFF) {
-            expectedPower = PowerState.ON;
-        } else {
-            Log.e(LOG_TAG, "Error in expected power = null");
+    View.OnClickListener btPowerClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            power(v);
         }
+    };
+
+    View.OnClickListener btSpeedClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch(v.getId()) {
+                case R.id.bt_low_speed:
+                    expectedStateInDevice.setSpeed(SpeedState.LOW);
+                    Log.i(LOG_TAG, "low speed");
+                    break;
+                case R.id.bt_med_speed:
+                    expectedStateInDevice.setSpeed(SpeedState.MED);
+                    Log.i(LOG_TAG, "med speed");
+                    break;
+                case R.id.bt_high_speed:
+                    expectedStateInDevice.setSpeed(SpeedState.HIGH);
+                    Log.i(LOG_TAG, "high speed");
+                    break;
+                default:
+                    Log.i(LOG_TAG, "wrong view : " + v.getId());
+                    break;
+            }
+        }
+    };
+
+    private void enableSpeedButton() {
+        mBtLowSpeed.setEnabled(true);
+        mBtMedSpeed.setEnabled(true);
+        mBtHighSpeed.setEnabled(true);
     }
 
+    private void disableSpeedButton() {
+        mBtLowSpeed.setEnabled(false);
+        mBtMedSpeed.setEnabled(false);
+        mBtHighSpeed.setEnabled(false);
+    }
 
-    private void changeSpeed(View view) {
-        switch(view.getId()) {
-            case R.id.bt_low_speed:
-                Log.i(LOG_TAG, "low speed");
-                break;
-            case R.id.bt_med_speed:
-                Log.i(LOG_TAG, "med speed");
-                break;
-            case R.id.bt_high_speed:
-                Log.i(LOG_TAG, "high speed");
-                break;
-            default:
-                Log.i(LOG_TAG, "wrong view : " + view.getId());
-                break;
+    /**
+     * ui in power on
+     */
+    private void uiInPowerOn() {
+        // Enable all button
+        mBtPower.setEnabled(true);
+        enableSpeedButton();
+    }
+
+    /**
+     * ui in power off
+     */
+    private void uiInPowerOff() {
+        // Disable speed button
+        disableSpeedButton();
+    }
+
+    private void power(View view) {
+        if (expectedStateInDevice.getPower() == PowerState.ON) {
+            // Power on
+            expectedStateInDevice.setPower(PowerState.OFF);
+        } else if (expectedStateInDevice.getPower() == PowerState.ON) {
+            // Power off
+            expectedStateInDevice.setPower(PowerState.ON);
+        } else {
+            Log.e(LOG_TAG, "Error in expected power = null");
         }
     }
 

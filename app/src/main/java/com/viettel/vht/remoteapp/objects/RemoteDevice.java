@@ -1,14 +1,17 @@
 package com.viettel.vht.remoteapp.objects;
 
-public class Device {
+import com.viettel.vht.remoteapp.common.PowerState;
+import com.viettel.vht.remoteapp.common.SpeedState;
+
+public class RemoteDevice {
     private String name;
     private String deviceId;
 
-    public Device() {
+    public RemoteDevice() {
 
     }
 
-    public Device(String name, String deviceId) {
+    public RemoteDevice(String name, String deviceId) {
         this.name = name;
         this.deviceId = deviceId;
     }
