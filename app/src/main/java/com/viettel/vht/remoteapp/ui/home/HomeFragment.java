@@ -197,6 +197,20 @@ public class HomeFragment extends Fragment {
         });
     }
 
+
+    private void uiInLowSpeed() {
+        
+    }
+
+    private void uiInMedSpeed() {
+
+    }
+
+    private void uiInHighSpeed() {
+
+    }
+
+
     private void power(View view) {
         if (expectedStateInDevice.getPower() == PowerState.ON) {
             // Power on

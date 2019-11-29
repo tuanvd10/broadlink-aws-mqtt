@@ -73,7 +73,10 @@ public class StateChecker extends Thread {
                                 }
                             }
                         }
+
+                        // Request all state
                         Thread.sleep(Constants.WAIT_TO_STATE_CHANGE);
+                        mqttClient.requestAllStatesOfDevice(smartPlugId);
                     }
                 }
 

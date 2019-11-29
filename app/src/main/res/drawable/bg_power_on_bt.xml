@@ -4,6 +4,5 @@
         android:drawable="@drawable/bt_primary_round" /> <!-- pressed -->
     <item android:state_enabled="false"
         android:drawable="@drawable/bt_grey_round" />    <!-- disabled -->
-    <item android:drawable="@drawable/bt_white_round" /> <!-- default -->
-
+    <item android:drawable="@drawable/bt_blue_round" /> <!-- default -->
 </selector>

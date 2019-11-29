@@ -210,19 +210,19 @@
 //    private void enableRemoteButton() {
 //        // Power button
 //        mPowerButton.setEnabled(true);
-//        mPowerButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
+//        mPowerButton.setBackground(getResources().getDrawable(R.drawable.bg_power_on_bt, null));
 //        // Rhythm button
 //        mRhythmButton.setEnabled(true);
-//        mRhythmButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
+//        mRhythmButton.setBackground(getResources().getDrawable(R.drawable.bg_power_on_bt, null));
 //        // Speed button
 //        mSpeedButton.setEnabled(true);
-//        mSpeedButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
+//        mSpeedButton.setBackground(getResources().getDrawable(R.drawable.bg_power_on_bt, null));
 //        // Swing button
 //        mSwingButton.setEnabled(true);
-//        mSwingButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
+//        mSwingButton.setBackground(getResources().getDrawable(R.drawable.bg_power_on_bt, null));
 //        // Timer button
 //        mTimerButton.setEnabled(true);
-//        mTimerButton.setBackground(getResources().getDrawable(R.drawable.list_selector_background, null));
+//        mTimerButton.setBackground(getResources().getDrawable(R.drawable.bg_power_on_bt, null));
 //    }
 //
 //
