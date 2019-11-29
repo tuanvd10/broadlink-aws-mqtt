@@ -34,6 +34,13 @@
 	"commandIncrease": "/airpurifier/speedup",
 	"commandDecrease": "/airpurifier/speeddown",
 	
-	"interval_time": "30000"
-  }
+	"interval_time": "120000"
+  },
+  "goodPoint":{
+		"aq": 90,
+		"pm": 25.4,
+		"co2": 880,
+		"voc": 1,
+		"formaldehyde": 0.05
+	}
 }

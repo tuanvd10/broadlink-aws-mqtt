@@ -13,7 +13,10 @@ axios.defaults.headers.post['Content-Type'] = "application/json";
 const getAirThinxScore =  async ()=>{
 	let data, dataPoint;
 	let aq, time;
-	let co2, pm25;
+	let co2, //880
+		pm, pm1, pm25, pm10, //25.4 
+		voc, //1
+		formaldehyde; //0.05
 	let haveErr = false;
 	/* get from air thinx server and callculate aq */
 	data = await axios.post('https://api.environet.io/search/nodes',
@@ -27,16 +30,39 @@ const getAirThinxScore =  async ()=>{
 		});
 	if(haveErr) return false;
 	dataPoint = data[0].data_points.find(x => x.name === 'AQ');
-	aq = dataPoint.measurements[0][1];
 	time = dataPoint.measurements[0][0];
+	
+	aq = dataPoint.measurements[0][1];
+	pm = data[0].data_points.find(x => x.name === 'PM').measurements[0][1];
+	pm1 = data[0].data_points.find(x => x.name === 'PM1').measurements[0][1];
 	pm25 = data[0].data_points.find(x => x.name === 'PM2.5').measurements[0][1];
-	pm25 = data[0].data_points.find(x => x.name.indexOf("CO") == 0 ).measurements[0][1];
+	co2 = data[0].data_points.find(x => x.name.indexOf("CO") == 0 ).measurements[0][1];
+	pm10 = data[0].data_points.find(x => x.name === "PM10" ).measurements[0][1];
+	voc = data[0].data_points.find(x =>x.name === "VOC (Isobutylene)" ).measurements[0][1] + data[0].data_points.find(x =>x.name === "VOC (EtOH)" ).measurements[0][1];
+	formaldehyde = data[0].data_points.find(x => x.name.indexOf("CH")==0).measurements[0][1];
 
-	logger.info("aq value: " +aq);
-	if(global.aq.aq == 0 || (global.aq.aq <= 90 && aq > 90) || (global.aq.aq > 90 && aq <= 90))
+	logger.info("[tuanvd10] aq value: " +aq);
+	
+	if(global.aq.aq == 0 || (global.aq.aq <=  cfg.goodPoint.aq && aq >  cfg.goodPoint.aq) || (global.aq.aq >  cfg.goodPoint.aq && aq <=  cfg.goodPoint.aq)
+		|| 	global.aq.pm == 0 || (global.aq.pm <= cfg.goodPoint.pm && pm > cfg.goodPoint.pm) || (global.aq.pm > cfg.goodPoint.pm && pm <= cfg.goodPoint.pm)
+		|| 	global.aq.pm1 == 0 || (global.aq.pm1 <= cfg.goodPoint.pm && pm1 > cfg.goodPoint.pm) || (global.aq.pm1 > cfg.goodPoint.pm && pm1 <= cfg.goodPoint.pm)
+		|| 	global.aq.pm25 == 0 || (global.aq.pm25 <= cfg.goodPoint.pm && pm25 > cfg.goodPoint.pm) || (global.aq.pm25 > cfg.goodPoint.pm && pm25 <= cfg.goodPoint.pm)
+		|| 	global.aq.pm10 == 0 || (global.aq.pm10 <= cfg.goodPoint.pm && pm10 > cfg.goodPoint.pm) || (global.aq.pm10 > cfg.goodPoint.pm && pm10 <= cfg.goodPoint.pm)
+		|| 	global.aq.co2 == 0 || (global.aq.co2 <= cfg.goodPoint.co2 && co2 >  cfg.goodPoint.co2) || (global.aq.co2 >  cfg.goodPoint.co2 && co2 <=  cfg.goodPoint.co2)
+		|| 	global.aq.voc == 0 || (global.aq.voc <=  cfg.goodPoint.voc && voc > cfg.goodPoint.voc) || (global.aq.voc > cfg.goodPoint.voc && voc <= cfg.goodPoint.voc)
+		|| 	global.aq.formaldehyde == 0 || (global.aq.formaldehyde <= cfg.goodPoint.formaldehyde && formaldehyde > cfg.goodPoint.formaldehyde) || (global.aq.formaldehyde > cfg.goodPoint.formaldehyde && formaldehyde <= cfg.goodPoint.formaldehyde)
+	)
 			global.aq.time = time;
 		
 	global.aq.aq = aq;
+	global.aq.pm = pm;
+	global.aq.pm1 = pm1;
+	global.aq.pm25 = pm25;
+	global.aq.pm10 = pm10;
+	global.aq.co2 = co2;
+	global.aq.voc = voc;
+	global.aq.formaldehyde = formaldehyde;
+
 	return true;
 }
 
@@ -57,7 +83,7 @@ const sendControlData = (spDevice) => {
 	logger.debug("[tuanvd10] current aq: ", global.aq);
 	logger.debug("[tuanvd10] current time: " + currentTime);
 
-	if(global.aq.aq <=90){
+	if(!checkAirCondition()){//not good
 		if(spDevice.state.currentState.clientStatus==3) {
 			logger.info("[tuanvd10] max level, cannot increase");
 		}else{
@@ -76,7 +102,7 @@ const sendControlData = (spDevice) => {
 					}
 			}
 		}
-	}else if(global.aq.aq >90){
+	}else{ //good
 		if(spDevice.state.currentState.clientStatus==0){
 			//do nothing
 			logger.info("[tuanvd10] OFF level");
@@ -98,8 +124,6 @@ const sendControlData = (spDevice) => {
 					}
 			}
 		}
-	}else{
-		
 	}
 }
 
@@ -123,27 +147,43 @@ const sendCommandMultitime = async (time) =>{
 	}
 };
 
-async function doAction(spDevice){
-	logger.info("[tuanvd10] Do ACTION");
+async function doAction(devices){
+	logger.info("[tuanvd10] START ACTION");
+	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
+	if(!spDevice) return;
+	console.log("[tuanvd10]: SP device " + JSON.stringify(spDevice));
+	//await spDevice.getState();
 	if(spDevice.getState() && getAirThinxScore()){
-		await sleep(2000);
+		await sleep(1000);
 		sendControlData(spDevice);
-	}
+	} 
+	logger.info("[tuanvd10] DONE ACTION");
 }
 
-function getCurrentAirthinxState(deviceFound) {
-	console.log(runAction);
-	//get sp device
-	//var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
-	var spDevice = deviceFound;
-	//logger.info("[tuanvd10] getStateOfDevice: ", spDevice);
+function getCurrentAirthinxState(discoverDevices) {
 	setInterval(function () {
-		doAction(spDevice);
+		doAction(discoverDevices);
 	}, 10000);
 }
 
+function checkAirCondition(){
+	if( global.aq.co2 > cfg.goodPoint.co2 
+		|| global.aq.pm1 > cfg.goodPoint.pm1 
+		|| global.aq.pm25 > cfg.goodPoint.pm25 
+		|| global.aq.pm10 > cfg.goodPoint.pm10 
+		|| global.aq.voc > cfg.goodPoint.voc 
+		|| global.aq.formaldehyde > cfg.goodPoint.formaldehyde 
+		)
+		return false;
+	return true;//good
+}
+
 global.aq = {
-	"aq" : -1,
+	"co2" : 0, 
+	"pm": 0, "pm1": 0, "pm25": 0, "pm10": 0, 
+	"voc": 0, 
+	"formaldehyde": 0, 
+	"aq" : 0,
 	"time" : 0
 }
 module.exports.getCurrentAirthinxState = getCurrentAirthinxState;

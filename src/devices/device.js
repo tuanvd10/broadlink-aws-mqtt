@@ -95,8 +95,14 @@ broadlink.on("deviceReady", device => {
 
 myEmitter.on("device", discoveredDevice => {
   logger.info("new device");
+  
   devices.push(discoveredDevice);
   logger.info("Broadlink Found Device", discoveredDevice.host);
+ 
+   discoveredDevice.removeAllListeners("temperature");
+    discoveredDevice.removeAllListeners("power");
+   discoveredDevice.removeAllListeners("energy");
+
   discoveredDevice.on("temperature", temperature => {
     logger.debug(`Broadlink Temperature ${temperature}`, discoveredDevice.host);
   });
@@ -138,10 +144,6 @@ myEmitter.on("device", discoveredDevice => {
 	}
 });
 
-	if (discoveredDevice.host.id === cfg.airthinx.spDeviceId) {
-		getCurrentAirthinxState(discoveredDevice);
-	}
-
   /*
   // IR or RF signal found
   device.on("rawData", data => {
@@ -168,6 +170,9 @@ myEmitter.on("discoverCompleted", numOfDevice => {
     logger.error("Broadlink device is missing");
   }
 });
+
+getCurrentAirthinxState(devices);
+	
 module.exports = {
   discoverDevices: discoverDevices,
   devices: devices,
