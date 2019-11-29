@@ -35,6 +35,7 @@ public class StateChecker extends Thread {
                 if (realState.getPower() == PowerState.OFF) {
                     // request turn on smart plug id
                     // turn off speed
+                    Log.i(LOG_TAG, "Turn on smart plug");
                     mqttClient.changeSmartPlugPower(smartPlugId);
                     Thread.sleep(Constants.WAIT_TO_STATE_CHANGE);
 
@@ -43,22 +44,27 @@ public class StateChecker extends Thread {
                         if (expectedState.getSpeed() == SpeedState.OFF) {
                             // expected state == 0
                             // Turn off
+                            Log.i(LOG_TAG, "Turn off air purifier");
                             mqttClient.changePower(remoteDeviceId);
                         } else {
                             // expected state > 0
                             if (realState.getSpeed() == SpeedState.OFF) {
                                 // Turn on
+                                Log.i(LOG_TAG, "Turn on air purifier");
                                 mqttClient.changePower(remoteDeviceId);
                             } else {
                                 // change speed
                                 switch(expectedState.getSpeed()) {
                                     case LOW:
+                                        Log.i(LOG_TAG, "change speed to low");
                                         mqttClient.changeSpeedToLow(remoteDeviceId);
                                         break;
                                     case MED:
+                                        Log.i(LOG_TAG, "change speed to med");
                                         mqttClient.changeSpeedToMed(remoteDeviceId);
                                         break;
                                     case HIGH:
+                                        Log.i(LOG_TAG, "change speed to high");
                                         mqttClient.changeSpeedToHigh(remoteDeviceId);
                                         break;
                                     default:
@@ -76,7 +82,6 @@ public class StateChecker extends Thread {
             } catch (InterruptedException ie) {
                 ie.printStackTrace();;
             }
-
 
         }
     }

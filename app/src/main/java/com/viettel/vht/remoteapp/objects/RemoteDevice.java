@@ -4,31 +4,29 @@ import com.viettel.vht.remoteapp.common.PowerState;
 import com.viettel.vht.remoteapp.common.SpeedState;
 
 public class RemoteDevice {
-    private String name;
-    private String deviceId;
+    private String remoteDeviceId;
+    private String smartPlugId;
+
 
     public RemoteDevice() {
-
+        smartPlugId = null;
+        remoteDeviceId = null;
     }
 
-    public RemoteDevice(String name, String deviceId) {
-        this.name = name;
-        this.deviceId = deviceId;
+    // Getter and setter
+    public String getRemoteDeviceId() {
+        return remoteDeviceId;
     }
 
-    public String getName() {
-        return name;
+    public void setRemoteDeviceId(String remoteDeviceId) {
+        this.remoteDeviceId = remoteDeviceId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getSmartPlugId() {
+        return smartPlugId;
     }
 
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setSmartPlugId(String smartPlugId) {
+        this.smartPlugId = smartPlugId;
     }
 }

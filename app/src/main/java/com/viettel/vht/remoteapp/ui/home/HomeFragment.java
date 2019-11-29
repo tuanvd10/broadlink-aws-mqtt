@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils;
 import com.viettel.vht.remoteapp.MainActivity;
 import com.viettel.vht.remoteapp.R;
 import com.viettel.vht.remoteapp.common.Constants;
@@ -25,8 +26,6 @@ import com.viettel.vht.remoteapp.common.SpeedState;
 import com.viettel.vht.remoteapp.monitoring.MonitoringSystem;
 import com.viettel.vht.remoteapp.objects.AirPurifier;
 import com.viettel.vht.remoteapp.remotecontrol.StateChecker;
-
-import java.util.HashMap;
 
 public class HomeFragment extends Fragment {
 
@@ -40,7 +39,7 @@ public class HomeFragment extends Fragment {
 
     private Thread monitoringThread;
     private MonitoringSystem monitoringSystem;
-    private MainActivity activity;
+    private MainActivity parentActivity;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,9 +99,10 @@ public class HomeFragment extends Fragment {
         mBtHighSpeed.setOnClickListener(btSpeedClick);
 
         // Parent Activity
-        activity = (MainActivity) getActivity();
-        // Start a state checker
-//        new StateChecker().start();
+        expectedStateInDevice = ((MainActivity) getActivity()).getExpectedState();
+        // Wait to update ui
+        disableAllButton();
+        new updateUI().start();
 
         return root;
     }
@@ -115,7 +115,7 @@ public class HomeFragment extends Fragment {
 
     // Hungdv39 add variable
     private Button mBtPower, mBtLowSpeed, mBtMedSpeed, mBtHighSpeed;
-    private AirPurifier expectedStateInDevice = new AirPurifier(PowerState.NULL, SpeedState.NULL);
+    private AirPurifier expectedStateInDevice;
 
     static final String LOG_TAG = HomeFragment.class.getCanonicalName();
 
@@ -155,19 +155,31 @@ public class HomeFragment extends Fragment {
         mBtHighSpeed.setEnabled(true);
     }
 
+
     private void disableSpeedButton() {
         mBtLowSpeed.setEnabled(false);
         mBtMedSpeed.setEnabled(false);
         mBtHighSpeed.setEnabled(false);
     }
 
+    private void disableAllButton() {
+        mBtPower.setEnabled(false);
+        disableSpeedButton();
+    }
+
     /**
      * ui in power on
      */
     private void uiInPowerOn() {
-        // Enable all button
-        mBtPower.setEnabled(true);
-        enableSpeedButton();
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Enable all button
+                mBtPower.setEnabled(true);
+                enableSpeedButton();
+            }
+        });
+
     }
 
     /**
@@ -175,18 +187,50 @@ public class HomeFragment extends Fragment {
      */
     private void uiInPowerOff() {
         // Disable speed button
-        disableSpeedButton();
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Enable all button
+                mBtPower.setEnabled(true);
+                disableSpeedButton();
+            }
+        });
     }
 
     private void power(View view) {
         if (expectedStateInDevice.getPower() == PowerState.ON) {
             // Power on
+            expectedStateInDevice.setSpeed(SpeedState.OFF);
             expectedStateInDevice.setPower(PowerState.OFF);
-        } else if (expectedStateInDevice.getPower() == PowerState.ON) {
+            uiInPowerOff();
+        } else if (expectedStateInDevice.getPower() == PowerState.OFF) {
             // Power off
+            expectedStateInDevice.setSpeed(SpeedState.LOW);
             expectedStateInDevice.setPower(PowerState.ON);
+            uiInPowerOn();
         } else {
             Log.e(LOG_TAG, "Error in expected power = null");
+        }
+    }
+
+    private class updateUI extends Thread {
+        @Override
+        public void run() {
+            try {
+                while(expectedStateInDevice.getSpeed() == SpeedState.NULL) {
+                    Thread.sleep(Constants.SLEEP_WAIT);
+                }
+
+                if (expectedStateInDevice.getSpeed() == SpeedState.OFF) {
+                    uiInPowerOff();
+                } else {
+                    uiInPowerOn();
+                }
+
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+
         }
     }
 
