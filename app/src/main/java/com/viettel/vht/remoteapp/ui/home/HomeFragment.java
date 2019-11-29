@@ -67,7 +67,7 @@ public class HomeFragment extends Fragment {
                         monitoringSystem.readAndDisplayStatus(aqStatus, txtAQValue, txtAQTitle, txtAQLevel, gdView1, gdView2, gdView3, loadingBar, dsIcon, dsText);
                         Thread.sleep(Constants.UPDATE_DATA_TIME * 1000); // get data for each 5s
                     } catch (InterruptedException e) { // stop getting data
-                        System.out.println("Stop getting data...");
+                        System.out.println("Stop getting data....");
                         break;
                     }
                 }
