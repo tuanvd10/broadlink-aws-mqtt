@@ -39,7 +39,7 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:gravity="center"
-        app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
+        app:layout_constraintBottom_toTopOf="@+id/parameterView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -92,7 +92,7 @@
         app:layout_constraintVertical_bias="0.5"/>
 
     <RelativeLayout
-        android:id="@+id/relativeLayout"
+        android:id="@+id/parameterView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="4dp"
@@ -101,15 +101,16 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.95">
+        app:layout_constraintVertical_bias="0.9">
 
         <GridView
             android:id="@+id/gdHTP"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
-            android:numColumns="auto_fit"
-            android:padding="5dp"
+            android:layout_marginBottom="25dp"
+            android:numColumns="3"
+            android:paddingLeft="10dp"
+            android:paddingVertical="20dp"
             android:verticalSpacing="10dp" />
 
         <GridView
@@ -119,9 +120,10 @@
             android:layout_below="@id/gdHTP"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:layout_marginBottom="15dp"
-            android:numColumns="auto_fit"
-            android:padding="5dp"
+            android:layout_marginBottom="25dp"
+            android:numColumns="3"
+            android:paddingLeft="10dp"
+            android:paddingVertical="20dp"
             android:verticalSpacing="10dp" />
 
         <GridView
@@ -129,8 +131,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/gdCO2"
-            android:numColumns="auto_fit"
-            android:padding="5dp"
+            android:numColumns="3"
+            android:paddingLeft="10dp"
+            android:paddingVertical="20dp"
             android:verticalSpacing="10dp" />
     </RelativeLayout>
 
