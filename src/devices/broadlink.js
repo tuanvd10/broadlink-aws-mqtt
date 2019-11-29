@@ -223,7 +223,8 @@ class Broadlink extends EventEmitter {
       this.emit('deviceReady', device);
     });
 
-    device.authenticate();
+    
+	device.authenticate();
   }
 }
 
@@ -239,6 +240,7 @@ class Device {
     this.on = this.emitter.on;
     this.emit = this.emitter.emit;
     this.removeListener = this.emitter.removeListener;
+    this.removeAllListeners = this.emitter.removeAllListeners;
 
     this.count = Math.random() & 0xffff;
     this.key = Buffer.from([0x09, 0x76, 0x28, 0x34, 0x3f, 0xe9, 0x9e, 0x23, 0x76, 0x5c, 0x15, 0x13, 0xac, 0xcf, 0x8b, 0x02]);
@@ -484,6 +486,7 @@ class Device {
 
     this.getState = async () => {
 		var timeout = 500;
+		console.log("[tuanvd10] START getState");
 		//await mutex.lock("Get Power Regular");
 		this.checkPower = true;
 		this.getPower();
