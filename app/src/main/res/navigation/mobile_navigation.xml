@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_air_remote_control">
+    app:startDestination="@+id/nav_home">
 
     <fragment
         android:id="@+id/nav_home"
@@ -11,19 +11,25 @@
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
-    <fragment
-        android:id="@+id/nav_remote_control"
-        android:name="com.viettel.vht.remoteapp.ui.remotecontrol.RemoteControlFragment"
-        android:label="@string/menu_remote_control"
-        tools:layout="@layout/fragment_remote_control" >
-    </fragment>
+<!--    <fragment-->
+<!--        android:id="@+id/nav_remote_control"-->
+<!--        android:name="com.viettel.vht.remoteapp.ui.remotecontrol.RemoteControlFragment"-->
+<!--        android:label="@string/menu_remote_control"-->
+<!--        tools:layout="@layout/fragment_remote_control" >-->
+<!--    </fragment>-->
 
+<!--    <fragment-->
+<!--        android:id="@+id/nav_air_remote_control"-->
+<!--        android:name="com.viettel.vht.remoteapp.ui.remotecontrol.AirRemoteControl"-->
+<!--        android:label="@string/menu_air_remote_control"-->
+<!--        tools:layout="@layout/fragment_air_remote_control" >-->
+<!--    </fragment>-->
     <fragment
-        android:id="@+id/nav_air_remote_control"
-        android:name="com.viettel.vht.remoteapp.ui.remotecontrol.AirRemoteControl"
-        android:label="@string/menu_air_remote_control"
-        tools:layout="@layout/fragment_air_remote_control" >
-    </fragment>
+        android:id="@+id/nav_air_purifier"
+        android:name="com.viettel.vht.remoteapp.ui.airpurifier.AirPurifierFragment"
+        android:label="@string/nav_name_air_purifier"
+        tools:layout="@layout/fragment_air_purifier_home" />
+
 
     <fragment
         android:id="@+id/nav_gallery"

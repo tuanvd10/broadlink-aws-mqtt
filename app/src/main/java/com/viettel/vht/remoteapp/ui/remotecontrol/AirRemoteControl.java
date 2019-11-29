@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,7 +27,6 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils;
-import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
 import com.viettel.vht.remoteapp.MainActivity;
 import com.viettel.vht.remoteapp.R;
 import com.viettel.vht.remoteapp.common.AirPurifierTopics;
@@ -166,12 +164,12 @@ public class AirRemoteControl extends Fragment {
                 .setPositiveButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        showProgressBar();
-                        mqttClient.setConnected(false);
-                        mqttClient.setConnecting(true);
-                        mqttClient.makeConnectionToServer();
+//                        showProgressBar();
+//                        mqttClient.setConnected(false);
+//                        mqttClient.setConnecting(true);
+//                        mqttClient.makeConnectionToServer();
                         // Start a new information checker
-                        parentActivity.checkInformation();
+//                        parentActivity.checkInformation();
 //                        new AirRemoteControl.InformationChecker().start();
                     }
                 })
@@ -186,7 +184,7 @@ public class AirRemoteControl extends Fragment {
         // Dialog will show when connection to aws isn't established
         mServerConnectionDialog = new AlertDialog.Builder(parentActivity)
                 .setTitle(R.string.info)
-                .setMessage(R.string.msg_no_response_connection)
+                .setMessage(R.string.msg_no_response_from_device)
                 .setNegativeButton(R.string.OK, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

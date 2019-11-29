@@ -16,6 +16,7 @@
     <string name="air_status">Air Status</string>
     <string name="menu_remote_control">Remote Control</string>
     <string name="menu_air_remote_control">Điểu khiển máy lọc không khí</string>
+    <string name="nav_name_air_purifier">Home</string>
 
 <!--    String for fan mitsubishi-->
     <string name="fan_mitsubishi">Mitsubishi LV16-RT</string>
@@ -32,9 +33,9 @@
     <string name="connected_status">Đã kết nối</string>
     <string name="bt_try_again">Thử lại</string>
     <string name="bt_pass">Bỏ qua</string>
-    <string name="msg_lost_connection">Không thể kết nối tới máy chủ</string>
+    <string name="msg_lost_connection">Không thể kết nối tới máy chủ (Hãy kiểm tra lại đường truyền mạng)</string>
     <string name="title_lost_connection">Mất kết nối</string>
-    <string name="msg_no_response_connection">Máy chủ không phản hồi (Không thể lấy trạng thái của thiết bị)</string>
+    <string name="msg_no_response_from_device">Thiết bị không phản hồi! \nHãy liên hệ với tamnd12@viettel.com.vn hoặc tuanvd10@viettel.com.vn</string>
     <string name="check_smart_plug_and_remote">Hãy kiểm tra lại ổ cắm điện và thiết bị điều khiển (Không thể kết nối tới thiết bị)</string>
     <string name="not_connected">Chưa kết nối</string>
     <string name="error">Lỗi</string>

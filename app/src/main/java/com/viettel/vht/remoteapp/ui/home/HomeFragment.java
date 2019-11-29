@@ -1,9 +1,11 @@
 package com.viettel.vht.remoteapp.ui.home;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -15,9 +17,13 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.viettel.vht.remoteapp.MainActivity;
 import com.viettel.vht.remoteapp.R;
 import com.viettel.vht.remoteapp.common.Constants;
+import com.viettel.vht.remoteapp.common.PowerState;
 import com.viettel.vht.remoteapp.monitoring.MonitoringSystem;
+
+import java.util.HashMap;
 
 public class HomeFragment extends Fragment {
 
@@ -31,6 +37,7 @@ public class HomeFragment extends Fragment {
 
     private Thread monitoringThread;
     private MonitoringSystem monitoringSystem;
+    private MainActivity activity;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,6 +82,9 @@ public class HomeFragment extends Fragment {
         };
         monitoringThread.start();
 
+        // Hungdv39 change below
+
+
         return root;
     }
 
@@ -82,6 +92,41 @@ public class HomeFragment extends Fragment {
     public void onStop() {
         super.onStop();
         monitoringThread.interrupt(); // stop getting data
+    }
+
+    // Hungdv39 add variable
+    private Button mBtPower, mBtLowSpeed, mBtMedSpeed, mBtHighSpeed;
+    private PowerState expectedPower = PowerState.NULL;
+    private int expectedSpeed = -1;
+
+    static final String LOG_TAG = HomeFragment.class.getCanonicalName();
+
+    private void power() {
+        if (expectedPower == PowerState.ON) {
+            expectedPower = PowerState.OFF;
+        } else if (expectedPower == PowerState.OFF) {
+            expectedPower = PowerState.ON;
+        } else {
+            Log.e(LOG_TAG, "Error in expected power = null");
+        }
+    }
+
+
+    private void changeSpeed(View view) {
+        switch(view.getId()) {
+            case R.id.bt_low_speed:
+                Log.i(LOG_TAG, "low speed");
+                break;
+            case R.id.bt_med_speed:
+                Log.i(LOG_TAG, "med speed");
+                break;
+            case R.id.bt_high_speed:
+                Log.i(LOG_TAG, "high speed");
+                break;
+            default:
+                Log.i(LOG_TAG, "wrong view : " + view.getId());
+                break;
+        }
     }
 
 }

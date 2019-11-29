@@ -10,7 +10,7 @@
         android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/aq_status"
+        app:layout_constraintBottom_toTopOf="@+id/combination_aq_rm"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintVertical_bias="0.1"
@@ -34,50 +34,112 @@
     </RelativeLayout>
 
 
-    <RelativeLayout
-        android:id="@+id/aq_status"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:gravity="center"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/combination_aq_rm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" >
+
+        <RelativeLayout
+            android:id="@+id/aq_status"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
+
+            <TextView
+                android:id="@+id/aq_status_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/White"
+                android:textSize="20dp"
+                android:textStyle="bold"></TextView>
+
+            <TextView
+                android:id="@+id/aq_status_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/aq_status_value"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="5dp"
+                android:textStyle="bold"></TextView>
+
+            <TextView
+                android:id="@+id/aq_status_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/aq_status_title"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/White"
+                android:textStyle="bold">
+
+            </TextView>
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/bt_power"
+            android:layout_width="75sp"
+            android:layout_height="75sp"
+            android:foreground="@drawable/bt_power"
+            android:background="@drawable/list_selector_background"
+            android:onClick="power"
+            app:layout_constraintBottom_toTopOf="@id/aq_status"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+
+        <Button
+            android:id="@+id/bt_med_speed"
+            android:layout_width="75sp"
+            android:layout_height="75sp"
+            android:foreground="@drawable/ic_fan_2"
+            android:background="@drawable/list_selector_background"
+            app:layout_constraintTop_toBottomOf="@id/aq_status"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <Button
+            android:id="@+id/bt_low_speed"
+            android:layout_width="75sp"
+            android:layout_height="75sp"
+            android:background="@drawable/list_selector_background"
+            android:foreground="@drawable/ic_fan"
+            android:onClick="changeSpeed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/aq_status"/>
+
+        <Button
+            android:id="@+id/bt_high_speed"
+            android:layout_width="75sp"
+            android:layout_height="75sp"
+            android:foreground="@drawable/ic_fan_3"
+            android:background="@drawable/list_selector_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/aq_status" />
+
+<!--        <View-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:layout_constraintLeft_toLeftOf="parent"-->
+<!--            app:layout_constraintRight_toRightOf="parent"/>-->
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <TextView
-            android:id="@+id/aq_status_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:textColor="@color/White"
-            android:textSize="20dp"
-            android:textStyle="bold"></TextView>
-
-        <TextView
-            android:id="@+id/aq_status_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/aq_status_value"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="5dp"
-            android:textStyle="bold"></TextView>
-
-        <TextView
-            android:id="@+id/aq_status_level"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/aq_status_title"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="5dp"
-            android:textColor="@color/White"
-            android:textStyle="bold">
-
-        </TextView>
-
-    </RelativeLayout>
 
     <ProgressBar
         android:id="@+id/loading"

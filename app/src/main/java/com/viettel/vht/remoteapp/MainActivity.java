@@ -1,5 +1,8 @@
 package com.viettel.vht.remoteapp;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.navigation.NavController;
@@ -9,13 +12,13 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttNewMessageCallback;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
-import com.amazonaws.services.iot.client.AWSIotQos;
 import com.google.android.material.navigation.NavigationView;
 import com.viettel.vht.remoteapp.common.AirPurifierTopics;
 import com.viettel.vht.remoteapp.common.Constants;
 import com.viettel.vht.remoteapp.common.DevicesTopics;
 import com.viettel.vht.remoteapp.common.KeyOfDevice;
 import com.viettel.vht.remoteapp.common.KeyOfStates;
+import com.viettel.vht.remoteapp.common.PowerState;
 import com.viettel.vht.remoteapp.objects.Device;
 import com.viettel.vht.remoteapp.utilities.MqttClientToAWS;
 
@@ -32,7 +35,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.function.IntToDoubleFunction;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -42,11 +44,10 @@ public class MainActivity extends AppCompatActivity {
     private MqttClientToAWS mqttClient;
     private HashMap<String, Device> deviceList = new HashMap<String, Device>();
     private HashMap<String, String> stateList = new HashMap<String, String>();
-    private String remoteDeviceId = null;
-    private String smartPlugId = null;
-    private int speed = -1;
-    private boolean power = false;
-    private boolean isControlAvailable = false;
+
+
+    // Dialog alert
+    private Dialog mConnectionProblemDialog, mSmartPlugProblemDialog, mInfoDeviceProblemDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_remote_control, R.id.nav_air_remote_control, R.id.nav_gallery, R.id.nav_slideshow,
+                R.id.nav_home, R.id.nav_air_purifier, R.id.nav_gallery, R.id.nav_slideshow,
                 R.id.nav_tools, R.id.nav_share, R.id.nav_send)
                 .setDrawerLayout(drawer)
                 .build();
@@ -70,8 +71,60 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
+
+        // Get dialog
+        mConnectionProblemDialog = new AlertDialog.Builder(this)
+                                    .setTitle(R.string.title_lost_connection)
+                                    .setMessage(R.string.msg_lost_connection)
+                                    .setPositiveButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.bt_pass, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    })
+                                    .create();
+
+        // Dialog will show when connection to aws isn't established
+        mSmartPlugProblemDialog = new AlertDialog.Builder(this)
+                                    .setTitle(R.string.info)
+                                    .setMessage(R.string.msg_no_response_from_device)
+                                    .setNegativeButton(R.string.OK, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    }).setPositiveButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    })
+                                    .create();
+
+        // Dialog will shown when app cannot found deviceid in response message
+        mInfoDeviceProblemDialog = new AlertDialog.Builder(this)
+                                    .setTitle(R.string.info)
+                                    .setMessage(R.string.check_smart_plug_and_remote)
+                                    .setNegativeButton(R.string.OK, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    })
+                                    .setPositiveButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    }).create();
         // Get info of device
-        new InformationCollector().start();
+        checkInformation();
     }
 
     @Override
@@ -103,9 +156,6 @@ public class MainActivity extends AppCompatActivity {
                         device = new Device(jsonDevice.getString("name"), jsonDevice.getString("id"));
                         deviceList.put(device.getName(), device);
                     }
-                    // get remoteId
-                    remoteDeviceId = deviceList.get(KeyOfDevice.REMOTE.getValue()).getDeviceId();
-                    smartPlugId = deviceList.get(KeyOfDevice.SMART_PLUG.getValue()).getDeviceId();
 
                 } catch (JSONException je) {
                     Log.e(LOG_TAG, "Error when parsing json device info");
@@ -124,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMessageArrived(String topic, byte[] data) {
                 Log.d(LOG_TAG, "data_power = " + new String(data));
-                setPower(new String(data));
                 stateList.put(KeyOfStates.POWER.getValue(), new String(data));
             }
         };
@@ -152,8 +201,6 @@ public class MainActivity extends AppCompatActivity {
      */
     private class InformationCollector extends Thread {
         private long sleepTime = 500L;
-
-
         /**
          * check mqtt connection
          * @return
@@ -186,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         private boolean checkDeviceInfo() throws InterruptedException {
             boolean isHaveInfo = false;
             for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
-                if(remoteDeviceId == null || smartPlugId == null) {
+                if(getSmartPlugId() == null || getRemoteDeviceId() == null) {
                     Thread.sleep(sleepTime);
                     // Check error
                     if (i == Constants.LOOP_NUMBER - 1) {
@@ -206,8 +253,8 @@ public class MainActivity extends AppCompatActivity {
          * @return
          * @throws InterruptedException
          */
-        private String checkPowerDevice() throws InterruptedException {
-            String power = null;
+        private boolean checkPowerDevice() throws InterruptedException {
+            boolean isPowerExist = false;
             for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
                 if(stateList.get(KeyOfStates.POWER.getValue()) == null) {
                     Thread.sleep(sleepTime);
@@ -216,12 +263,12 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(LOG_TAG, "Not found power state");
                     }
                 } else {
-                    power = stateList.get(KeyOfStates.POWER.getValue());
+                    isPowerExist = true;
                     break;
                 }
             }
 
-            return power;
+            return isPowerExist;
         }
 
         /**
@@ -229,8 +276,8 @@ public class MainActivity extends AppCompatActivity {
          * @return
          * @throws InterruptedException
          */
-        private String checkSpeedDevice() throws InterruptedException {
-            String speed = null;
+        private boolean checkSpeedDevice() throws InterruptedException {
+            boolean isSpeedExist = false;
             for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
                 if(stateList.get(KeyOfStates.SPEED.getValue()) == null) {
                     Thread.sleep(sleepTime);
@@ -239,12 +286,12 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(LOG_TAG, "Not found speed state");
                     }
                 } else {
-                    speed = stateList.get(KeyOfStates.SPEED.getValue());
+                    isSpeedExist = true;
                     break;
                 }
             }
 
-            return speed;
+            return isSpeedExist;
         }
 
 
@@ -252,6 +299,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             try {
                 if (!checkMqttConnection()) {
+                    mConnectionProblemDialog.show();
                     return;
                 }
                 // Subscribe information
@@ -263,23 +311,18 @@ public class MainActivity extends AppCompatActivity {
                 mqttClient.requestDeviceInfos();
                 // Check information
                 if (!checkDeviceInfo()) {
+                    mInfoDeviceProblemDialog.show();
                     return;
                 }
 
                 // Request state of device
-                mqttClient.requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
-                String power = null;
-                if ((power = checkPowerDevice()) == null) {
-                    return;
-                }
+                mqttClient.requestAWSIotServer("checkpower-" + getSmartPlugId(), AirPurifierTopics.REQUEST_STATE_POWER);
+                mqttClient.requestAWSIotServer("checkspeed-" + getSmartPlugId(), AirPurifierTopics.REQUEST_STATE_SPEED);
 
-                // Check speed if power on
-                Thread.sleep(sleepTime);
-                if (power.equals(getString(R.string.state_power_on))) {
-                    mqttClient.requestAWSIotServer("checkspeed-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_SPEED);
-                } else if (power.equals(getString(R.string.state_power_off))) {
-                    stateList.put(KeyOfStates.SPEED.getValue(), "0");
-                }
+               if (!(checkPowerDevice() && checkSpeedDevice())) {
+                   mSmartPlugProblemDialog.show();
+                   return;
+               }
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -292,65 +335,54 @@ public class MainActivity extends AppCompatActivity {
         return mqttClient;
     }
 
-    public void setMqttClient(MqttClientToAWS mqttClient) {
-        this.mqttClient = mqttClient;
-    }
 
     public HashMap<String, Device> getDeviceList() {
         return deviceList;
     }
 
-    public void setDeviceList(HashMap<String, Device> deviceList) {
-        this.deviceList = deviceList;
-    }
 
     public HashMap<String, String> getStateList() {
         return stateList;
     }
 
-    public void setStateList(HashMap<String, String> stateList) {
-        this.stateList = stateList;
-    }
 
     public String getRemoteDeviceId() {
-        return remoteDeviceId;
+        return deviceList.get(KeyOfDevice.REMOTE.getValue()).getDeviceId();
     }
 
-    public void setRemoteDeviceId(String remoteDeviceId) {
-        this.remoteDeviceId = remoteDeviceId;
-    }
 
     public String getSmartPlugId() {
-        return smartPlugId;
+        return deviceList.get(KeyOfDevice.SMART_PLUG.getValue()).getDeviceId();
     }
 
-    public void setSmartPlugId(String smartPlugId) {
-        this.smartPlugId = smartPlugId;
-    }
 
     public int getSpeed() {
+        String speedStr = stateList.get(KeyOfStates.SPEED.getValue());
+        int speed = -1;
+        if (speedStr != null) {
+            speed = Integer.parseInt(speedStr);
+        }
         return speed;
     }
 
-    public void setSpeed(int speed) {
-        if (speed >= 0 && speed <= 3) {
-            this.speed = speed;
+
+    public PowerState getPower() throws NullPointerException {
+        PowerState retVal = PowerState.NULL;
+        String powerStr = stateList.get(KeyOfStates.POWER.getValue());
+        if (powerStr != null) {
+            if (powerStr.equals(PowerState.ON.getValue())) {
+                retVal = PowerState.ON;
+            } else {
+                retVal = PowerState.OFF;
+            }
         }
+
+        return retVal;
     }
 
-    public boolean getPower() {
-        return power;
-    }
 
-    private void setPower(boolean power) {
-        this.power = power;
-    }
 
-    public void setPower(String power) {
-        if (power.equals(getString(R.string.state_power_on))) {
-            this.power = true;
-        } else if (power.equals(getString(R.string.state_power_off))) {
-            this.power = false;
-        }
-    }
+
+
+
 }

@@ -24,6 +24,7 @@ import com.viettel.vht.remoteapp.common.AirPurifierTopics;
 import com.viettel.vht.remoteapp.common.DevicesTopics;
 import com.viettel.vht.remoteapp.common.KeyOfStates;
 import com.viettel.vht.remoteapp.common.MitsubishiFanTopics;
+import com.viettel.vht.remoteapp.ui.airpurifier.AirPurifierFragment;
 
 import java.io.Serializable;
 import java.security.KeyStore;
@@ -53,8 +54,6 @@ public class MqttClientToAWS implements Serializable {
     private AWSIotClient mIotAndroidClient;
 
     private AWSIotMqttManager mqttManager;
-
-
 
     private boolean isConnected = false;
 
@@ -294,12 +293,30 @@ public class MqttClientToAWS implements Serializable {
         }
     }
 
+
     public void publish(String msg, String topic) {
         mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
     }
 
+
     public void subscribe(String topic, AWSIotMqttNewMessageCallback callback) {
         mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS1, callback);
+    }
+
+    public void changePower(String deviceId) {
+        publish("play" + deviceId, AirPurifierTopics.POWER);
+    }
+
+    public void changeSpeedToLow(String deviceId) {
+        publish("play" + deviceId, AirPurifierTopics.LOW_SPEED);
+    }
+
+    public void changeSpeedToMed(String deviceId) {
+        publish("play" + deviceId, AirPurifierTopics.MED_SPEED);
+    }
+
+    public void changeSpeedToHigh(String deviceId) {
+        publish("play" + deviceId, AirPurifierTopics.HIGH_SPEED);
     }
     // Getter and setter
     public String getClientId() {
