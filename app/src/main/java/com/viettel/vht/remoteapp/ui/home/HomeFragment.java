@@ -132,13 +132,16 @@ public class HomeFragment extends Fragment {
             switch(v.getId()) {
                 case R.id.bt_low_speed:
                     expectedStateInDevice.setSpeed(SpeedState.LOW);
+                    uiInLowSpeed();
                     Log.i(LOG_TAG, "low speed");
                     break;
                 case R.id.bt_med_speed:
                     expectedStateInDevice.setSpeed(SpeedState.MED);
+                    uiInMedSpeed();
                     Log.i(LOG_TAG, "med speed");
                     break;
                 case R.id.bt_high_speed:
+                    uiInHighSpeed();
                     expectedStateInDevice.setSpeed(SpeedState.HIGH);
                     Log.i(LOG_TAG, "high speed");
                     break;
@@ -201,15 +204,42 @@ public class HomeFragment extends Fragment {
 
 
     private void uiInLowSpeed() {
-
+        // Disable speed button
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Enable all button
+                mBtLowSpeed.setBackground(getResources().getDrawable(R.drawable.bg_selected_speed_bt, null));
+                mBtMedSpeed.setBackground(getResources().getDrawable(R.drawable.bg_speed_bt, null));
+                mBtHighSpeed.setBackground(getResources().getDrawable(R.drawable.bg_speed_bt, null));
+            }
+        });
     }
 
     private void uiInMedSpeed() {
-
+        // Disable speed button
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Enable all button
+                mBtLowSpeed.setBackground(getResources().getDrawable(R.drawable.bg_speed_bt, null));
+                mBtMedSpeed.setBackground(getResources().getDrawable(R.drawable.bg_selected_speed_bt, null));
+                mBtHighSpeed.setBackground(getResources().getDrawable(R.drawable.bg_speed_bt, null));
+            }
+        });
     }
 
     private void uiInHighSpeed() {
-
+        // Disable speed button
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Enable all button
+                mBtLowSpeed.setBackground(getResources().getDrawable(R.drawable.bg_speed_bt, null));
+                mBtMedSpeed.setBackground(getResources().getDrawable(R.drawable.bg_speed_bt, null));
+                mBtHighSpeed.setBackground(getResources().getDrawable(R.drawable.bg_selected_speed_bt, null));
+            }
+        });
     }
 
 

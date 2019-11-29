@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <item android:state_pressed="true"  android:drawable="@drawable/bt_red_round" /> <!-- pressed -->
+    <item android:state_enabled="false" android:drawable="@drawable/bt_grey_round" />    <!-- disabled -->
+    <item android:drawable="@drawable/bt_green_round" /> <!-- default -->
 </selector>

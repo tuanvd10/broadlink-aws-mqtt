@@ -60,7 +60,7 @@
     <!-- String for Air Parameter -->
     <string name="AQ">AQ</string>
     <string name="CO2">CO\u2082</string>
-    <string name="H2CO">Formaldehyde</string>
+    <string name="H2CO">H\u2082CO</string>
     <string name="HM">Độ ẩm</string>
     <string name="Pressure">Áp suất</string>
     <string name="Temperature">Nhiệt độ</string>
