@@ -176,6 +176,7 @@ public class HomeFragment extends Fragment {
             public void run() {
                 // Enable all button
                 mBtPower.setEnabled(true);
+                mBtPower.setBackground(getResources().getDrawable(R.drawable.bg_power_on_bt, null));
                 enableSpeedButton();
             }
         });
@@ -192,6 +193,7 @@ public class HomeFragment extends Fragment {
             public void run() {
                 // Enable all button
                 mBtPower.setEnabled(true);
+                mBtPower.setBackground(getResources().getDrawable(R.drawable.bg_power_off_bt, null));
                 disableSpeedButton();
             }
         });
@@ -199,7 +201,7 @@ public class HomeFragment extends Fragment {
 
 
     private void uiInLowSpeed() {
-        
+
     }
 
     private void uiInMedSpeed() {
