@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils;
 import com.viettel.vht.remoteapp.MainActivity;
@@ -34,6 +35,7 @@ public class HomeFragment extends Fragment {
     RelativeLayout aqStatus;
     TextView txtAQValue, txtAQLevel, txtAQTitle;
     ProgressBar loadingBar;
+    SwipeRefreshLayout refreshStatusSwipe;
     ImageView dsIcon;
     TextView dsText;
 
@@ -61,28 +63,31 @@ public class HomeFragment extends Fragment {
         txtAQLevel = (TextView) root.findViewById(R.id.aq_status_level);
         txtAQTitle = (TextView) root.findViewById(R.id.aq_status_title);
         loadingBar = (ProgressBar) root.findViewById(R.id.loading);
+        refreshStatusSwipe = (SwipeRefreshLayout) root.findViewById(R.id.swiperefreshStatus);
         dsIcon = (ImageView) root.findViewById(R.id.ds_icon);
         dsText = (TextView) root.findViewById(R.id.ds_text);
+
 
         // getting data in another thread
         monitoringThread = new Thread() {
             @Override
             public void run() {
-                while (true) {
-                    try {
-                        if (getActivity() == null)
-                            return;
-                        System.out.println("Getting data...");
-                        monitoringSystem.readAndDisplayStatus(aqStatus, txtAQValue, txtAQTitle, txtAQLevel, gdView1, gdView2, gdView3, loadingBar, dsIcon, dsText);
-                        Thread.sleep(Constants.UPDATE_DATA_TIME * 1000); // get data for each 5s
-                    } catch (InterruptedException e) { // stop getting data
-                        System.out.println("Stop getting data....");
-                        break;
-                    }
-                }
+                loadingStatusData();
             }
         };
         monitoringThread.start();
+
+        refreshStatusSwipe.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout");
+                        if (monitoringSystem != null)
+                            monitoringSystem.readAndDisplayStatus(aqStatus, txtAQValue, txtAQTitle, txtAQLevel, gdView1, gdView2, gdView3, loadingBar, refreshStatusSwipe, dsIcon, dsText);
+
+                    }
+                }
+        );
 
         // Hungdv39 change below
         // power
@@ -107,6 +112,41 @@ public class HomeFragment extends Fragment {
         new updateUI().start();
 
         return root;
+    }
+
+    private void loadingStatusData(){
+        while (true) {
+            try {
+                if (getActivity() == null){
+                    System.out.println("EXCEPCTION: Activity null...");
+                    return;
+                }
+                System.out.println("Getting data...");
+                monitoringSystem.readAndDisplayStatus(aqStatus, txtAQValue, txtAQTitle, txtAQLevel, gdView1, gdView2, gdView3, loadingBar, refreshStatusSwipe, dsIcon, dsText);
+                Thread.sleep(Constants.UPDATE_DATA_TIME * 1000); // get data for each 5s
+
+            } catch (InterruptedException e) { // stop getting data
+                System.out.println("Stop getting data....");
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        if (!monitoringThread.isAlive()){
+            System.out.println("RESTARTING data...");
+            monitoringThread = new Thread() {
+                @Override
+                public void run() {
+                    loadingStatusData();
+                }
+            };
+            monitoringThread.start();
+        }
+        System.out.println("STARTING data...");
+        super.onResume();
+
     }
 
     @Override

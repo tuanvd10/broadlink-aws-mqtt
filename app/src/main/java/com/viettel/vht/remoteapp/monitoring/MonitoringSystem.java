@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Response;
 import com.viettel.vht.remoteapp.R;
@@ -41,7 +42,7 @@ public class MonitoringSystem {
 
 
     readAndDisplayStatus(final RelativeLayout vAQStatus, final TextView txtAQValue, final TextView txtAQTitle, final TextView txtAQLevel,
-                                     final GridView gdView1, final GridView gdView2, final GridView gdView3, final ProgressBar loadingBar, final ImageView dsIcon, final TextView dsText) {
+                         final GridView gdView1, final GridView gdView2, final GridView gdView3, final ProgressBar loadingBar, final SwipeRefreshLayout swipeRefreshStatus, final ImageView dsIcon, final TextView dsText) {
 
         JSONObject jsonObject = new JSONObject(); // requesting json
         try {
@@ -89,7 +90,6 @@ public class MonitoringSystem {
                                     }
                                 }
                             }
-                            loadingBar.setVisibility(View.GONE); // disable the loading bar
 
                             // set data for grid views
                             gdView1.setAdapter(new MonitoringGridAdapter(activity, gdList3));
@@ -115,7 +115,9 @@ public class MonitoringSystem {
 
 
                             // set status for device
-                            if (mesuareTime.charAt(0) == '0') {
+                            String msTime = mesuareTime.toString();
+                            System.out.println("TIME: " + msTime);
+                            if (msTime.lastIndexOf("0 minute") > -1) {
                                 //  System.out.println("I'M HERE");
                                 dsText.setText(activity.getApplicationContext().getString(R.string.online));
                                 dsText.setTextColor(activity.getColor(R.color.Black));
@@ -123,7 +125,6 @@ public class MonitoringSystem {
                                         R.drawable.online_ic, null);
                                 dsIcon.setBackground(gradientDrawable);
                             } else {
-                                String msTime = mesuareTime.toString();
                                 if (msTime.lastIndexOf("Yeste") > -1)
                                     msTime = "1 " +  activity.getApplicationContext().getString(R.string.dayago);
                                // msTime = msTime.replaceAll("Yesterday", "1");
@@ -143,6 +144,9 @@ public class MonitoringSystem {
                                         R.drawable.offline_ic, null);
                                 dsIcon.setBackground(gradientDrawable);
                             }
+
+                            loadingBar.setVisibility(View.GONE); // disable the loading bar
+                            swipeRefreshStatus.setRefreshing(false);
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -231,9 +235,9 @@ public class MonitoringSystem {
                 result = AirQualityLevel.GOOD;
                 break;
             case "ic_temperature":
-                if (value >= 68 && value <= 74)
+                if (value >= 20 && value < 24.4)
                     result = AirQualityLevel.GOOD;
-                else if ((value >= 55 && value <= 68) || (value >= 74 && value <= 83))
+                else if ((value >= 16 && value <= 20) || (value >= 24.4 && value <= 30))
                     result = AirQualityLevel.MODERATE;
                 else
                     result = AirQualityLevel.POOR;
