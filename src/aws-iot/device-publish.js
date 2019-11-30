@@ -35,7 +35,7 @@ var awsPublishDeviceInfos = (data) => {
 var awsPublishAirthinxMode = (mode) => {
 	logger.debug(`Publish AirthinxMode ${mode} to ${mqttOptions.subscribeBasePath}-stat/airthinx/currentmode`);
     try {
-        device.publish(`${mqttOptions.subscribeBasePath}-stat/airthinx/current-mode`, mode);
+        device.publish(`${mqttOptions.subscribeBasePath}-stat/airthinx/currentmode`, mode);
     } catch (error) {
         logger.error("AWS IOT MQTT Publish AirthinxMode Failed", error);
     }
