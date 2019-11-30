@@ -486,7 +486,7 @@ class Device {
 
     this.getState = async () => {
 		var timeout = 500;
-		console.log("[tuanvd10] START getState");
+		//console.log("[tuanvd10] START getState");
 		//await mutex.lock("Get Power Regular");
 		this.checkPower = true;
 		this.getPower();
