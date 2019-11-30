@@ -10,7 +10,7 @@ var devices = []
 var deviceInfos = [];
 
 const {
-  getCurrentAirthinxState
+  getCurrentAirthinxState, getCurrentAirthinxMode
 } = require("./../devices/airthinx_device");
 
 const discoveredDevices = {};
@@ -172,10 +172,18 @@ myEmitter.on("discoverCompleted", numOfDevice => {
 });
 
 getCurrentAirthinxState(devices);
-	
+
+const setAirthinxMode = (mode) => {
+	getCurrentAirthinxState(devices, mode);
+}
+
+const getAirthinxMode = () => {
+	return getCurrentAirthinxMode();
+}
 module.exports = {
   discoverDevices: discoverDevices,
   devices: devices,
-  deviceInfos: deviceInfos
-
+  deviceInfos: deviceInfos,
+setAirthinxMode:setAirthinxMode,
+getAirthinxMode: getAirthinxMode
 };

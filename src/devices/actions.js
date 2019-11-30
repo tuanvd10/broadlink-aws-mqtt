@@ -112,8 +112,21 @@ function runAction(action, topic, origin) {
             .then( (data) => {
                 logger.info("Done get speed action");
             })
-        case "getinfo":      
+        case "getinfo": 
             return getDeviceInfos();
+		case "getairthinxmode":
+			if(topic.indexOf(cfg.mqtt.subscribeBasePath+ "/airthinx/getcurrentmode") >=0)
+				return getAirthinxMode();
+			break;
+		case "setairthinxmode":
+			if(topic.indexOf(cfg.mqtt.subscribeBasePath+ "/airthinx/setmode") >=0){
+				//parse action to get mode: auto = false; manual = true
+				 if (action.indexOf("-") !== -1){
+					let mode = action.substring(action.indexOf("-")+1, action.length);
+					return setAirthinxMode(mode);
+				 }
+			}
+			 break;
         default:
             logger.error(`Action ${action} doesn't exists`);
             return handleActionError(`Action ${action} doesn't exists`);
@@ -182,10 +195,6 @@ const prepareAction = data =>
             reject("Stopped prepareAction");
         }
     });
-
-
-
-
 
 const queryTemperature = data =>
     new Promise((resolve, reject) => {
@@ -325,6 +334,16 @@ const getDevicesInfo = () =>
     });
 const scanDevice = (count) => {
     Broadlink.discoverDevices(count);
+}
+
+const getAirthinxMode = () => {
+	let mode = Broadlink.getAirthinxMode();
+    awsDevice.awsPublishAirthinxMode(mode);
+	return mode;
+}
+
+const setAirthinxMode = (value = true) => {
+	Broadlink.setAirthinxMode(value);
 }
 
 module.exports = {

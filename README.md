@@ -76,3 +76,13 @@ STATE_SPEED_TOPIC = "broadlink-stat/airpurifier/speed";    // 0 - 1 - 2 - 3
 SET_STATE_POWER_TOPIC = "broadlink/airpurifier/info";
 payload = "setpower-<Smart Plug ID>"
 ```
+- Topic để lấy/set chế độ chạy cho service (auto/manual)
+```js
+REQUEST_GET_CURRENT_MODE_TOPIC = "broadlink/airthinx/getcurrentmode";
+payload = "getairthinxmode"
+REQUEST_SET_CURRENT_MODE_TOPIC = "broadlink/airthinx/setmode";
+payload = "setairthinxmode-<auto/manuall>"
+
+RESPONSE_CURRENT_MODE_TOPIC="broadlink-stat/airthinx/currentmode";
+response = auto/manual
+```

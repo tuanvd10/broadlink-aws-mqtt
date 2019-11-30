@@ -26,7 +26,12 @@ device.on('connect', function () {
   if (err) {
       logger.error("AWS IOT MQTT Failed to Subscribe", err);
   }
-});
+   });
+   device.subscribe(`${mqttOptions.subscribeBasePath}/airthinx/#`, function (err) {
+	  if (err) {
+		  logger.error("AWS IOT MQTT Failed to Subscribe", err);
+	  }
+   });
 });
 device.on('close', function () {
    logger.error('AWS IOT device close');

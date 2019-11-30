@@ -25,7 +25,8 @@
   "airthinx":{
 	"deviceid": "770f78d91f64",
 	"spDeviceId": "34ea3479ee2b",
-	"PowerCommand": "/airpurifier/power", 
+	"PowerOffCommand": "/airpurifier/power", 
+	"PowerOnCommand": "/airpurifier/poweron", 
 	"LowCommand" : "/airpurifier/low", 
 	"MedCommand": "/airpurifier/med", 
 	"HighCommand": "/airpurifier/high",

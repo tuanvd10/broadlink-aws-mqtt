@@ -4,7 +4,9 @@ const cfg = require("./../config");
 const axios = require("axios");
 const fs = require("fs");
 
-var commandList = ["PowerCommand", "LowCommand", "MedCommand", "HighCommand"];
+var commandList = ["PowerOnCommand", "PowerOffCommand","LowCommand", "MedCommand", "HighCommand"];
+var interval = null;
+var mode = null;
 
 axios.defaults.headers.common['Authorization'] = "Bearer 1339b161-9ea6-490b-877f-bd6e65674373";
 axios.defaults.headers.common['Accept'] = "application/json";
@@ -43,9 +45,10 @@ const getAirThinxScore =  async ()=>{
 
 	logger.info("[tuanvd10] aq value: " +aq);
 	
-	if(global.aq.aq == 0 || (global.aq.aq <=  cfg.goodPoint.aq && aq >  cfg.goodPoint.aq) || (global.aq.aq >  cfg.goodPoint.aq && aq <=  cfg.goodPoint.aq)
-		|| 	global.aq.pm == 0 || (global.aq.pm <= cfg.goodPoint.pm && pm > cfg.goodPoint.pm) || (global.aq.pm > cfg.goodPoint.pm && pm <= cfg.goodPoint.pm)
-		|| 	global.aq.pm1 == 0 || (global.aq.pm1 <= cfg.goodPoint.pm && pm1 > cfg.goodPoint.pm) || (global.aq.pm1 > cfg.goodPoint.pm && pm1 <= cfg.goodPoint.pm)
+	if(
+//		global.aq.aq == 0 || (global.aq.aq <=  cfg.goodPoint.aq && aq >  cfg.goodPoint.aq) || (global.aq.aq >  cfg.goodPoint.aq && aq <=  cfg.goodPoint.aq)
+//		|| 	global.aq.pm == 0 || (global.aq.pm <= cfg.goodPoint.pm && pm > cfg.goodPoint.pm) || (global.aq.pm > cfg.goodPoint.pm && pm <= cfg.goodPoint.pm)
+		global.aq.pm1 == 0 || (global.aq.pm1 <= cfg.goodPoint.pm && pm1 > cfg.goodPoint.pm) || (global.aq.pm1 > cfg.goodPoint.pm && pm1 <= cfg.goodPoint.pm)
 		|| 	global.aq.pm25 == 0 || (global.aq.pm25 <= cfg.goodPoint.pm && pm25 > cfg.goodPoint.pm) || (global.aq.pm25 > cfg.goodPoint.pm && pm25 <= cfg.goodPoint.pm)
 		|| 	global.aq.pm10 == 0 || (global.aq.pm10 <= cfg.goodPoint.pm && pm10 > cfg.goodPoint.pm) || (global.aq.pm10 > cfg.goodPoint.pm && pm10 <= cfg.goodPoint.pm)
 		|| 	global.aq.co2 == 0 || (global.aq.co2 <= cfg.goodPoint.co2 && co2 >  cfg.goodPoint.co2) || (global.aq.co2 >  cfg.goodPoint.co2 && co2 <=  cfg.goodPoint.co2)
@@ -98,7 +101,7 @@ const sendControlData = (spDevice) => {
 						logger.info("[tuanvd10] increse 1 level");
 						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandIncrease, "airthinx");
 						//sendCommandMultitime(1);//if only 1 button
-						sendAirthinxCommand(spDevice.state.currentState.clientStatus + 1);
+						sendAirthinxCommand(spDevice.state.currentState.clientStatus+2);
 					}
 			}
 		}
@@ -115,12 +118,12 @@ const sendControlData = (spDevice) => {
 						logger.info("[tuanvd10] Turn OFF level");
 						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
 						//sendCommandMultitime(3);//if only 1 button
-						sendAirthinxCommand(0);
+						sendAirthinxCommand(1);
 					}else{
 						logger.info("[tuanvd10] decrease 1 level");
 						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandDecrease, "airthinx");
 						//sendCommandMultitime(3);//if only 1 button
-						sendAirthinxCommand(spDevice.state.currentState.clientStatus - 1);
+						sendAirthinxCommand(spDevice.state.currentState.clientStatus);
 					}
 			}
 		}
@@ -151,7 +154,7 @@ async function doAction(devices){
 	logger.info("[tuanvd10] START ACTION");
 	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
 	if(!spDevice) return;
-	console.log("[tuanvd10]: SP device " + JSON.stringify(spDevice));
+	//console.log("[tuanvd10]: SP device " + JSON.stringify(spDevice));
 	//await spDevice.getState();
 	if(spDevice.getState() && getAirThinxScore()){
 		await sleep(1000);
@@ -160,17 +163,28 @@ async function doAction(devices){
 	logger.info("[tuanvd10] DONE ACTION");
 }
 
-function getCurrentAirthinxState(discoverDevices) {
-	setInterval(function () {
-		doAction(discoverDevices);
-	}, 10000);
+function getCurrentAirthinxState(discoverDevices, requsetMode = "auto") {
+	logger.info("[tuanvd10] change mode " + mode + " => " + requsetMode);
+	if(mode === requsetMode) return;
+	if(requsetMode==="auto" && interval){
+		interval = setInterval(function () {
+			doAction(discoverDevices);
+		}, 10000);
+	}else if(requsetMode==="manual"){
+		removeInterval();
+	}
+	mode = requsetMode;
+}
+
+function getCurrentAirthinxMode(){
+	return mode;
 }
 
 function checkAirCondition(){
 	if( global.aq.co2 > cfg.goodPoint.co2 
-		|| global.aq.pm1 > cfg.goodPoint.pm1 
-		|| global.aq.pm25 > cfg.goodPoint.pm25 
-		|| global.aq.pm10 > cfg.goodPoint.pm10 
+		|| global.aq.pm1 > cfg.goodPoint.pm
+		|| global.aq.pm25 > cfg.goodPoint.pm
+		|| global.aq.pm10 > cfg.goodPoint.pm
 		|| global.aq.voc > cfg.goodPoint.voc 
 		|| global.aq.formaldehyde > cfg.goodPoint.formaldehyde 
 		)
@@ -178,12 +192,19 @@ function checkAirCondition(){
 	return true;//good
 }
 
+//remove interval when have request from app
+function removeInterval(){
+		clearInterval(interval);
+		interval = null;
+}
+
 global.aq = {
-	"co2" : 0, 
-	"pm": 0, "pm1": 0, "pm25": 0, "pm10": 0, 
-	"voc": 0, 
-	"formaldehyde": 0, 
-	"aq" : 0,
-	"time" : 0
+	"co2" : -1, 
+	"pm": -1, "pm1": -1, "pm25": -1, "pm10": -1, 
+	"voc": -1, 
+	"formaldehyde": -1, 
+	"aq" : -1,
+	"time" : -1
 }
 module.exports.getCurrentAirthinxState = getCurrentAirthinxState;
+module.exports.getCurrentAirthinxMode = getCurrentAirthinxMode;
