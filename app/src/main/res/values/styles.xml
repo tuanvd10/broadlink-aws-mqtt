@@ -22,4 +22,5 @@
         <item name="android:padding">10dp</item>
         <item name="android:textStyle">bold</item>
     </style>
+
 </resources>

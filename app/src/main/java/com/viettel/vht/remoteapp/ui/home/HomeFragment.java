@@ -10,6 +10,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -25,7 +26,6 @@ import com.viettel.vht.remoteapp.common.PowerState;
 import com.viettel.vht.remoteapp.common.SpeedState;
 import com.viettel.vht.remoteapp.monitoring.MonitoringSystem;
 import com.viettel.vht.remoteapp.objects.AirPurifier;
-import com.viettel.vht.remoteapp.remotecontrol.StateChecker;
 
 public class HomeFragment extends Fragment {
 
@@ -98,6 +98,8 @@ public class HomeFragment extends Fragment {
         mBtHighSpeed = root.findViewById(R.id.bt_high_speed);
         mBtHighSpeed.setOnClickListener(btSpeedClick);
 
+        // Switch
+        mSwitchMode = root.findViewById(R.id.sw_mode);
         // Parent Activity
         expectedStateInDevice = ((MainActivity) getActivity()).getExpectedState();
         // Wait to update ui
@@ -116,6 +118,7 @@ public class HomeFragment extends Fragment {
     // Hungdv39 add variable
     private Button mBtPower, mBtLowSpeed, mBtMedSpeed, mBtHighSpeed;
     private AirPurifier expectedStateInDevice;
+    private Switch mSwitchMode;
 
     static final String LOG_TAG = HomeFragment.class.getCanonicalName();
 
@@ -152,24 +155,41 @@ public class HomeFragment extends Fragment {
         }
     };
 
+    /**
+     * Enable speed button
+     */
     private void enableSpeedButton() {
         mBtLowSpeed.setEnabled(true);
         mBtMedSpeed.setEnabled(true);
         mBtHighSpeed.setEnabled(true);
     }
 
-
+    /**
+     * Disable speed button
+     */
     private void disableSpeedButton() {
         mBtLowSpeed.setEnabled(false);
         mBtMedSpeed.setEnabled(false);
         mBtHighSpeed.setEnabled(false);
     }
 
+    /**
+     * Disable all button
+     */
     private void disableAllButton() {
         mBtPower.setEnabled(false);
+        mSwitchMode.setEnabled(false);
         disableSpeedButton();
     }
 
+    /**
+     * Enable all button
+     */
+    private void enableAllButton() {
+        mBtPower.setEnabled(true);
+        mSwitchMode.setEnabled(true);
+        enableSpeedButton();
+    }
     /**
      * ui in power on
      */
@@ -254,23 +274,59 @@ public class HomeFragment extends Fragment {
             expectedStateInDevice.setSpeed(SpeedState.LOW);
             expectedStateInDevice.setPower(PowerState.ON);
             uiInPowerOn();
+            uiInLowSpeed();
         } else {
             Log.e(LOG_TAG, "Error in expected power = null");
         }
+    }
+
+    private void setVisibleAllButton() {
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Set visible all button
+                mBtPower.setVisibility(View.VISIBLE);
+                mBtLowSpeed.setVisibility(View.VISIBLE);
+                mBtMedSpeed.setVisibility(View.VISIBLE);
+                mBtHighSpeed.setVisibility(View.VISIBLE);
+                // Set visible switch
+                mSwitchMode.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private class updateUI extends Thread {
         @Override
         public void run() {
             try {
-                while(expectedStateInDevice.getSpeed() == SpeedState.NULL) {
-                    Thread.sleep(Constants.SLEEP_WAIT);
+                while(loadingBar.getVisibility() == View.VISIBLE) {
+                    Thread.sleep(Constants.WAIT_TO_UPDATE_UI);
                 }
+                // Visiable all button
+                setVisibleAllButton();
+
+                while(expectedStateInDevice.getSpeed() == SpeedState.NULL ) {
+                    Thread.sleep(Constants.WAIT_TO_UPDATE_UI);
+                }
+
 
                 if (expectedStateInDevice.getSpeed() == SpeedState.OFF) {
                     uiInPowerOff();
                 } else {
                     uiInPowerOn();
+                    switch (expectedStateInDevice.getSpeed()) {
+                        case LOW:
+                            uiInLowSpeed();
+                            break;
+                        case MED:
+                            uiInMedSpeed();
+                            break;
+                        case HIGH:
+                            uiInHighSpeed();
+                            break;
+                        default:
+                            Log.e(LOG_TAG, "Error in speed");
+                    }
                 }
 
             } catch (InterruptedException ie) {

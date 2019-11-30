@@ -36,6 +36,7 @@
     <string name="msg_lost_connection">Không thể kết nối tới máy chủ (Hãy kiểm tra lại đường truyền mạng)</string>
     <string name="title_lost_connection">Mất kết nối</string>
     <string name="msg_no_response_from_device">Thiết bị không phản hồi! \nHãy liên hệ với tamnd12@viettel.com.vn hoặc tuanvd10@viettel.com.vn</string>
+    <string name="msg_no_response_from_service">Máy chủ giám sát không phản hồi! \nHãy liên hệ với tuanvd10@viettel.com.vn</string>
     <string name="check_smart_plug_and_remote">Hãy kiểm tra lại ổ cắm điện và thiết bị điều khiển (Không thể kết nối tới thiết bị)</string>
     <string name="not_connected">Chưa kết nối</string>
     <string name="error">Lỗi</string>
@@ -93,5 +94,11 @@
     <string name="speed_3">3</string>
 
     <string name="status_title">Trạng thái</string>
+
+    <string name="mode_auto">Tự động</string>
+    <string name="mode_manual">Thủ công</string>
+
+    // resource for layout
+    <string name="margin_remote_button_with_center">20dp</string>
 
 </resources>

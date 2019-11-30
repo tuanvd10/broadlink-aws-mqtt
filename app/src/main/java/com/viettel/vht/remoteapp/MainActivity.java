@@ -3,6 +3,7 @@ package com.viettel.vht.remoteapp;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.icu.util.LocaleData;
 import android.os.Bundle;
 
 import androidx.navigation.NavController;
@@ -13,9 +14,11 @@ import androidx.navigation.ui.NavigationUI;
 import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttNewMessageCallback;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
+import com.amazonaws.services.iot.AWSIot;
 import com.google.android.material.navigation.NavigationView;
 import com.viettel.vht.remoteapp.common.AirPurifierTopics;
 import com.viettel.vht.remoteapp.common.Constants;
+import com.viettel.vht.remoteapp.common.ControlMode;
 import com.viettel.vht.remoteapp.common.DevicesTopics;
 import com.viettel.vht.remoteapp.common.KeyOfDevice;
 import com.viettel.vht.remoteapp.common.PowerState;
@@ -52,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private AirPurifier expectedState = new AirPurifier(PowerState.NULL, SpeedState.NULL);
 
     // Dialog alert
-    private Dialog mConnectionProblemDialog, mSmartPlugProblemDialog, mInfoDeviceProblemDialog;
+    private Dialog mConnectionProblemDialog, mSmartPlugProblemDialog, mInfoDeviceProblemDialog, mNoResponseFromService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,12 +102,12 @@ public class MainActivity extends AppCompatActivity {
         mSmartPlugProblemDialog = new AlertDialog.Builder(this)
                                     .setTitle(R.string.info)
                                     .setMessage(R.string.msg_no_response_from_device)
-                                    .setNegativeButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
+                                    .setPositiveButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             checkInformation();
                                         }
-                                    }).setPositiveButton(R.string.bt_pass, new DialogInterface.OnClickListener() {
+                                    }).setNegativeButton(R.string.bt_pass, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
 
@@ -116,18 +119,36 @@ public class MainActivity extends AppCompatActivity {
         mInfoDeviceProblemDialog = new AlertDialog.Builder(this)
                                     .setTitle(R.string.info)
                                     .setMessage(R.string.check_smart_plug_and_remote)
-                                    .setNegativeButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
+                                    .setPositiveButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             checkInformation();
                                         }
                                     })
-                                    .setPositiveButton(R.string.bt_pass, new DialogInterface.OnClickListener() {
+                                    .setNegativeButton(R.string.bt_pass, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
 
                                         }
                                     }).create();
+
+        // Dialog will shown when service can not response to app
+        mNoResponseFromService = new AlertDialog.Builder(this)
+                .setTitle(R.string.info)
+                .setMessage(R.string.msg_no_response_from_service)
+                .setPositiveButton(R.string.bt_try_again, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        checkInformation();
+                    }
+                })
+                .setNegativeButton(R.string.bt_pass, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                }).create();
+
         // Get info of device
         checkInformation();
     }
@@ -233,6 +254,31 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void subscribeModeControl() {
+        // Subscribe state of control mode from server
+        // Set call back function
+        AWSIotMqttNewMessageCallback callbackControlMode = new AWSIotMqttNewMessageCallback() {
+            @Override
+            public void onMessageArrived(String topic, byte[] data) {
+                String mode = new String(data);
+                Log.d(LOG_TAG, "mode = " + mode);
+                // check mode
+                if (mode.equals(ControlMode.AUTO.getValue())) {
+                    // auto
+                    remoteDevice.setControlMode(ControlMode.AUTO);
+                } else if (mode.equals(ControlMode.MANUAL.getValue())) {
+                    // manual
+                    remoteDevice.setControlMode(ControlMode.MANUAL);
+                } else {
+                    Log.e(LOG_TAG, "Wrong value in control mode");
+                }
+
+            }
+        };
+
+        // subcribe
+        mqttClient.subscribe(DevicesTopics.SUBSCRIBE_CURRENT_MODE_TOPIC, callbackControlMode);
+    }
 
     public void checkInformation() {
         new InformationCollector().start();
@@ -295,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
          * @throws InterruptedException
          */
         private boolean checkPowerDevice() throws InterruptedException {
-            boolean isPowerExist = false;
+            boolean doesPowerExist = false;
             for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
                 if(realState.getPower() == PowerState.NULL) {
                     Thread.sleep(Constants.SLEEP_TIME);
@@ -304,12 +350,12 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(LOG_TAG, "Not found power state");
                     }
                 } else {
-                    isPowerExist = true;
+                    doesPowerExist = true;
                     break;
                 }
             }
 
-            return isPowerExist;
+            return doesPowerExist;
         }
 
         /**
@@ -318,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
          * @throws InterruptedException
          */
         private boolean checkSpeedDevice() throws InterruptedException {
-            boolean isSpeedExist = false;
+            boolean doesSpeedExist = false;
             for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
                 if(realState.getSpeed() == SpeedState.NULL) {
                     Thread.sleep(Constants.SLEEP_TIME);
@@ -327,13 +373,34 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(LOG_TAG, "Not found speed state");
                     }
                 } else {
-                    isSpeedExist = true;
+                    doesSpeedExist = true;
                     break;
                 }
             }
 
-            return isSpeedExist;
+            return doesSpeedExist;
         }
+
+        private boolean checkControlMode() throws InterruptedException {
+            boolean doesControlModeExist = false;
+            // Wait a time until control mode state be sent or inform error
+            for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
+                if (remoteDevice.getControlMode() == ControlMode.NULL) {
+                    Thread.sleep(Constants.SLEEP_TIME);
+                    // Check error
+                    if (i == Constants.LOOP_NUMBER - 1) {
+                        Log.e(LOG_TAG, "Server does not response control mode value");
+                    }
+                } else {
+                    // control mode state has been sent
+                    doesControlModeExist = true;
+                    break;
+                }
+            }
+
+            return doesControlModeExist;
+        }
+
 
         @Override
         public void run() {
@@ -351,7 +418,8 @@ public class MainActivity extends AppCompatActivity {
                 subscribeDeviceInfo();
                 // Subscribe state of devices
                 subscribeDeviceStates();
-
+                // Subscribe control mode
+                subscribeModeControl();
 
                 mqttClient.requestDeviceInfos();
                 // Check information
@@ -369,6 +437,7 @@ public class MainActivity extends AppCompatActivity {
                 mqttClient.requestAWSIotServer("checkpower-" + getSmartPlugId(), AirPurifierTopics.REQUEST_STATE_POWER);
                 mqttClient.requestAWSIotServer("checkspeed-" + getSmartPlugId(), AirPurifierTopics.REQUEST_STATE_SPEED);
 
+                // TODO check switch mode
                if (!(checkPowerDevice() && checkSpeedDevice())) {
                    ThreadUtils.runOnUiThread(new Runnable() {
                        @Override
@@ -382,6 +451,18 @@ public class MainActivity extends AppCompatActivity {
                 // Set expected state
                 expectedState.setSpeed(realState.getSpeed());
                 expectedState.setPower(realState.getPower());
+
+                if (!checkControlMode()) {
+                    ThreadUtils.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSmartPlugProblemDialog.show();
+                        }
+                    });
+
+                    return;
+                }
+
                 // Start a state checker
                 new StateChecker(mqttClient, expectedState, realState, getRemoteDeviceId(), getSmartPlugId()).start();
             } catch (Exception ex) {
