@@ -342,7 +342,7 @@ const getAirthinxMode = () => {
 	return mode;
 }
 
-const setAirthinxMode = (value = true) => {
+const setAirthinxMode = (value) => {
 	Broadlink.setAirthinxMode(value);
 }
 

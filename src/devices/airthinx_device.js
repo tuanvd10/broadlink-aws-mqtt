@@ -170,10 +170,11 @@ function getCurrentAirthinxState(discoverDevices, requsetMode = "auto") {
 		interval = setInterval(function () {
 			doAction(discoverDevices);
 		}, 10000);
+		mode = requsetMode;
 	}else if(requsetMode==="manual"){
 		removeInterval();
+		mode = requsetMode;
 	}
-	mode = requsetMode;
 }
 
 function getCurrentAirthinxMode(){

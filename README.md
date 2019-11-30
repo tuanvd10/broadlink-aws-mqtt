@@ -81,7 +81,7 @@ payload = "setpower-<Smart Plug ID>"
 REQUEST_GET_CURRENT_MODE_TOPIC = "broadlink/airthinx/getcurrentmode";
 payload = "getairthinxmode"
 REQUEST_SET_CURRENT_MODE_TOPIC = "broadlink/airthinx/setmode";
-payload = "setairthinxmode-<auto/manuall>"
+payload = "setairthinxmode-<auto/manual>"
 
 RESPONSE_CURRENT_MODE_TOPIC="broadlink-stat/airthinx/currentmode";
 response = auto/manual
