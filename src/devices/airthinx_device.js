@@ -6,7 +6,7 @@ const fs = require("fs");
 
 var commandList = ["PowerOnCommand", "PowerOffCommand","LowCommand", "MedCommand", "HighCommand"];
 var interval = null;
-var mode = null;
+var mode = "auto";
 
 axios.defaults.headers.common['Authorization'] = "Bearer 1339b161-9ea6-490b-877f-bd6e65674373";
 axios.defaults.headers.common['Accept'] = "application/json";
@@ -165,8 +165,9 @@ async function doAction(devices){
 
 function getCurrentAirthinxState(discoverDevices, requsetMode = "auto") {
 	logger.info("[tuanvd10] change mode " + mode + " => " + requsetMode);
-	if(mode === requsetMode) return;
-	if(requsetMode==="auto" && interval){
+	//if(mode === requsetMode) return;
+
+	if(requsetMode==="auto" && !interval){
 		interval = setInterval(function () {
 			doAction(discoverDevices);
 		}, 10000);

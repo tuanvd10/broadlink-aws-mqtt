@@ -174,11 +174,11 @@ myEmitter.on("discoverCompleted", numOfDevice => {
 getCurrentAirthinxState(devices);
 
 const setAirthinxMode = (mode) => {
-	getCurrentAirthinxState(devices, mode);
+    setAirthinxMode(devices, mode);
 }
 
 const getAirthinxMode = () => {
-	return getCurrentAirthinxMode();
+    return getCurrentAirthinxMode();
 }
 module.exports = {
   discoverDevices: discoverDevices,
