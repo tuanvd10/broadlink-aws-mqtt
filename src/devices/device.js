@@ -174,7 +174,7 @@ myEmitter.on("discoverCompleted", numOfDevice => {
 getCurrentAirthinxState(devices);
 
 const setAirthinxMode = (mode) => {
-    setAirthinxMode(devices, mode);
+    getCurrentAirthinxState(devices, mode);
 }
 
 const getAirthinxMode = () => {

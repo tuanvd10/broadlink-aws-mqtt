@@ -339,11 +339,12 @@ const scanDevice = (count) => {
 const getAirthinxMode = () => {
 	let mode = Broadlink.getAirthinxMode();
     awsDevice.awsPublishAirthinxMode(mode);
-	return new Promise((resolve, reject) => resolve(1));
+	return new Promise((resolve, reject) => resolve(mode));
 }
 
-const setAirthinxMode = (value) => {
-    Broadlink.setAirthinxMode(value);
+const setAirthinxMode = (mode) => {
+    Broadlink.setAirthinxMode(mode);
+	awsDevice.awsPublishAirthinxMode(mode);
     return new Promise((resolve, reject) => resolve(1));
 }
 
