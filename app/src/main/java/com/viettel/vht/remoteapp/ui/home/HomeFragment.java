@@ -23,6 +23,7 @@ import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils;
 import com.viettel.vht.remoteapp.MainActivity;
 import com.viettel.vht.remoteapp.R;
 import com.viettel.vht.remoteapp.common.Constants;
+import com.viettel.vht.remoteapp.common.ControlMode;
 import com.viettel.vht.remoteapp.common.PowerState;
 import com.viettel.vht.remoteapp.common.SpeedState;
 import com.viettel.vht.remoteapp.monitoring.MonitoringSystem;
@@ -63,7 +64,7 @@ public class HomeFragment extends Fragment {
         txtAQLevel = (TextView) root.findViewById(R.id.aq_status_level);
         txtAQTitle = (TextView) root.findViewById(R.id.aq_status_title);
         loadingBar = (ProgressBar) root.findViewById(R.id.loading);
-        refreshStatusSwipe = (SwipeRefreshLayout) root.findViewById(R.id.swiperefreshStatus);
+//        refreshStatusSwipe = (SwipeRefreshLayout) root.findViewById(R.id.swiperefreshStatus);
         dsIcon = (ImageView) root.findViewById(R.id.ds_icon);
         dsText = (TextView) root.findViewById(R.id.ds_text);
 
@@ -77,23 +78,23 @@ public class HomeFragment extends Fragment {
         };
         monitoringThread.start();
 
-        refreshStatusSwipe.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout");
-                        if (monitoringSystem != null)
-                            monitoringSystem.readAndDisplayStatus(aqStatus, txtAQValue, txtAQTitle, txtAQLevel, gdView1, gdView2, gdView3, loadingBar, refreshStatusSwipe, dsIcon, dsText);
-
-                    }
-                }
-        );
+//        refreshStatusSwipe.setOnRefreshListener(
+//                new SwipeRefreshLayout.OnRefreshListener() {
+//                    @Override
+//                    public void onRefresh() {
+//                        Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout");
+//                        if (monitoringSystem != null)
+//                            monitoringSystem.readAndDisplayStatus(aqStatus, txtAQValue, txtAQTitle, txtAQLevel, gdView1, gdView2, gdView3, loadingBar, refreshStatusSwipe, dsIcon, dsText);
+//
+//                    }
+//                }
+//        );
 
         // Hungdv39 change below
-        // power
+        // Power
         mBtPower = root.findViewById(R.id.bt_power);
         mBtPower.setOnClickListener(btPowerClick);
-        // low speed
+        // Low speed
         mBtLowSpeed = root.findViewById(R.id.bt_low_speed);
         mBtLowSpeed.setOnClickListener(btSpeedClick);
         // Medium speed
@@ -105,6 +106,8 @@ public class HomeFragment extends Fragment {
 
         // Switch
         mSwitchMode = root.findViewById(R.id.sw_mode);
+        mSwitchMode.setOnClickListener(switchModeListener);
+
         // Parent Activity
         expectedStateInDevice = ((MainActivity) getActivity()).getExpectedState();
         // Wait to update ui
@@ -191,6 +194,23 @@ public class HomeFragment extends Fragment {
                 default:
                     Log.i(LOG_TAG, "wrong view : " + v.getId());
                     break;
+            }
+        }
+    };
+
+    View.OnClickListener switchModeListener = new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            if (mSwitchMode.isChecked()) {
+                // Auto mode
+                mSwitchMode.setText(R.string.mode_auto);
+                expectedStateInDevice.setControlMode(ControlMode.AUTO);
+                uiInAutoMode();
+            } else {
+                // Manual mode
+                mSwitchMode.setText(R.string.mode_manual);
+                expectedStateInDevice.setControlMode(ControlMode.MANUAL);
+                new updateUI().start();
             }
         }
     };
@@ -302,6 +322,31 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    /**
+     * Disable all button except switch button
+     */
+    private void uiInAutoMode() {
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                disableAllButton();
+                mSwitchMode.setEnabled(true);
+                mSwitchMode.setChecked(true);
+                mSwitchMode.setText(R.string.mode_auto);
+            }
+        });
+    }
+
+    private void uiInManualMode() {
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSwitchMode.setEnabled(true);
+                mSwitchMode.setChecked(false);
+                mSwitchMode.setText(R.string.mode_manual);
+            }
+        });
+    }
 
     private void power(View view) {
         if (expectedStateInDevice.getPower() == PowerState.ON) {
@@ -336,39 +381,51 @@ public class HomeFragment extends Fragment {
     }
 
     private class updateUI extends Thread {
+
         @Override
         public void run() {
             try {
                 while(loadingBar.getVisibility() == View.VISIBLE) {
                     Thread.sleep(Constants.WAIT_TO_UPDATE_UI);
                 }
+
                 // Visiable all button
                 setVisibleAllButton();
 
-                while(expectedStateInDevice.getSpeed() == SpeedState.NULL ) {
+                // Wait until complete load
+                while(!expectedStateInDevice.isNotNull()) {
                     Thread.sleep(Constants.WAIT_TO_UPDATE_UI);
                 }
 
-
-                if (expectedStateInDevice.getSpeed() == SpeedState.OFF) {
-                    uiInPowerOff();
+                // Set ui
+                if (expectedStateInDevice.getControlMode() == ControlMode.AUTO) {
+                    // auto mode
+                    uiInAutoMode();
                 } else {
-                    uiInPowerOn();
-                    switch (expectedStateInDevice.getSpeed()) {
-                        case LOW:
-                            uiInLowSpeed();
-                            break;
-                        case MED:
-                            uiInMedSpeed();
-                            break;
-                        case HIGH:
-                            uiInHighSpeed();
-                            break;
-                        default:
-                            Log.e(LOG_TAG, "Error in speed");
+                    // manual mode
+                   uiInManualMode();
+                    // Check speed and power
+                    if (expectedStateInDevice.getSpeed() == SpeedState.OFF) {
+                        // off device
+                        uiInPowerOff();
+                    } else {
+                        // on device
+                        uiInPowerOn();
+                        switch (expectedStateInDevice.getSpeed()) {
+                            case LOW:
+                                uiInLowSpeed();
+                                break;
+                            case MED:
+                                uiInMedSpeed();
+                                break;
+                            case HIGH:
+                                uiInHighSpeed();
+                                break;
+                            default:
+                                Log.e(LOG_TAG, "Error in speed");
+                        }
                     }
                 }
-
             } catch (InterruptedException ie) {
                 ie.printStackTrace();
             }

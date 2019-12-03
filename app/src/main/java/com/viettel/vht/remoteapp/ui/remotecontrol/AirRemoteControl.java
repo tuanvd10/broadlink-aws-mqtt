@@ -728,7 +728,7 @@
 //                    hideProgressBar();
 //
 //                    // Wait to next refresh
-//                    Thread.sleep(Constants.SLEEP_WAIT);
+//                    Thread.sleep(Constants.WAIT_NEXT_LOOP);
 //                } catch (InterruptedException ex) {
 //                    // disable remote button
 //                    disableRemoteButton();

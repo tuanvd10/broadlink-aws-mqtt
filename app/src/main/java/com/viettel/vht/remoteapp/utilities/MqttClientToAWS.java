@@ -1,6 +1,7 @@
 package com.viettel.vht.remoteapp.utilities;
 
 import android.content.Context;
+import android.icu.util.LocaleData;
 import android.util.Log;
 
 
@@ -19,13 +20,10 @@ import com.amazonaws.services.iot.AWSIotClient;
 import com.amazonaws.services.iot.model.AttachPrincipalPolicyRequest;
 import com.amazonaws.services.iot.model.CreateKeysAndCertificateRequest;
 import com.amazonaws.services.iot.model.CreateKeysAndCertificateResult;
-import com.viettel.vht.remoteapp.R;
 import com.viettel.vht.remoteapp.common.AirPurifierTopics;
+import com.viettel.vht.remoteapp.common.ControlMode;
 import com.viettel.vht.remoteapp.common.DevicesTopics;
-import com.viettel.vht.remoteapp.common.KeyOfStates;
 import com.viettel.vht.remoteapp.common.MitsubishiFanTopics;
-import com.viettel.vht.remoteapp.objects.AirPurifier;
-import com.viettel.vht.remoteapp.ui.airpurifier.AirPurifierFragment;
 
 import java.io.Serializable;
 import java.security.KeyStore;
@@ -247,7 +245,6 @@ public class MqttClientToAWS implements Serializable {
                 Log.e(LOG_TAG, "onError: ", e);
             }
         });
-
     }
 
 
@@ -258,10 +255,12 @@ public class MqttClientToAWS implements Serializable {
     }
 
     public void requestAllStatesOfDevice(String smartPlugId) throws InterruptedException {
+        // request power of device
         requestPowerStateOfDevice(smartPlugId);
-//        Thread.sleep(300);
-        // Check speed if power on
+        // Check speed of device
         requestSpeedStateOfDevice(smartPlugId);
+        // request remote control mode
+        requestGetCurrentControlMode();
     }
 
     /**
@@ -269,7 +268,7 @@ public class MqttClientToAWS implements Serializable {
      * @param smartPlugId
      */
     public void requestPowerStateOfDevice(String smartPlugId) {
-        requestAWSIotServer("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
+        publish("checkpower-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_POWER);
     }
 
     /**
@@ -278,14 +277,10 @@ public class MqttClientToAWS implements Serializable {
      * @throws InterruptedException
      */
     public void requestSpeedStateOfDevice(String smartPlugId) {
-        requestAWSIotServer("checkspeed-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_SPEED);
+        publish("checkspeed-" + smartPlugId, AirPurifierTopics.REQUEST_STATE_SPEED);
     }
 
-    public void requestAWSIotServer(String msg, String topic) {
-        // Check power
-        mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
-    }
-    
+
     private void disconnect() {
         try {
             mqttManager.disconnect();
@@ -295,12 +290,14 @@ public class MqttClientToAWS implements Serializable {
     }
 
 
+
     public void publish(String msg, String topic) {
         Log.d(LOG_TAG, "publish message: " + msg + ", to topic: " + topic);
         mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
     }
 
     public void subscribe(String topic, AWSIotMqttNewMessageCallback callback) {
+        Log.d(LOG_TAG, "subscribe topic = " + topic);
         mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS1, callback);
     }
 
@@ -323,6 +320,25 @@ public class MqttClientToAWS implements Serializable {
     public void changeSmartPlugPower(String smartPlugId) {
         publish("setpower-"+smartPlugId, DevicesTopics.REQUEST_DEVICE_INFO);
     }
+
+    /**
+     * Get current mode
+     */
+    public void requestGetCurrentControlMode() {
+        Log.d(LOG_TAG, "Get current control mode");
+        publish("getairthinxmode", DevicesTopics.REQUEST_GET_CURRENT_MODE_TOPIC);
+    }
+
+    /**
+     * Set control mode
+     * @param mode
+     */
+    public void changeControlMode(ControlMode mode) {
+        Log.d(LOG_TAG, "Set current control mode");
+        publish("setairthinxmode-" + mode.getValue(), DevicesTopics.REQUEST_SET_CURRENT_MODE_TOPIC);
+    }
+
+
     // Getter and setter
     public String getClientId() {
         return clientId;

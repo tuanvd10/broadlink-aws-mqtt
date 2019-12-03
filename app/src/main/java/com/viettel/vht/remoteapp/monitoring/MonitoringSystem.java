@@ -146,7 +146,7 @@ public class MonitoringSystem {
                             }
 
                             loadingBar.setVisibility(View.GONE); // disable the loading bar
-                            swipeRefreshStatus.setRefreshing(false);
+//                            swipeRefreshStatus.setRefreshing(false);
 
                         } catch (Exception e) {
                             e.printStackTrace();

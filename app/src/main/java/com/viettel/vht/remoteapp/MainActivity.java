@@ -3,7 +3,6 @@ package com.viettel.vht.remoteapp;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.icu.util.LocaleData;
 import android.os.Bundle;
 
 import androidx.navigation.NavController;
@@ -14,7 +13,6 @@ import androidx.navigation.ui.NavigationUI;
 import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttNewMessageCallback;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
-import com.amazonaws.services.iot.AWSIot;
 import com.google.android.material.navigation.NavigationView;
 import com.viettel.vht.remoteapp.common.AirPurifierTopics;
 import com.viettel.vht.remoteapp.common.Constants;
@@ -40,8 +38,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
 //    private HashMap<String, RemoteDevice> deviceList = new HashMap<String, RemoteDevice>();
 //    private HashMap<String, String> stateList = new HashMap<String, String>();
     private RemoteDevice remoteDevice = new RemoteDevice();
-    private AirPurifier realState = new AirPurifier(PowerState.NULL, SpeedState.NULL);
-    private AirPurifier expectedState = new AirPurifier(PowerState.NULL, SpeedState.NULL);
+    private AirPurifier realState = new AirPurifier();
+    private AirPurifier expectedState = new AirPurifier();
 
     // Dialog alert
     private Dialog mConnectionProblemDialog, mSmartPlugProblemDialog, mInfoDeviceProblemDialog, mNoResponseFromService;
@@ -265,10 +261,10 @@ public class MainActivity extends AppCompatActivity {
                 // check mode
                 if (mode.equals(ControlMode.AUTO.getValue())) {
                     // auto
-                    remoteDevice.setControlMode(ControlMode.AUTO);
+                    realState.setControlMode(ControlMode.AUTO);
                 } else if (mode.equals(ControlMode.MANUAL.getValue())) {
                     // manual
-                    remoteDevice.setControlMode(ControlMode.MANUAL);
+                    realState.setControlMode(ControlMode.MANUAL);
                 } else {
                     Log.e(LOG_TAG, "Wrong value in control mode");
                 }
@@ -385,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
             boolean doesControlModeExist = false;
             // Wait a time until control mode state be sent or inform error
             for (int i = 0; i < Constants.LOOP_NUMBER; i++) {
-                if (remoteDevice.getControlMode() == ControlMode.NULL) {
+                if (realState.getControlMode() == ControlMode.NULL) {
                     Thread.sleep(Constants.SLEEP_TIME);
                     // Check error
                     if (i == Constants.LOOP_NUMBER - 1) {
@@ -421,8 +417,10 @@ public class MainActivity extends AppCompatActivity {
                 // Subscribe control mode
                 subscribeModeControl();
 
+                // Request device info
                 mqttClient.requestDeviceInfos();
-                // Check information
+
+                // Check information in device
                 if (!checkRemoteDeviceInfo()) {
                     ThreadUtils.runOnUiThread(new Runnable() {
                         @Override
@@ -434,10 +432,10 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // Request state of device
-                mqttClient.requestAWSIotServer("checkpower-" + getSmartPlugId(), AirPurifierTopics.REQUEST_STATE_POWER);
-                mqttClient.requestAWSIotServer("checkspeed-" + getSmartPlugId(), AirPurifierTopics.REQUEST_STATE_SPEED);
+                mqttClient.requestSpeedStateOfDevice(getSmartPlugId());
+                mqttClient.requestPowerStateOfDevice(getSmartPlugId());
 
-                // TODO check switch mode
+                // Check power and speed in device
                if (!(checkPowerDevice() && checkSpeedDevice())) {
                    ThreadUtils.runOnUiThread(new Runnable() {
                        @Override
@@ -452,19 +450,25 @@ public class MainActivity extends AppCompatActivity {
                 expectedState.setSpeed(realState.getSpeed());
                 expectedState.setPower(realState.getPower());
 
+                // Request control mode
+                mqttClient.requestGetCurrentControlMode();
+                // Check response from control mode
                 if (!checkControlMode()) {
                     ThreadUtils.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mSmartPlugProblemDialog.show();
+                            mNoResponseFromService.show();
                         }
                     });
 
                     return;
                 }
 
+                // Set expected remote control mode
+                expectedState.setControlMode(realState.getControlMode());
+
                 // Start a state checker
-                new StateChecker(mqttClient, expectedState, realState, getRemoteDeviceId(), getSmartPlugId()).start();
+                new StateChecker(mqttClient, expectedState, realState, remoteDevice).start();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -476,13 +480,9 @@ public class MainActivity extends AppCompatActivity {
         return mqttClient;
     }
 
-
-
-
     public String getRemoteDeviceId() {
         return remoteDevice.getRemoteDeviceId();
     }
-
 
     public String getSmartPlugId() {
         return remoteDevice.getSmartPlugId();
