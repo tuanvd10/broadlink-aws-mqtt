@@ -157,25 +157,27 @@ async function doAction(devices){
 	//console.log("[tuanvd10]: SP device " + JSON.stringify(spDevice));
 	//await spDevice.getState();
 	if(spDevice.getState() && getAirThinxScore()){
-		await sleep(1000);
-		sendControlData(spDevice);
+		if(mode==="auto"){
+			await sleep(1000);
+			sendControlData(spDevice);
+		}
 	} 
 	logger.info("[tuanvd10] DONE ACTION");
 }
 
 function getCurrentAirthinxState(discoverDevices, requsetMode = "auto") {
-	logger.info("[tuanvd10] change mode " + mode + " => " + requsetMode);
-	//if(mode === requsetMode) return;
+	setInterval(function () {
+		doAction(discoverDevices);
+	}, cfg.airthinx.time_delay);
+}
 
-	if(requsetMode==="auto" && !interval){
-		interval = setInterval(function () {
-			doAction(discoverDevices);
-		}, 10000);
-		mode = requsetMode;
-	}else if(requsetMode==="manual"){
-		removeInterval();
-		mode = requsetMode;
+function setCurrentAirthinxMode(requsetMode = "auto"){
+	logger.info("[tuanvd10] change mode: " + mode + " => " + requsetMode);
+	if("auto" !== requsetMode || "manual" !== requsetMode) {
+		logger.debug("[tuanvd10] request mode not correct");
+		return;
 	}
+	mode = requsetMode;
 }
 
 function getCurrentAirthinxMode(){
@@ -210,3 +212,4 @@ global.aq = {
 }
 module.exports.getCurrentAirthinxState = getCurrentAirthinxState;
 module.exports.getCurrentAirthinxMode = getCurrentAirthinxMode;
+module.exports.setCurrentAirthinxMode = setCurrentAirthinxMode;

@@ -10,7 +10,7 @@ var devices = []
 var deviceInfos = [];
 
 const {
-  getCurrentAirthinxState, getCurrentAirthinxMode
+  getCurrentAirthinxState, getCurrentAirthinxMode, setCurrentAirthinxMode
 } = require("./../devices/airthinx_device");
 
 const discoveredDevices = {};
@@ -174,7 +174,7 @@ myEmitter.on("discoverCompleted", numOfDevice => {
 getCurrentAirthinxState(devices);
 
 const setAirthinxMode = (mode) => {
-    getCurrentAirthinxState(devices, mode);
+    setCurrentAirthinxMode(mode);
 }
 
 const getAirthinxMode = () => {
