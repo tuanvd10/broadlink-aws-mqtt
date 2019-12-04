@@ -35,7 +35,8 @@
 	"commandIncrease": "/airpurifier/speedup",
 	"commandDecrease": "/airpurifier/speeddown",
 	
-	"interval_time": "120000"
+	"interval_time": 120000,
+	"time_delay": 10000
   },
   "goodPoint":{
 		"aq": 90,
