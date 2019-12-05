@@ -1,5 +1,7 @@
 package com.viettel.vht.remoteapp.objects;
 
+import android.util.Log;
+
 import com.viettel.vht.remoteapp.common.ControlMode;
 import com.viettel.vht.remoteapp.common.PowerState;
 import com.viettel.vht.remoteapp.common.SpeedState;
@@ -10,6 +12,8 @@ import java.util.UUID;
  * Devices are remoted
  */
 public class AirPurifier {
+    static final String LOG_TAG = AirPurifier.class.getCanonicalName();
+
     private UUID id;
     private String name;
     private PowerState power;
@@ -25,6 +29,12 @@ public class AirPurifier {
         this.power = PowerState.NULL;
         this.speed = SpeedState.NULL;
         this.controlMode = ControlMode.NULL;
+    }
+
+    public AirPurifier(PowerState powerState, SpeedState speedState, ControlMode controlMode) {
+        this.power = powerState;
+        this.speed = speedState;
+        this.controlMode = controlMode;
     }
 
     // Is not null
@@ -59,5 +69,21 @@ public class AirPurifier {
 
     public void setControlMode(ControlMode controlMode) {
         this.controlMode = controlMode;
+    }
+
+    public void setPowerFromSpeed(SpeedState speed) {
+        switch (speed) {
+            case OFF:
+                setPower(PowerState.OFF);
+                break;
+            case LOW:
+            case MED:
+            case HIGH:
+                setPower(PowerState.ON);
+                break;
+            default:
+                Log.e(LOG_TAG, "wrong speed from setPowerFromSpeed");
+                break;
+        }
     }
 }

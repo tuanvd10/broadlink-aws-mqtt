@@ -3,6 +3,8 @@ package com.viettel.vht.remoteapp.common;
 public class AirPurifierTopics {
     // Power and speed air purifier
     public final static String POWER = "broadlink/airpurifier/power";
+    public final static String POWER_ON = "broadlink/airpurifier/poweron";
+    public final static String POWER_OFF = "broadlink/airpurifier/poweroff";
     public final static String SPEED = "broadlink/airpurifier/speed";
     public final static String UV = "broadlink/airpurifier/uv";
     public final static String LOW_SPEED = "broadlink/airpurifier/low";

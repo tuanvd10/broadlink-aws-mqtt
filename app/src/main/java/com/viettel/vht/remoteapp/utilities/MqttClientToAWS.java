@@ -289,8 +289,6 @@ public class MqttClientToAWS implements Serializable {
         }
     }
 
-
-
     public void publish(String msg, String topic) {
         Log.d(LOG_TAG, "publish message: " + msg + ", to topic: " + topic);
         mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
@@ -303,6 +301,14 @@ public class MqttClientToAWS implements Serializable {
 
     public void changePower(String deviceId) {
         publish("play-" + deviceId, AirPurifierTopics.POWER);
+    }
+
+    public void changePowerOn(String deviceId) {
+        publish("play-" + deviceId, AirPurifierTopics.POWER_ON);
+    }
+
+    public void changePowerOff(String deviceId) {
+        publish("play-" + deviceId, AirPurifierTopics.POWER_OFF);
     }
 
     public void changeSpeedToLow(String deviceId) {

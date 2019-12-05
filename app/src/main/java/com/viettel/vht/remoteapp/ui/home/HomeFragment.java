@@ -1,5 +1,8 @@
 package com.viettel.vht.remoteapp.ui.home;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -107,12 +110,26 @@ public class HomeFragment extends Fragment {
         // Switch
         mSwitchMode = root.findViewById(R.id.sw_mode);
         mSwitchMode.setOnClickListener(switchModeListener);
+        // parent activity
+        parentActivity = (MainActivity) getActivity();
 
-        // Parent Activity
-        expectedStateInDevice = ((MainActivity) getActivity()).getExpectedState();
+        // Dialog
+        mCannotRemoteDevice = new AlertDialog.Builder(parentActivity)
+                .setTitle(R.string.info)
+                .setMessage(R.string.cannot_remote_device)
+                .setNegativeButton(R.string.OK, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.i(LOG_TAG, "OK button click on CannotRemoteDevice dialog");
+                    }
+                }).create();
+
+        // get expected state in device
+        expectedStateInDevice = parentActivity.getExpectedState();
+        stateInUI = new AirPurifier();
         // Wait to update ui
         disableAllButton();
-        new updateUI().start();
+        updateUI();
 
         return root;
     }
@@ -162,12 +179,14 @@ public class HomeFragment extends Fragment {
     private Button mBtPower, mBtLowSpeed, mBtMedSpeed, mBtHighSpeed;
     private AirPurifier expectedStateInDevice;
     private Switch mSwitchMode;
+    private AirPurifier stateInUI;
 
     static final String LOG_TAG = HomeFragment.class.getCanonicalName();
 
     View.OnClickListener btPowerClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.d(LOG_TAG, "Click power button");
             power(v);
         }
     };
@@ -178,17 +197,20 @@ public class HomeFragment extends Fragment {
             switch(v.getId()) {
                 case R.id.bt_low_speed:
                     expectedStateInDevice.setSpeed(SpeedState.LOW);
+                    stateInUI.setSpeed(SpeedState.LOW);
                     uiInLowSpeed();
                     Log.i(LOG_TAG, "low speed");
                     break;
                 case R.id.bt_med_speed:
                     expectedStateInDevice.setSpeed(SpeedState.MED);
+                    stateInUI.setSpeed(SpeedState.MED);
                     uiInMedSpeed();
                     Log.i(LOG_TAG, "med speed");
                     break;
                 case R.id.bt_high_speed:
-                    uiInHighSpeed();
                     expectedStateInDevice.setSpeed(SpeedState.HIGH);
+                    stateInUI.setSpeed(SpeedState.HIGH);
+                    uiInHighSpeed();
                     Log.i(LOG_TAG, "high speed");
                     break;
                 default:
@@ -198,17 +220,21 @@ public class HomeFragment extends Fragment {
         }
     };
 
+
     View.OnClickListener switchModeListener = new View.OnClickListener(){
         @Override
         public void onClick(View v) {
             if (mSwitchMode.isChecked()) {
                 // Auto mode
                 mSwitchMode.setText(R.string.mode_auto);
+                stateInUI.setControlMode(ControlMode.AUTO);
                 expectedStateInDevice.setControlMode(ControlMode.AUTO);
+                loopFlag = false;
                 uiInAutoMode();
             } else {
                 // Manual mode
                 mSwitchMode.setText(R.string.mode_manual);
+                stateInUI.setControlMode(ControlMode.MANUAL);
                 expectedStateInDevice.setControlMode(ControlMode.MANUAL);
                 new updateUI().start();
             }
@@ -257,10 +283,10 @@ public class HomeFragment extends Fragment {
         ThreadUtils.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                enableSpeedButton();
                 // Enable all button
                 mBtPower.setEnabled(true);
                 mBtPower.setBackground(getResources().getDrawable(R.drawable.bg_power_on_bt, null));
-                enableSpeedButton();
             }
         });
 
@@ -274,10 +300,11 @@ public class HomeFragment extends Fragment {
         ThreadUtils.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                // Enable all button
+                // Disable speed button
+                disableSpeedButton();
+                // Enable power button
                 mBtPower.setEnabled(true);
                 mBtPower.setBackground(getResources().getDrawable(R.drawable.bg_power_off_bt, null));
-                disableSpeedButton();
             }
         });
     }
@@ -349,19 +376,36 @@ public class HomeFragment extends Fragment {
     }
 
     private void power(View view) {
-        if (expectedStateInDevice.getPower() == PowerState.ON) {
-            // Power on
+        // Check value of smart plug id
+        if (stateInUI.getPower() == PowerState.OFF) {
+            stateInUI.setPower(PowerState.ON);
+            expectedStateInDevice.setPower(PowerState.ON);
+        }
+        // Value of speed in smart plug id (power + speed in device)
+        Log.d(LOG_TAG, "Old_state = " + stateInUI.getSpeed().name());
+        if (stateInUI.getSpeed() != SpeedState.OFF) {
+            // Now: power on => Set power off
+            // state in ui
+            Log.i(LOG_TAG, "Turn off device");
+            stateInUI.setSpeed(SpeedState.OFF);
+            stateInUI.setPower(PowerState.OFF);
+            // expected state
             expectedStateInDevice.setSpeed(SpeedState.OFF);
             expectedStateInDevice.setPower(PowerState.OFF);
+            //Set ui
             uiInPowerOff();
-        } else if (expectedStateInDevice.getPower() == PowerState.OFF) {
-            // Power off
+        } else {
+            // Now: power off => Set power on
+            // State in ui
+            Log.i(LOG_TAG, "Turn off device");
+            stateInUI.setSpeed(SpeedState.LOW);
+            stateInUI.setPower(PowerState.ON);
+            // Expected state
             expectedStateInDevice.setSpeed(SpeedState.LOW);
             expectedStateInDevice.setPower(PowerState.ON);
+            //Set ui
             uiInPowerOn();
             uiInLowSpeed();
-        } else {
-            Log.e(LOG_TAG, "Error in expected power = null");
         }
     }
 
@@ -380,6 +424,28 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    /**
+     * check value between expected state and state in ui
+     * @return
+     */
+    private boolean checkStateBetweenExpectedAndUI() {
+        if (expectedStateInDevice.getControlMode() != stateInUI.getControlMode() ||
+            expectedStateInDevice.getPower() != stateInUI.getPower() ||
+            expectedStateInDevice.getSpeed() != stateInUI.getSpeed()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Start update ui
+     */
+    public void updateUI() {
+        // start updateUI
+        new updateUI().start();
+    }
+
     private class updateUI extends Thread {
 
         @Override
@@ -396,6 +462,11 @@ public class HomeFragment extends Fragment {
                 while(!expectedStateInDevice.isNotNull()) {
                     Thread.sleep(Constants.WAIT_TO_UPDATE_UI);
                 }
+
+                // set ui state
+                stateInUI.setPower(expectedStateInDevice.getPower());
+                stateInUI.setSpeed(expectedStateInDevice.getSpeed());
+                stateInUI.setControlMode(expectedStateInDevice.getControlMode());
 
                 // Set ui
                 if (expectedStateInDevice.getControlMode() == ControlMode.AUTO) {
@@ -425,6 +496,54 @@ public class HomeFragment extends Fragment {
                                 Log.e(LOG_TAG, "Error in speed");
                         }
                     }
+                }
+
+                // Start check update
+                if (!loopFlag) {
+                    checkUpdate();
+                }
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+
+        }
+    }
+
+
+    // Dialog inform to user when it cannot remote the device
+    private Dialog mCannotRemoteDevice;
+
+    /**
+     * function to call cannot remote dialog
+     */
+    private void showCannotRemoteDeviceDialog() {
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mCannotRemoteDevice.show();
+            }
+        });
+    }
+
+    private void checkUpdate() {
+        loopFlag = true;
+        new CheckUpdate().start();
+    }
+
+    // Flag for check update
+    private boolean loopFlag = false;
+
+    private class CheckUpdate extends Thread {
+        @Override
+        public void run() {
+            // infinite loop check value
+            try {
+                while(loopFlag) {
+                    if (checkStateBetweenExpectedAndUI()) {
+                        showCannotRemoteDeviceDialog();
+                        updateUI();
+                    }
+                    Thread.sleep(Constants.WAIT_TO_STATE_CHANGE);
                 }
             } catch (InterruptedException ie) {
                 ie.printStackTrace();

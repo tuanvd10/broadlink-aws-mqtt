@@ -3,7 +3,6 @@ package com.viettel.vht.remoteapp.remotecontrol;
 
 import android.util.Log;
 
-import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils;
 import com.viettel.vht.remoteapp.common.Constants;
 import com.viettel.vht.remoteapp.common.ControlMode;
 import com.viettel.vht.remoteapp.common.PowerState;
@@ -18,9 +17,9 @@ public class StateChecker extends Thread {
     private AirPurifier realState;
     private MqttClientToAWS mqttClient;
     private RemoteDevice remoteDevice;
-    private final int MAX_RETRY = 3;
 
-    public StateChecker (MqttClientToAWS mqttClient, AirPurifier expectedState, AirPurifier realState, RemoteDevice remoteDevice) {
+    public StateChecker (MqttClientToAWS mqttClient, AirPurifier expectedState, AirPurifier realState,
+                         RemoteDevice remoteDevice) {
         this.mqttClient = mqttClient;
         this.expectedState = expectedState;
         this.realState = realState;
@@ -40,62 +39,79 @@ public class StateChecker extends Thread {
 //                if (isChanging) {
 //                    retry();
 //                }
-                // Check expected state and real state
-                if (realState.getPower() == PowerState.OFF) {
-                    // Request turn on smart plug id
-                    // Turn off speed
-                    Log.i(LOG_TAG, "Turn on smart plug");
-                    mqttClient.changeSmartPlugPower(remoteDevice.getSmartPlugId());
-                    Thread.sleep(Constants.WAIT_TO_STATE_CHANGE);
-                    // Request change in remote state
-                    mqttClient.requestPowerStateOfDevice(remoteDevice.getSmartPlugId());
-                    markRetry(DifferentType.POWER);
-
-                } else {
-                    if (expectedState.getSpeed() != realState.getSpeed()) {
-                        // Check remote control mode
-                        if (expectedState.getControlMode() != realState.getControlMode()) {
-                            // Check remote control
+                // If have a change in
+                if (expectedState.getControlMode() != realState.getControlMode() ||
+                    realState.getPower() == PowerState.OFF ||
+                    expectedState.getSpeed() != realState.getSpeed()) {
+                    // Check remote control mode
+                    if (expectedState.getControlMode() != realState.getControlMode()) {
+                        boolean retCode = false;
+                        if (expectedState.getControlMode() == ControlMode.AUTO) {
+                            // auto
+                            retCode = markRetry(DifferentType.CONTROL_MODE_AUTO);
+                        } else {
+                            // manual
+                            retCode = markRetry(DifferentType.CONTROL_MODE_MANUAL);
+                        }
+                        // Check remote control
+                        if (retCode) {
                             mqttClient.changeControlMode(expectedState.getControlMode());
-                            if (expectedState.getControlMode() == ControlMode.AUTO) {
-                                // auto
-                                markRetry(DifferentType.CONTROL_MODE_AUTO);
-                            } else {
-                                // manual
-                                markRetry(DifferentType.CONTROL_MODE_MANUAL);
-                            }
+                            // Wait to change state
+                            Thread.sleep(Constants.WAIT_TO_STATE_CHANGE);
+                            // get state to check
+                            mqttClient.requestGetCurrentControlMode();
+                        }
+                    } else if (realState.getPower() == PowerState.OFF) {
+                        // Check expected state and real state
+                        if (markRetry(DifferentType.POWER)) {
+                            // Request turn on smart plug id
+                            Log.i(LOG_TAG, "Turn on smart plug");
+                            mqttClient.changeSmartPlugPower(remoteDevice.getSmartPlugId());
+                            Thread.sleep(Constants.WAIT_TO_STATE_CHANGE);
+                            // Request change in remote state
+                            mqttClient.requestPowerStateOfDevice(remoteDevice.getSmartPlugId());
                         }
 
+                    } else if (expectedState.getSpeed() != realState.getSpeed()) {
+                        // check speed
                         if (expectedState.getSpeed() == SpeedState.OFF) {
                             // expected state == 0
-                            // Turn off
-                            Log.i(LOG_TAG, "Turn off air purifier");
-                            mqttClient.changePower(remoteDevice.getRemoteDeviceId());
-                            markRetry(DifferentType.SPEED_OFF);
+                            if (markRetry(DifferentType.SPEED_OFF)) {
+                                // Turn off
+                                Log.i(LOG_TAG, "Turn off air purifier");
+                                mqttClient.changePowerOff(remoteDevice.getRemoteDeviceId());
+                            }
+
                         } else {
                             // expected state > 0
                             if (realState.getSpeed() == SpeedState.OFF) {
-                                // Turn on
-                                Log.i(LOG_TAG, "Turn on air purifier");
-                                mqttClient.changePower(remoteDevice.getRemoteDeviceId());
-                                markRetry(DifferentType.SPEED_ON);
+                                if (markRetry(DifferentType.SPEED_ON)) {
+                                    // Turn on
+                                    Log.i(LOG_TAG, "Turn on air purifier");
+                                    mqttClient.changePowerOn(remoteDevice.getRemoteDeviceId());
+                                }
+
                             } else {
                                 // change speed
                                 switch(expectedState.getSpeed()) {
                                     case LOW:
-                                        Log.i(LOG_TAG, "change speed to low");
-                                        mqttClient.changeSpeedToLow(remoteDevice.getRemoteDeviceId());
-                                        markRetry(DifferentType.SPEED_LOW);
+                                        if (markRetry(DifferentType.SPEED_LOW)) {
+                                            Log.i(LOG_TAG, "change speed to low");
+                                            mqttClient.changeSpeedToLow(remoteDevice.getRemoteDeviceId());
+                                        }
                                         break;
                                     case MED:
-                                        Log.i(LOG_TAG, "change speed to med");
-                                        mqttClient.changeSpeedToMed(remoteDevice.getRemoteDeviceId());
-                                        markRetry(DifferentType.SPEED_MED);
+                                        if (markRetry(DifferentType.SPEED_MED)) {
+                                            Log.i(LOG_TAG, "change speed to med");
+                                            mqttClient.changeSpeedToMed(remoteDevice.getRemoteDeviceId());
+                                        }
+
                                         break;
                                     case HIGH:
-                                        Log.i(LOG_TAG, "change speed to high");
-                                        mqttClient.changeSpeedToHigh(remoteDevice.getRemoteDeviceId());
-                                        markRetry(DifferentType.SPEED_HIGH);
+                                        if (markRetry(DifferentType.SPEED_HIGH)) {
+                                            Log.i(LOG_TAG, "change speed to high");
+                                            mqttClient.changeSpeedToHigh(remoteDevice.getRemoteDeviceId());
+                                        }
                                         break;
                                     default:
                                         Log.e(LOG_TAG, "wrong expected speed : " + expectedState.getSpeed().getValue());
@@ -103,20 +119,21 @@ public class StateChecker extends Thread {
                                 }
                             }
                         }
-                        // Wait to change
-                        sleepToWaitChange();
-                    } else {
-                        // Nothing to change
-                        if (isChanging) {
-                            removeRetry();
-                        }
-
-                        // Check on screen or not
-
+                        // Wait state to change
+                        Thread.sleep(Constants.WAIT_TO_STATE_CHANGE);
+                        // Request state
+                        mqttClient.requestAllStatesOfDevice(remoteDevice.getSmartPlugId());
                     }
+
+                } else {
+                    // Nothing to change
+                    if (isChanging) {
+                        removeRetry();
+                    }
+                    // Check on screen or not
                 }
 
-                // Wait until next state check
+                // Wait to state change if it has change in start of loop
                 Thread.sleep(Constants.WAIT_NEXT_LOOP);
             } catch (InterruptedException ie) {
                 ie.printStackTrace();
@@ -124,124 +141,43 @@ public class StateChecker extends Thread {
         }
     }
 
-    private void retry() {
-        // Check change value
-        Log.d(LOG_TAG, "one of values is changing. retry");
-        switch (diffType) {
-            case SPEED_LOW:
-                if (realState.getSpeed() != SpeedState.LOW) {
-                    mqttClient.changeSpeedToLow(remoteDevice.getRemoteDeviceId());
-                } else {
-                    removeRetry();
-                }
-                break;
-            case SPEED_MED:
-                if (realState.getSpeed() != SpeedState.MED) {
-                    mqttClient.changeSpeedToMed(remoteDevice.getRemoteDeviceId());
-                } else {
-                    removeRetry();
-                }
-                break;
-            case SPEED_HIGH:
-                if (realState.getSpeed() != SpeedState.HIGH) {
-                    mqttClient.changeSpeedToHigh(remoteDevice.getRemoteDeviceId());
-                } else {
-                    removeRetry();
-                }
-                break;
-            case SPEED_OFF:
-                if (realState.getSpeed() != SpeedState.OFF) {
-                    mqttClient.changePower(remoteDevice.getRemoteDeviceId());
-                } else {
-                    removeRetry();
-                }
-                break;
-            case SPEED_ON:
-                if (realState.getSpeed() == SpeedState.OFF) {
-                    mqttClient.changePower(remoteDevice.getRemoteDeviceId());
-                } else {
-                    removeRetry();
-                }
-                break;
-            case POWER:
-                if (realState.getPower() == PowerState.OFF) {
-                    mqttClient.changeSmartPlugPower(remoteDevice.getSmartPlugId());
-                } else {
-                    removeRetry();
-                }
-                break;
-            case CONTROL_MODE_AUTO:
-                if (realState.getControlMode() != ControlMode.AUTO) {
-                    mqttClient.changeControlMode(ControlMode.AUTO);
-                } else {
-                    removeRetry();
-                }
-                break;
-            case CONTROL_MODE_MANUAL:
-                if (realState.getControlMode() != ControlMode.MANUAL) {
-                    mqttClient.changeControlMode(ControlMode.MANUAL);
-                } else {
-                    removeRetry();
-                }
-                break;
-            default:
-                Log.d(LOG_TAG, "Error in different type");
-                break;
-        }
-        // Increase value retry
-        count++;
-        // Check maximum number retry
-        if (count == MAX_RETRY) {
-            removeRetry();
-        }
-    }
-
     /**
      * Function is called every time expected state have differences with real state
      * @param diffType
      */
-    private void markRetry(DifferentType diffType) {
+    private boolean markRetry(DifferentType diffType) {
         if (isChanging) {
-            Log.d(LOG_TAG, "Retry in " + count + " with type " + diffType.name());
-            if (this.diffType == diffType) {
-                // increase number retry
-                count++;
-                if (count == MAX_RETRY) {
-                    // Inform to user and reset state of expected value
-                    switch (diffType) {
-                        case SPEED_LOW:
-                        case SPEED_MED:
-                        case SPEED_HIGH:
-                        case SPEED_OFF:
-                        case SPEED_ON:
-                            expectedState.setSpeed(realState.getSpeed());
-                            // Change in ui
-                            break;
-                        case POWER:
-                            expectedState.setPower(realState.getPower());
-                            // Change in ui
-                            break;
-                        case CONTROL_MODE_AUTO:
-                        case CONTROL_MODE_MANUAL:
-                            expectedState.setControlMode(realState.getControlMode());
-                            // Change in ui
-                            break;
-                        default:
-                            Log.d(LOG_TAG, "Error in different type");
-                            break;
-                    }
-                }
+            Log.d(LOG_TAG, "Retry in " + count + ". Type param = " + diffType.name() + ", Type object = " + this.diffType.name());
 
+            // Check diff type
+            if (this.diffType != diffType) {
+                count = 0;
+                this.diffType = diffType;
             } else {
-                // another type request
-
+                count++;
             }
+
+            // Check diff type
+            if (count == Constants.MAX_TRY_REQUEST) {
+                // Inform to user and reset state of expected value
+                Log.d(LOG_TAG, "Cannot change value, reset expected value");
+                expectedState.setSpeed(realState.getSpeed());
+                expectedState.setPower(realState.getPower());
+                expectedState.setControlMode(realState.getControlMode());
+                // Remove retry
+                removeRetry();
+                // Just 1 retry
+                return false;
+            }
+
         } else {
             Log.d(LOG_TAG, "Start retry");
             isChanging = true;
             count = 0;
             this.diffType = diffType;
         }
+
+        return true;
     }
 
     /**
@@ -253,10 +189,6 @@ public class StateChecker extends Thread {
         diffType = DifferentType.NOTHING;
     }
 
-    private void sleepToWaitChange() throws InterruptedException {
-        Thread.sleep(Constants.WAIT_TO_STATE_CHANGE);
-        mqttClient.requestAllStatesOfDevice(remoteDevice.getSmartPlugId());
-    }
 
 
     /**
@@ -272,5 +204,38 @@ public class StateChecker extends Thread {
         CONTROL_MODE_AUTO,          // Real control mode must be auto
         CONTROL_MODE_MANUAL,        // Real control mode must be manual
         NOTHING;                    // Nothing to change
+    }
+
+    private boolean checkCompleteRequest(DifferentType diffType) {
+        boolean retVal = false;
+        switch (diffType) {
+            case SPEED_LOW:
+            case SPEED_MED:
+            case SPEED_HIGH:
+            case SPEED_ON:
+            case SPEED_OFF:
+                if (realState.getSpeed() == expectedState.getSpeed()) {
+                    retVal = true;
+                }
+                Log.d(LOG_TAG, "Check complete speed");
+                break;
+            case POWER:
+                if (expectedState.getPower() == realState.getPower()) {
+                    retVal = true;
+                }
+                Log.d(LOG_TAG, "Check complete power");
+                break;
+            case CONTROL_MODE_AUTO:
+            case CONTROL_MODE_MANUAL:
+                if (expectedState.getControlMode() == realState.getControlMode()) {
+                    retVal = true;
+                }
+                break;
+            default:
+                Log.d(LOG_TAG, "Error in different type in check complete request");
+                break;
+        }
+        // return value
+        return retVal;
     }
 }

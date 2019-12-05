@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -24,6 +25,7 @@ import com.viettel.vht.remoteapp.common.SpeedState;
 import com.viettel.vht.remoteapp.objects.AirPurifier;
 import com.viettel.vht.remoteapp.objects.RemoteDevice;
 import com.viettel.vht.remoteapp.remotecontrol.StateChecker;
+import com.viettel.vht.remoteapp.ui.home.HomeFragment;
 import com.viettel.vht.remoteapp.utilities.MqttClientToAWS;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -284,6 +286,7 @@ public class MainActivity extends AppCompatActivity {
      * class: get device and state of device from aws iot
      */
     private class InformationCollector extends Thread {
+
         /**
          * check mqtt connection
          * @return
@@ -468,6 +471,7 @@ public class MainActivity extends AppCompatActivity {
                 expectedState.setControlMode(realState.getControlMode());
 
                 // Start a state checker
+
                 new StateChecker(mqttClient, expectedState, realState, remoteDevice).start();
             } catch (Exception ex) {
                 ex.printStackTrace();

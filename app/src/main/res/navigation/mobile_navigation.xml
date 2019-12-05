@@ -27,7 +27,7 @@
     <fragment
         android:id="@+id/nav_air_purifier"
         android:name="com.viettel.vht.remoteapp.ui.airpurifier.AirPurifierFragment"
-        android:label="@string/nav_name_air_purifier"
+        android:label="@string/test"
         tools:layout="@layout/fragment_air_purifier_home" />
 
 
