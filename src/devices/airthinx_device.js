@@ -173,7 +173,7 @@ function getCurrentAirthinxState(discoverDevices, requsetMode = "auto") {
 
 function setCurrentAirthinxMode(requsetMode = "auto"){
 	logger.info("[tuanvd10] change mode: " + mode + " => " + requsetMode);
-	if("auto" !== requsetMode || "manual" !== requsetMode) {
+	if("auto" !== requsetMode && "manual" !== requsetMode) {
 		logger.debug("[tuanvd10] request mode not correct");
 		return;
 	}
