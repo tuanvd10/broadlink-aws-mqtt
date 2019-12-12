@@ -112,14 +112,14 @@ const sendControlData = (spDevice) => {
 		}else{
 			//decrease a level
 			let currentTime = new Date().getTime();
-			if(currentTime - global.aq.time > cfg.airthinx.interval_time && currentTime-spDevice.state.currentState.time > cfg.airthinx.interval_time){
+			{
 					//decrease 1 level or OFF if it keep state too long
 					if(spDevice.state.currentState.clientStatus==1){
 						logger.info("[tuanvd10] Turn OFF level");
 						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
 						//sendCommandMultitime(3);//if only 1 button
 						sendAirthinxCommand(1);
-					}else{
+					}else if(currentTime - global.aq.time > cfg.airthinx.interval_time && currentTime-spDevice.state.currentState.time > cfg.airthinx.interval_time){
 						logger.info("[tuanvd10] decrease 1 level");
 						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandDecrease, "airthinx");
 						//sendCommandMultitime(3);//if only 1 button
