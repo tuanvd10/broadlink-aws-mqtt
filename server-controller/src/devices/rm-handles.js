@@ -16,7 +16,18 @@ const playAction = data =>
                 reject("Stopped at playAction");
                 return;
             } else {
-                data.device.sendData(fileData, false);
+                //try 3 time
+                let retry = 0;
+                //current state
+                //expect state
+                while (retry < 3){
+                    data.device.sendData(fileData, false);
+                    //sleep 500ms
+                    //get state => auto publish current state
+                    data.spDevice.getState();
+                    retry++;
+                    //sleep 500ms
+                }
                 resolve(data);
             }
         });

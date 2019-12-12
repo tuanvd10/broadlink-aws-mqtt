@@ -162,7 +162,7 @@ const prepareAction = data =>
             const folderPath = filePath.substr(0, filePath.lastIndexOf("/"));
 
             // find device to use
-            let device;
+            let device, spDevice;
             if (Broadlink.devices.length === 0) {
                 logger.debug("No devices");
                 return reject("No devices");
@@ -182,12 +182,13 @@ const prepareAction = data =>
             } else {
                 device = Broadlink.devices[0];
             }
-
+            spDevice = Broadlink.devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
             data = Object.assign({}, data, {
                 path: actionPath,
                 folderPath,
                 filePath,
-                device
+                device,
+                spDevice
             });
             resolve(data);
         } else {

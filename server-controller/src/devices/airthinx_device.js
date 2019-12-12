@@ -7,7 +7,7 @@ const fs = require("fs");
 var commandList = ["PowerOnCommand", "PowerOffCommand","LowCommand", "MedCommand", "HighCommand"];
 var interval = null;
 var mode = "auto";
-
+var globalSpDevice = null;
 axios.defaults.headers.common['Authorization'] = "Bearer 1339b161-9ea6-490b-877f-bd6e65674373";
 axios.defaults.headers.common['Accept'] = "application/json";
 axios.defaults.headers.post['Content-Type'] = "application/json";
@@ -145,14 +145,15 @@ function sleep(ms){
 const sendCommandMultitime = async (time) =>{
 	let i =0;
 	for(i = 0; i< time; i++) {
-		await 	runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
-		await  sleep(500);
+		await runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
+		await sleep(500);
 	}
 };
 
 async function doAction(devices){
 	logger.debug("[tuanvd10] START ACTION");
 	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
+	globalSpDevice = spDevice;
 	if(!spDevice) return;
 	//console.log("[tuanvd10]: SP device " + JSON.stringify(spDevice));
 	//await spDevice.getState();
@@ -171,13 +172,21 @@ function getCurrentAirthinxState(discoverDevices, requsetMode = "auto") {
 	}, cfg.airthinx.time_delay);
 }
 
-function setCurrentAirthinxMode(requsetMode = "auto"){
+async function setCurrentAirthinxMode(requsetMode = "auto"){
 	logger.debug("[tuanvd10] change mode: " + mode + " => " + requsetMode);
 	if("auto" !== requsetMode && "manual" !== requsetMode) {
 		logger.debug("[tuanvd10] request mode not correct");
 		return;
 	}
-	mode = requsetMode;
+	mode = requsetMode;	
+	if(globalSpDevice){
+		if(globalSpDevice.getState() && getAirThinxScore()){
+			if(mode==="auto"){
+				await sleep(500);
+				sendControlData(globalSpDevice);
+			}
+		} 
+	}
 }
 
 function getCurrentAirthinxMode(){
