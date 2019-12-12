@@ -90,14 +90,14 @@ const sendControlData = (spDevice) => {
 		if(spDevice.state.currentState.clientStatus==3) {
 			logger.debug("[tuanvd10] max level, cannot increase");
 		}else{
-			if(currentTime - global.aq.time > cfg.airthinx.interval_time && currentTime-spDevice.state.currentState.time > cfg.airthinx.interval_time){
+			{
 					//increase 1 level if it keep aq and state too long
 					if(spDevice.state.currentState.clientStatus==0){
 						logger.info("[tuanvd10] turn ON level");
 						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandPower, "airthinx");
 						//sendCommandMultitime(1);//if only 1 button
 						sendAirthinxCommand(0);
-					}else{
+					}else if (currentTime - global.aq.time > cfg.airthinx.interval_time && currentTime-spDevice.state.currentState.time > cfg.airthinx.interval_time){
 						logger.info("[tuanvd10] increse 1 level");
 						//runAction("play-" + cfg.airthinx.deviceid, cfg.mqtt.subscribeBasePath + cfg.airthinx.commandIncrease, "airthinx");
 						//sendCommandMultitime(1);//if only 1 button
