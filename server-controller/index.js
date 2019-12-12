@@ -3,7 +3,6 @@
 const logger = require("./src/logger");
 require("./src/web/server");;
 
-const mqttClient = require("./src/mqtt/mqtt-client");
 const awsDevice = require("./src/aws-iot/device-connect");
 const handleMsg = require("./src/devices/actions");
 
@@ -19,19 +18,6 @@ awsDevice.on('message', function (topic, payload) {
     handleMsg.runAction(msg, topic, "aws")
         .then(data => logger.debug("mqtt done"))
         .catch(err => logger.error("mqtt aws iot failed on message", err));
-});
-
-//Handle mqtt local message
-mqttClient.on("message", function (topic, message) {
-    // message is Buffer
-    const msg = message.toString();
-    logger.debug("MQTT Message", {
-        topic,
-        msg
-    });
-    handleMsg.runAction(msg, topic, "mqtt")
-        .then(data => logger.debug("mqtt done"))
-        .catch(err => logger.info("mqtt failed on message: ", err));
 });
 
 logger.info("Starting Broadlink MQTT NodeJS Application");
