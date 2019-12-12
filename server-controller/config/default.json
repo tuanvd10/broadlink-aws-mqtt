@@ -5,6 +5,7 @@
     "protocol": "mqtt",
     "subscribeBasePath": "broadlink"
   },
+  "numOfDiscover": 5,
   "recording": {
     "timeout": {
       "ir": 30,
@@ -15,7 +16,9 @@
   "gui": {
     "port": 3001
   },
-
+  "log": {
+    "level": "info"
+  },
   "smartplug": {
     "POWEROFF": 5,
     "LOW": 15,
@@ -23,7 +26,7 @@
     "HIGH": 55
 	},
   "airthinx":{
-	"deviceid": "770f78d91f64",
+	"deviceid": "42f7c863187",
 	"spDeviceId": "34ea3479ee2b",
 	"PowerOffCommand": "/airpurifier/poweroff", 
 	"PowerOnCommand": "/airpurifier/poweron", 

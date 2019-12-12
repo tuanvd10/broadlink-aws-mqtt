@@ -332,7 +332,7 @@ const getDevicesInfo = () =>
         }
         resolve(devs);
     });
-const scanDevice = (count) => {
+const scanDevice = (count = cfg.numOfDiscover) => {
     Broadlink.discoverDevices(count);
 }
 

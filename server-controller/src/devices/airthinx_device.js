@@ -43,7 +43,7 @@ const getAirThinxScore =  async ()=>{
 	voc = data[0].data_points.find(x =>x.name === "VOC (Isobutylene)" ).measurements[0][1] + data[0].data_points.find(x =>x.name === "VOC (EtOH)" ).measurements[0][1];
 	formaldehyde = data[0].data_points.find(x => x.name.indexOf("CH")==0).measurements[0][1];
 
-	logger.info("[tuanvd10] aq value: " +aq);
+	logger.debug("[tuanvd10] aq value: " +aq);
 	
 	if(
 //		global.aq.aq == 0 || (global.aq.aq <=  cfg.goodPoint.aq && aq >  cfg.goodPoint.aq) || (global.aq.aq >  cfg.goodPoint.aq && aq <=  cfg.goodPoint.aq)
@@ -88,7 +88,7 @@ const sendControlData = (spDevice) => {
 
 	if(!checkAirCondition()){//not good
 		if(spDevice.state.currentState.clientStatus==3) {
-			logger.info("[tuanvd10] max level, cannot increase");
+			logger.debug("[tuanvd10] max level, cannot increase");
 		}else{
 			if(currentTime - global.aq.time > cfg.airthinx.interval_time && currentTime-spDevice.state.currentState.time > cfg.airthinx.interval_time){
 					//increase 1 level if it keep aq and state too long
@@ -108,7 +108,7 @@ const sendControlData = (spDevice) => {
 	}else{ //good
 		if(spDevice.state.currentState.clientStatus==0){
 			//do nothing
-			logger.info("[tuanvd10] OFF level");
+			logger.debug("[tuanvd10] OFF level");
 		}else{
 			//decrease a level
 			let currentTime = new Date().getTime();
@@ -151,7 +151,7 @@ const sendCommandMultitime = async (time) =>{
 };
 
 async function doAction(devices){
-	logger.info("[tuanvd10] START ACTION");
+	logger.debug("[tuanvd10] START ACTION");
 	var spDevice = devices.find(x => x.host.id === cfg.airthinx.spDeviceId);
 	if(!spDevice) return;
 	//console.log("[tuanvd10]: SP device " + JSON.stringify(spDevice));
@@ -162,7 +162,7 @@ async function doAction(devices){
 			sendControlData(spDevice);
 		}
 	} 
-	logger.info("[tuanvd10] DONE ACTION");
+	logger.debug("[tuanvd10] DONE ACTION");
 }
 
 function getCurrentAirthinxState(discoverDevices, requsetMode = "auto") {
@@ -172,7 +172,7 @@ function getCurrentAirthinxState(discoverDevices, requsetMode = "auto") {
 }
 
 function setCurrentAirthinxMode(requsetMode = "auto"){
-	logger.info("[tuanvd10] change mode: " + mode + " => " + requsetMode);
+	logger.debug("[tuanvd10] change mode: " + mode + " => " + requsetMode);
 	if("auto" !== requsetMode && "manual" !== requsetMode) {
 		logger.debug("[tuanvd10] request mode not correct");
 		return;

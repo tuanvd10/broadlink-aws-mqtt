@@ -71,7 +71,7 @@ io.on("connection", socket => {
   });
   socket.on("rescanDevices", () => {
     logger.info("Rescan devices");
-    scanDevice(2);
+    scanDevice();
   });
 });
 module.export = io;

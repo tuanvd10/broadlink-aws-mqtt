@@ -2,7 +2,7 @@
 //Require a web server code
 const logger = require("./src/logger");
 require("./src/web/server");;
-
+let cfg = require("./src/config");
 const awsDevice = require("./src/aws-iot/device-connect");
 const handleMsg = require("./src/devices/actions");
 
@@ -22,5 +22,5 @@ awsDevice.on('message', function (topic, payload) {
 
 logger.info("Starting Broadlink MQTT NodeJS Application");
 
-handleMsg.scanDevice(2);
+handleMsg.scanDevice();
 

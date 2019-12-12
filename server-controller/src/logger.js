@@ -1,11 +1,12 @@
 const winston = require("winston");
 const CircularJSON = require("circular-json");
+let cfg = require("./config");
 // -------------------------------------
 //      SETUP LOGGER with Winston
 // -------------------------------------
 // Logger to be used in project
 const logger = winston.createLogger({
-    level: "debug",
+    level: cfg.log.level,
     format: winston.format.json(),
     transports: [
         new winston.transports.File({
