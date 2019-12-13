@@ -4,11 +4,16 @@ const fs = require("fs");
 const logger = require("./../logger");
 const cfg = require("./../config");
 
+function sleep(ms){
+    return new Promise(resolve=>{
+        setTimeout(resolve,ms)
+    })
+}
 
 const playAction = data =>
     new Promise((resolve, reject) => {
         logger.info("playAction");
-        fs.readFile(data.filePath, (err, fileData) => {
+        fs.readFile(data.filePath, async function read(err, fileData) {  
             if (err) {
                 logger.error("Failed to read file", {
                     err
@@ -18,15 +23,37 @@ const playAction = data =>
             } else {
                 //try 3 time
                 let retry = 0;
+                let current, expect;
                 //current state
                 //expect state
+                switch (data.folderPath) {
+                    case "low.bin":
+                        expect = 1;
+                        break;
+                    case "med.bin":
+                        expect = 2;
+                        break;
+                    case "high.bin":
+                        expect = 3;
+                        break;
+                    default:
+                        if(data.folderPath.indexOf("off") !== -1) expect = 0;
+                        else expect = "ON";//different != 0
+                        break;
+                }    
                 while (retry < 3){
                     data.device.sendData(fileData, false);
-                    //sleep 500ms
+                    await sleep(200);
                     //get state => auto publish current state
-                    data.spDevice.getState();
+                    await data.spDevice.getState();
+                    await sleep(200);
                     retry++;
-                    //sleep 500ms
+                    current = data.device.state.currentState.clientStatus;
+                    logger.debug("[tuanvd10] playAction--sendata: " + current + " - expect" + expect);
+                    if(current === expect || (expect==="ON" && current!=0)){
+                        //publish?
+                        break;
+                    }
                 }
                 resolve(data);
             }

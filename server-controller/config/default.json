@@ -26,7 +26,7 @@
     "HIGH": 55
 	},
   "airthinx":{
-	"deviceid": "42f7c863187",
+	"deviceid": "42f7c863187b",
 	"spDeviceId": "34ea3479ee2b",
 	"PowerOffCommand": "/airpurifier/poweroff", 
 	"PowerOnCommand": "/airpurifier/poweron", 
@@ -38,13 +38,13 @@
 	"commandIncrease": "/airpurifier/speedup",
 	"commandDecrease": "/airpurifier/speeddown",
 	
-	"interval_time": 120000,
+	"interval_time": 60000,
 	"time_delay": 10000
   },
   "goodPoint":{
 		"aq": 90,
 		"pm": 25.4,
-		"co2": 880,
+		"co2": 850,
 		"voc": 1,
 		"formaldehyde": 0.05
 	}
