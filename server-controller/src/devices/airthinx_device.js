@@ -8,6 +8,15 @@ var commandList = ["PowerOnCommand", "PowerOffCommand","LowCommand", "MedCommand
 var interval = null;
 var mode = "auto";
 var globalSpDevice = null;
+global.aq = {
+	"co2" : -1, 
+	"pm": -1, "pm1": -1, "pm25": -1, "pm10": -1, 
+	"voc": -1, 
+	"formaldehyde": -1, 
+	"aq" : -1,
+	"time" : -1
+}
+
 axios.defaults.headers.common['Authorization'] = "Bearer 1339b161-9ea6-490b-877f-bd6e65674373";
 axios.defaults.headers.common['Accept'] = "application/json";
 axios.defaults.headers.post['Content-Type'] = "application/json";
@@ -82,6 +91,11 @@ const sendControlData = (spDevice) => {
 		logger.debug("[tuanvd10] sendControlData SP state: " + spDevice.state.spState);
 		return;
 	}
+
+	if(global.aq.time===-1){ //not get any air quality information
+		return;
+	}
+	
 	logger.debug("[tuanvd10] current state: ", spDevice.state);
 	logger.debug("[tuanvd10] current aq: ", global.aq);
 	logger.debug("[tuanvd10] current time: " + currentTime);
@@ -211,14 +225,6 @@ function removeInterval(){
 		interval = null;
 }
 
-global.aq = {
-	"co2" : -1, 
-	"pm": -1, "pm1": -1, "pm25": -1, "pm10": -1, 
-	"voc": -1, 
-	"formaldehyde": -1, 
-	"aq" : -1,
-	"time" : -1
-}
 module.exports.getCurrentAirthinxState = getCurrentAirthinxState;
 module.exports.getCurrentAirthinxMode = getCurrentAirthinxMode;
 module.exports.setCurrentAirthinxMode = setCurrentAirthinxMode;
