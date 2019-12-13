@@ -23,11 +23,11 @@ const playAction = data =>
             } else {
                 //try 3 time
                 let retry = 0;
-                let current, expect;
+                let current, expect, command;
                 //current state
                 //expect state
                 
-                switch (data.path.substr(filePath.lastIndexOf("/")+1, data.path.length)) {
+                switch (command = data.path.substr(data.path.lastIndexOf("/")+1, data.path.length)) {
                     case "low":
                         expect = 1;
                         break;
@@ -38,7 +38,7 @@ const playAction = data =>
                         expect = 3;
                         break;
                     default:
-                        if(data.folderPath.indexOf("off") !== -1) expect = 0;
+                        if(command.indexOf("off") !== -1) expect = 0;
                         else expect = "ON";//different != 0
                         break;
                 }    
