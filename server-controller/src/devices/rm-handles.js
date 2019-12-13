@@ -26,14 +26,15 @@ const playAction = data =>
                 let current, expect;
                 //current state
                 //expect state
-                switch (data.folderPath) {
-                    case "low.bin":
+                
+                switch (data.path.substr(filePath.lastIndexOf("/")+1, data.path.length)) {
+                    case "low":
                         expect = 1;
                         break;
-                    case "med.bin":
+                    case "med":
                         expect = 2;
                         break;
-                    case "high.bin":
+                    case "high":
                         expect = 3;
                         break;
                     default:
@@ -48,7 +49,7 @@ const playAction = data =>
                     await data.spDevice.getState();
                     await sleep(200);
                     retry++;
-                    current = data.device.state.currentState.clientStatus;
+                    current = data.spDevice.state.currentState.clientStatus;
                     logger.debug("[tuanvd10] playAction--sendata: " + current + " - expect" + expect);
                     if(current === expect || (expect==="ON" && current!=0)){
                         //publish?
