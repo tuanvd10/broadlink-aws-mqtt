@@ -57,14 +57,14 @@ const getAirThinxScore =  async ()=>{
 	if(
 //		global.aq.aq == 0 || (global.aq.aq <=  cfg.goodPoint.aq && aq >  cfg.goodPoint.aq) || (global.aq.aq >  cfg.goodPoint.aq && aq <=  cfg.goodPoint.aq)
 //		|| 	global.aq.pm == 0 || (global.aq.pm <= cfg.goodPoint.pm && pm > cfg.goodPoint.pm) || (global.aq.pm > cfg.goodPoint.pm && pm <= cfg.goodPoint.pm)
-		global.aq.pm1 == 0 || (global.aq.pm1 <= cfg.goodPoint.pm && pm1 > cfg.goodPoint.pm) || (global.aq.pm1 > cfg.goodPoint.pm && pm1 <= cfg.goodPoint.pm)
-		|| 	global.aq.pm25 == 0 || (global.aq.pm25 <= cfg.goodPoint.pm && pm25 > cfg.goodPoint.pm) || (global.aq.pm25 > cfg.goodPoint.pm && pm25 <= cfg.goodPoint.pm)
-		|| 	global.aq.pm10 == 0 || (global.aq.pm10 <= cfg.goodPoint.pm && pm10 > cfg.goodPoint.pm) || (global.aq.pm10 > cfg.goodPoint.pm && pm10 <= cfg.goodPoint.pm)
-		|| 	global.aq.co2 == 0 || (global.aq.co2 <= cfg.goodPoint.co2 && co2 >  cfg.goodPoint.co2) || (global.aq.co2 >  cfg.goodPoint.co2 && co2 <=  cfg.goodPoint.co2)
-		|| 	global.aq.voc == 0 || (global.aq.voc <=  cfg.goodPoint.voc && voc > cfg.goodPoint.voc) || (global.aq.voc > cfg.goodPoint.voc && voc <= cfg.goodPoint.voc)
-		|| 	global.aq.formaldehyde == 0 || (global.aq.formaldehyde <= cfg.goodPoint.formaldehyde && formaldehyde > cfg.goodPoint.formaldehyde) || (global.aq.formaldehyde > cfg.goodPoint.formaldehyde && formaldehyde <= cfg.goodPoint.formaldehyde)
+		global.aq.pm1 == -1 || (global.aq.pm1 <= cfg.goodPoint.pm && pm1 > cfg.goodPoint.pm) || (global.aq.pm1 > cfg.goodPoint.pm && pm1 <= cfg.goodPoint.pm)
+		|| 	global.aq.pm25 == -1 || (global.aq.pm25 <= cfg.goodPoint.pm && pm25 > cfg.goodPoint.pm) || (global.aq.pm25 > cfg.goodPoint.pm && pm25 <= cfg.goodPoint.pm)
+		|| 	global.aq.pm10 == -1 || (global.aq.pm10 <= cfg.goodPoint.pm && pm10 > cfg.goodPoint.pm) || (global.aq.pm10 > cfg.goodPoint.pm && pm10 <= cfg.goodPoint.pm)
+		|| 	global.aq.co2 == -1 || (global.aq.co2 <= cfg.goodPoint.co2 && co2 >  cfg.goodPoint.co2) || (global.aq.co2 >  cfg.goodPoint.co2 && co2 <=  cfg.goodPoint.co2)
+		|| 	global.aq.voc == -1 || (global.aq.voc <=  cfg.goodPoint.voc && voc > cfg.goodPoint.voc) || (global.aq.voc > cfg.goodPoint.voc && voc <= cfg.goodPoint.voc)
+		|| 	global.aq.formaldehyde == -1 || (global.aq.formaldehyde <= cfg.goodPoint.formaldehyde && formaldehyde > cfg.goodPoint.formaldehyde) || (global.aq.formaldehyde > cfg.goodPoint.formaldehyde && formaldehyde <= cfg.goodPoint.formaldehyde)
 	)
-			global.aq.time = time;
+			global.aq.time = new Date().getTime();
 		
 	global.aq.aq = aq;
 	global.aq.pm = pm;
