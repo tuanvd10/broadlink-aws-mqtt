@@ -23,7 +23,7 @@ const alignedWithColorsAndTime = winston.format.combine(
 
 const timestamp = () =>  {
     const d = new Date();
-    return d.getDate() + d.getMonth()+d.getFullYear();
+    return "-"+d.getDate() + d.getMonth()+d.getFullYear();
 };
 
 // Logger to be used in project
