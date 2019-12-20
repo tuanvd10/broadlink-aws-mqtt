@@ -1,30 +1,11 @@
 const winston = require("winston");
 const CircularJSON = require("circular-json");
 let cfg = require("./config");
+const fs = require('fs');
+const path = require('path');
 // -------------------------------------
 //      SETUP LOGGER with Winston
 // -------------------------------------
-// Logger to be used in project
-const logger = winston.createLogger({
-    level: cfg.log.level,
-    format: winston.format.json(),
-    transports: [
-        new winston.transports.File({
-            filename: "output.log",
-            tailable: true,
-            maxsize: 2000000,
-            maxFiles: 1
-        })
-        //new winston.transports.Http({ path: "log", port:3001 })
-    ]
-});
-
-// Output stream to socket.io
-logger.stream({ start: -1 }).on("log", function (log) {
-    if (io !== null) {
-        io.emit("log", log);
-    }
-});
 
 // try to make some pretty output
 const alignedWithColorsAndTime = winston.format.combine(
@@ -39,6 +20,32 @@ const alignedWithColorsAndTime = winston.format.combine(
             }`;
     })
 );
+
+const timestamp = () =>  {
+    const d = new Date();
+    return d.getDate() + d.getMonth()+d.getFullYear();
+};
+
+// Logger to be used in project
+const logger = winston.createLogger({
+    level: cfg.log.level,
+    format: alignedWithColorsAndTime, 
+    transports: [
+        new winston.transports.Stream({
+            level: cfg.log.level,
+            stream: fs.createWriteStream(path.join(__dirname, `log${timestamp()}.log`), {flags: 'a'})
+          })
+        //new winston.transports.Http({ path: "log", port:3001 })
+    ]
+});
+
+// Output stream to socket.io
+logger.stream({ start: -1 }).on("log", function (log) {
+    if (io !== null) {
+        io.emit("log", log);
+    }
+});
+
 logger.add(
     new winston.transports.Console({
         format: alignedWithColorsAndTime
