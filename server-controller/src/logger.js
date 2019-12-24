@@ -1,4 +1,5 @@
 const winston = require("winston");
+require('winston-daily-rotate-file');
 const CircularJSON = require("circular-json");
 let cfg = require("./config");
 const fs = require('fs');
@@ -6,7 +7,6 @@ const path = require('path');
 // -------------------------------------
 //      SETUP LOGGER with Winston
 // -------------------------------------
-
 // try to make some pretty output
 const alignedWithColorsAndTime = winston.format.combine(
     winston.format.colorize(),
@@ -26,15 +26,20 @@ const timestamp = () =>  {
     return "-"+d.getDate() + d.getMonth()+d.getFullYear();
 };
 
+var transport = new (winston.transports.DailyRotateFile)({
+    filename: 'application-%DATE%.log',
+    datePattern: 'DD-MM-YYYY',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '30d'
+});
+
 // Logger to be used in project
 const logger = winston.createLogger({
     level: cfg.log.level,
     format: alignedWithColorsAndTime, 
     transports: [
-        new winston.transports.Stream({
-            level: cfg.log.level,
-            stream: fs.createWriteStream(path.join(__dirname, `log${timestamp()}.log`), {flags: 'a'})
-          })
+        transport
         //new winston.transports.Http({ path: "log", port:3001 })
     ]
 });
