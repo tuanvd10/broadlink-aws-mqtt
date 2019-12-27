@@ -1,0 +1,104 @@
+<resources>
+    <string name="app_name">vAirPurifier</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Máy lọc không khí</string>
+    <string name="nav_header_subtitle">Trung tâm nghiên cứu thiết bị Y Tế (viettel)</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_tools">Tools</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_send">Send</string>
+    <string name="air_status">Air Status</string>
+    <string name="menu_remote_control">Remote Control</string>
+    <string name="menu_air_remote_control">Điểu khiển máy lọc không khí</string>
+
+<!--    String for fan mitsubishi-->
+    <string name="fan_mitsubishi">Mitsubishi LV16-RT</string>
+<!--    String for button in fan mitsubishi-->
+    <string name="bt_connect">Kết nối</string>
+    <string name="fan_speed">Tốc độ</string>
+    <string name="fan_power">Bật/Tắt</string>
+    <string name="fan_swing">Quay</string>
+    <string name="fan_rhythm">Thay đổi nhịp độ</string>
+    <string name="fan_timer">Thời gian tắt</string>
+
+<!--    String for status screen in remote control-->
+    <string name="connecting_status">Đang kết nối</string>
+    <string name="connected_status">Đã kết nối</string>
+    <string name="bt_try_again">Thử lại</string>
+    <string name="bt_pass">Bỏ qua</string>
+    <string name="msg_lost_connection">Không thể kết nối tới máy chủ (Hãy kiểm tra lại đường truyền mạng)</string>
+    <string name="title_lost_connection">Mất kết nối</string>
+    <string name="msg_no_response_from_device">Thiết bị không phản hồi hoặc máy chủ giám sát không phải hồi! \nHãy liên hệ với tamnd12@viettel.com.vn hoặc tuanvd10@viettel.com.vn</string>
+    <string name="msg_no_response_from_service">Máy chủ giám sát không phản hồi! \nHãy liên hệ với tuanvd10@viettel.com.vn</string>
+    <string name="check_smart_plug_and_remote">Hãy kiểm tra lại ổ cắm điện và thiết bị điều khiển (Không thể kết nối tới thiết bị)</string>
+    <string name="not_connected">Chưa kết nối</string>
+    <string name="error">Lỗi</string>
+    <string name="info">Thông báo</string>
+    <string name="OK">OK</string>
+    <string name="error_not_found_device_id">Không thể tìm thấy thiết bị điều khiển</string>
+    <string name="cannot_remote_device">Không thể điều khiển thiết bị</string>
+<!--    String for state in air condition-->
+    <string name="air_purifier">Máy lọc không khí</string>
+    <string name="state_1">Yếu</string>
+    <string name="state_2">Trung bình</string>
+    <string name="state_3">Mạnh</string>
+    <string name="speed_title">Tốc độ</string>
+    <string name="power_title">Nguồn</string>
+    <string name="state_power_on">ON</string>
+    <string name="state_power_off">OFF</string>
+
+
+<!--    String for test-->
+    <string name="test">Test</string>
+    <string name="test_number">0</string>
+
+    <!-- String for Air Parameter -->
+    <string name="AQ">AQ</string>
+    <string name="CO2">CO\u2082</string>
+    <string name="H2CO">CH\u2082O</string>
+    <string name="HM">Độ ẩm</string>
+    <string name="Pressure">Áp suất</string>
+    <string name="Temperature">Nhiệt độ</string>
+    <string name="VOC">VOC</string>
+    <string name="PM1">PM1</string>
+    <string name="PM10">PM10</string>
+    <string name="PM25">PM2.5</string>
+
+    <string name="good">Tốt</string>
+    <string name="mod">Khá</string>
+    <string name="poor">Kém</string>
+    <string name="power_on">Bật Nguồn</string>
+    <string name="power_off">Tắt Nguồn</string>
+    <string name="uv_on">Bật UV</string>
+    <string name="uv_off">Tắt UV</string>
+
+    <string name="online">Đang hoạt động</string>
+    <string name="hourago">giờ trước</string>
+    <string name="minago">phút trước</string>
+    <string name="dayago">ngày trước</string>
+    <string name="active">Hoạt động</string>
+
+    <string name="name_device">Tên thiết bị</string>
+    <string name="state_of_device">Trạng thái hiện tại</string>
+    <string name="speed_of_device">Tốc độ quạt</string>
+
+    <string name="speed_0">0</string>
+    <string name="speed_1">1</string>
+    <string name="speed_2">2</string>
+    <string name="speed_3">3</string>
+
+    <string name="status_title">Trạng thái</string>
+
+    <string name="mode_auto">Tự động</string>
+    <string name="mode_manual">Thủ công</string>
+
+    // resource for layout
+    <string name="margin_remote_button_with_center">20dp</string>
+
+</resources>

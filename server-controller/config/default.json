@@ -1,0 +1,51 @@
+{
+  "mqtt": {
+    "host": "192.168.2.69",
+    "port": 1883,
+    "protocol": "mqtt",
+    "subscribeBasePath": "broadlink"
+  },
+  "numOfDiscover": 5,
+  "recording": {
+    "timeout": {
+      "ir": 30,
+      "rf": 30
+    },
+    "path": "./commands"
+  },
+  "gui": {
+    "port": 3001
+  },
+  "log": {
+    "level": "info"
+  },
+  "smartplug": {
+    "POWEROFF": 5,
+    "LOW": 15,
+    "MEDIUM": 30,
+    "HIGH": 55
+	},
+  "airthinx":{
+	"deviceid": "42f7c863187b",
+	"spDeviceId": "34ea3479ee2b",
+	"PowerOffCommand": "/airpurifier/poweroff", 
+	"PowerOnCommand": "/airpurifier/poweron", 
+	"LowCommand" : "/airpurifier/low", 
+	"MedCommand": "/airpurifier/med", 
+	"HighCommand": "/airpurifier/high",
+	
+	"commandPower":"/airpurifier/power",
+	"commandIncrease": "/airpurifier/speedup",
+	"commandDecrease": "/airpurifier/speeddown",
+	
+	"interval_time": 60000,
+	"time_delay": 10000
+  },
+  "goodPoint":{
+		"aq": 90,
+		"pm": 25.4,
+		"co2": 850,
+		"voc": 1,
+		"formaldehyde": 0.05
+	}
+}

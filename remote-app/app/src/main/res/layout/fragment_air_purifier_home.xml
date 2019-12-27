@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/tv_aqi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/AQ"
+        style="@style/TextFontForRemote"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+    <Button
+        android:id="@+id/bt_power"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/power_title"
+        style="@style/TextFontForRemote"
+        app:layout_constraintLeft_toLeftOf="@id/tv_aqi"
+        app:layout_constraintRight_toRightOf="@id/tv_aqi"
+        app:layout_constraintBottom_toTopOf="@id/tv_aqi" />
+
+    <Button
+        android:id="@+id/bt_low_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/state_1"
+        style="@style/TextFontForRemote"
+        app:layout_constraintRight_toLeftOf="@id/tv_aqi"
+        app:layout_constraintTop_toTopOf="@id/tv_aqi"
+        app:layout_constraintBottom_toBottomOf="@id/tv_aqi"/>
+
+    <Button
+        android:id="@+id/bt_med_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/state_2"
+        style="@style/TextFontForRemote"
+        app:layout_constraintLeft_toLeftOf="@id/tv_aqi"
+        app:layout_constraintRight_toRightOf="@id/tv_aqi"
+        app:layout_constraintTop_toBottomOf="@id/tv_aqi"/>
+
+    <Button
+        android:id="@+id/bt_high_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/state_3"
+        style="@style/TextFontForRemote"
+        app:layout_constraintLeft_toRightOf="@id/tv_aqi"
+        app:layout_constraintTop_toTopOf="@id/tv_aqi"
+        app:layout_constraintBottom_toBottomOf="@id/tv_aqi"/>
+
+    <ProgressBar
+        android:layout_width="75sp"
+        android:layout_height="75sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/bt_med_speed"
+        app:layout_constraintLeft_toLeftOf="@id/bt_low_speed"
+        app:layout_constraintRight_toRightOf="@id/bt_high_speed"
+        app:layout_constraintTop_toTopOf="@id/bt_power" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
