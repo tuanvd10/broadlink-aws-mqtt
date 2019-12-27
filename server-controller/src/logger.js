@@ -10,12 +10,20 @@ const path = require('path');
 // try to make some pretty output
 const alignedWithColorsAndTime = winston.format.combine(
     winston.format.colorize(),
-    winston.format.timestamp(),
     winston.format.align(),
     winston.format.printf(info => {
-        const { timestamp, level, message, ...args } = info;
-        const ts = timestamp.slice(0, 19).replace("T", " ");
-        return `${ts} [${level}]: ${message} ${
+        const {level, message, ...args } = info;
+        return `${timestamp()} [${level}]: ${message} ${
+            Object.keys(args).length ? CircularJSON.stringify(args, null, 2) : ""
+            }`;
+    })
+);
+
+const alignedWithoutColorsAndTime = winston.format.combine(
+    winston.format.align(),
+    winston.format.printf(info => {
+        const {level, message, ...args } = info;
+        return `${timestamp()} [${level}]: ${message} ${
             Object.keys(args).length ? CircularJSON.stringify(args, null, 2) : ""
             }`;
     })
@@ -23,7 +31,10 @@ const alignedWithColorsAndTime = winston.format.combine(
 
 const timestamp = () =>  {
     const d = new Date();
-    return "-"+d.getDate() + (d.getMonth()+1) +d.getFullYear();
+    return d.getDate() +"-"+ (d.getMonth()+1) +"-"+d.getFullYear() + " " 
+        + (d.getHours()<10?"0"+d.getHours():d.getHours()) + ":" 
+        + (d.getMinutes()<10?"0"+d.getMinutes():d.getMinutes()) + ":" 
+        + (d.getSeconds()<10?"0"+d.getSeconds():d.getSeconds());
 };
 
 var transport = new (winston.transports.DailyRotateFile)({
@@ -37,7 +48,7 @@ var transport = new (winston.transports.DailyRotateFile)({
 // Logger to be used in project
 const logger = winston.createLogger({
     level: cfg.log.level,
-    format: alignedWithColorsAndTime, 
+    format: alignedWithoutColorsAndTime, 
     transports: [
         transport
         //new winston.transports.Http({ path: "log", port:3001 })
