@@ -171,12 +171,13 @@ async function doAction(devices){
 	if(!spDevice) return;
 	//console.log("[tuanvd10]: SP device " + JSON.stringify(spDevice));
 	//await spDevice.getState();
-	if(spDevice.getState() && getAirThinxScore()){
+	if(await spDevice.getState() && getAirThinxScore()){
 		if(mode==="auto"){
-			await sleep(1000);
 			sendControlData(spDevice);
 		}
-	} 
+	}else {
+		logger.debug("[tuanvd10] spdevice or airthinx device error when get state");	
+	}
 	logger.debug("[tuanvd10] DONE ACTION");
 }
 
@@ -194,11 +195,12 @@ async function setCurrentAirthinxMode(requsetMode = "auto"){
 	}
 	mode = requsetMode;	
 	if(globalSpDevice){
-		if(globalSpDevice.getState() && getAirThinxScore()){
+		if(await globalSpDevice.getState() && getAirThinxScore()){
 			if(mode==="auto"){
-				await sleep(500);
 				sendControlData(globalSpDevice);
 			}
+		}else {
+			logger.debug("[tuanvd10] spdevice or airthinx device error when get state");	
 		} 
 	}
 }
